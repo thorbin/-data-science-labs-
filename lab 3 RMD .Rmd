@@ -1,6 +1,6 @@
 ---
 title: "Lab 3"
-author: "Thorbin AD"
+author: "Erik Svenneby,Jorge Robelo,Mandy Karako, Ryan Bilkie,Thorbin Atwell-Donaghey "
 date: "9/10/2019"
 output: html_document
 ---
