@@ -1,0 +1,16 @@
+---
+title: "Lab 3"
+author: "Erik Svenneby,Jorge Robelo,Mandy Karako, Ryan Bilkie,Thorbin Atwell-Donaghey"
+date: "10/9/2019"
+output: html_document
+---
+Thorbin's Question: Is health related to gender? 
+```{R}
+library(tidyverse)
+library(dplyr)
+source("http://www.openintro.org/stat/data/cdc.R")
+first_step<-mutate(cdc,genhlth=case_when(genhlth=="poor"~1,genhlth=="fair"~2,genhlth=="good"~3,genhlth=="very good"~4,genhlth=="excellent"~5))
+second_step<-mutate(first_step,corr_health=log(abs(weight-wtdesire),exp(1)))
+cdc_transf<-mutate(second_step,corr_health=case_when(abs(weight-wtdesire)==0~genhlth,weight-wtdesire!=0~corr_health))
+```
+
