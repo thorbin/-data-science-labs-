@@ -19,3 +19,23 @@ ggplot(data=cdc_transf_male,mapping=aes(x=age,y=corr_health,color=smoke100))
 ggplot(data=cdc_tranf_fem,mapping=aes(x=age,y=corr_health,color=smoke100))
 ```
 end Thorbin
+
+
+jorge's Question: what the relationship between age general health and smoking 
+'''
+ggplot(data = cdc) + 
+  geom_smooth(mapping = aes(x = age, y = smoke100))
+#this graph displays the relationship between age and smoking. 40 percent of people from ages between 0-25 smoke. 
+#following the age of 30 there is a steady increase in the percentage of people that smoke. 
+#this increase persists until approximately the age of 60 where it is followed by a sharp decline in the percentage of smokers. 
+#the decline in smokers persists until the age of 90 where we see another sharp incline in the percentage of smokers. 
+
+#my graph 1 
+ggplot(data = cdc) + 
+  geom_smooth(mapping = aes(x = age, y = smoke100,  color = genhlth))
+#this graph displays the relationship between age and smoking. 40 percent of people from ages between 0-25 smoke. 
+#following the age of 30 there is a steady increase in the percentage of people that smoke. 
+#this increase persists approximately until the age of 60 where it is followed by a sharp decline in the percentage of smokers. 
+#the decline in smokers persist until the age of 90 where we see another sharp incline in the percentage of smokers. 
+'''
+end Jorge R
