@@ -11,6 +11,11 @@ library(dplyr)
 source("http://www.openintro.org/stat/data/cdc.R")
 first_step<-mutate(cdc,genhlth=case_when(genhlth=="poor"~1,genhlth=="fair"~2,genhlth=="good"~3,genhlth=="very good"~4,genhlth=="excellent"~5))
 second_step<-mutate(first_step,corr_health=log(abs(weight-wtdesire),exp(1)))
-cdc_transf<-mutate(second_step,corr_health=case_when(abs(weight-wtdesire)==0~genhlth,weight-wtdesire!=0~corr_health))
+cdc_transf<-mutate(second_step,corr_health=case_when(abs(weight-wtdesire)==0~genhlth,weight-wtdesire!=0~corr_health),gender=case_when(gender=="m"~1,gender=="f"~0),case_when(smoke100==TRUE~"100 cig.club",smoke100==0~"non-smoker"))
+ggplot(data=cdc_transf,mapping=aes(x=corr_health,y=age,color=gender))+geom_point()+geom_smooth()+facet_wrap(~class=smoke100,nrow=2 )
+cdc_transf_male<-filter(cdc_transf,gender==1)
+cdc_trans_fem<-filter(cdc_transf,gender==0)
+ggplot(data=cdc_transf_male,mapping=aes(x=age,y=corr_health,color=smoke100))
+ggplot(data=cdc_tranf_fem,mapping=aes(x=age,y=corr_health,color=smoke100))
 ```
 end Thorbin
