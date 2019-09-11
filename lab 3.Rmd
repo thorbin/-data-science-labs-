@@ -6,7 +6,7 @@ output: html_document
 ---
 # Black Swans lab 3
 ## Smoking bad?
-Thorbin's Question: Is health related to gender? 
+Thorbin's Question: Is there a clear relationship between gender regardless of tobacco use? 
 ```{r echo=FALSE}
 library(tidyverse)
 library(dplyr)
