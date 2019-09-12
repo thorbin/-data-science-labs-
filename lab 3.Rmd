@@ -59,7 +59,11 @@ geom_bar(mapping=aes(x=height,fill=genhlth))+
 facet_wrap(~smoke100, nrow=2)+
 ggtitle("General Health of Smokers vs Non-Smokers Based on Height")
 ```
-#These two bar graphs show the number of people in each general health category at each height. The data shows that the majority of #people are clustered around average heights, which was expected, but there was a higher percentage of the top two health categories it #seems in the average to high average height demographic, which suggests that people in the average to high average height range are #more likely to be healthy. This was true of both smokers and non-smokers. There was also a higher percentage of healthy people in the #non-smoker category which suggests that smokers are more inclined to be less healthy. 
+#These two bar graphs show the number of people in each general health category at each height. The data shows that the majority of 
+#people are clustered around average heights, which was expected, but there was a higher percentage of the top two health categories it 
+#seems in the average to high average height demographic, which suggests that people in the average to high average height range are 
+#more likely to be healthy. This was true of both smokers and non-smokers. There was also a higher percentage of healthy people in the 
+#non-smoker category which suggests that smokers are more inclined to be less healthy. 
 
 '''
 end Erik Svenneby
