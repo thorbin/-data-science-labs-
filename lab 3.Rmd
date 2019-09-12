@@ -11,7 +11,6 @@ output: html_document
 library(tidyverse)
 library(dplyr)
 source("http://www.openintro.org/stat/data/cdc.R")
-
 ```
 ```{r echo=FALSE}
 first_step<-mutate(cdc,genhlth=case_when(genhlth=="poor"~1,genhlth=="fair"~2,genhlth=="good"~3,genhlth=="very good"~4,genhlth=="excellent"~5))
@@ -23,6 +22,7 @@ cdc_transf_fem<-filter(cdc_transf,gender==0)
 ```
 
 After correcting the self evaluated health indicator by subtracting the natural log of the absolute value of the difference between weight and desired weight ,'corrected health' was obtained by changing the self rated health strings in an increasing value from 1 to 5 from poor to excellent. I figured that this would give a better idea of what the actual health of the individual under the assumption that people over estimate their health. A pitfall of this method is that it doesn't take into account under estimates of ones health. 
+
 ```{r echo=FALSE}
 ggplot(data=cdc_transf_male,mapping=aes(x=age,y=corr_health,color=smoke100))+geom_point()+geom_smooth(color="black")+facet_wrap(~smoke100)+ggtitle("A plot comparing male smokers to male non-smokers")+labs(y="Corrected health value",x= "age (years)")+theme(legend.title=element_blank())
 ggplot(data=cdc_transf_fem,mapping=aes(x=age,y=corr_health,color=smoke100))+geom_point()+geom_smooth(color="black")+facet_wrap(~smoke100)+ggtitle("A plot comparing female smokers to female non-smokers")+labs(y="Corrected health value",x= "age (years)")+theme(legend.title=element_blank())
@@ -30,14 +30,10 @@ ggplot(data=cdc_transf_fem,mapping=aes(x=age,y=corr_health,color=smoke100))+geom
 ```
 
   These plots give an idea of health as a function of age which are separated by sex of the surveyed. Clearly the smokers and non smokers in both male and female categories should be separate which is why there are 4 plots designating the categories and sub categories (sex and sex that smoked/didnt smoke).
-It can be seen from the male category that there is a steep incline in health around year 80 for those who have smoked 100 cigarettes where as there is a steep decline in health for those males who havent smoked 100 cigarettes in their life. An explanation for this is that perhaps males who have smoked recently started smoking and were happier/less stressed at the time of survey leading to greatly over exaggerated percieved health, to the degree of defeating the health correction. It is interesting that this trend is not seen in the female category where they both tend to agree on the decline in percieved health around year 80.
+It can be seen from the male category that there is a steep incline in health around year 80 for those who have smoked 100 cigarettes where as there is a steep decline in health for those males who havent smoked 100 cigarettes in their life. An explanation for this is that perhaps males who have smoked recently started smoking and were happier/less stressed at the time of survey leading to greatly over exaggerated percieved health, to the degree of defeating the health correction. It is interesting that this trend is not seen in the female category where they both tend to agree on the decline in percieved health around year 80.  
+__conclusion__: while it is not clear what the mechanism behind the increase in health for male smokers is, it appears as though there is no evidence to support a gender related health trend from the above plots. This is based on the fact that male smokers and female non smoker subjects diplay the same negative decline in health around year 80. As for the conclusion that the raw data seems to support, if you are a male, when you are 80, smoke up bud.  
 
-conclusion: while it is not clear what the mechanism behind the increase in health for male smokers is, it appears as though there is no evidence to support a gender related health trend from the above plots. This is based on the fact that male smokers and female non smoker subjects diplay the same negative decline in health around year 80. As for the conclusion that the raw data seems to support, if you are a male, when you are 80, smoke up bud.  
-=======
-end Thorbin
-
-
-#### jorge's Question: What the relationship between age general health and smoking?
+### jorge's Question: What the relationship between age general health and smoking?
 ```{r echo=FALSE}
 ggplot(data = cdc) + 
   geom_smooth(mapping = aes(x = age, y = smoke100))
@@ -58,7 +54,7 @@ The decline in smokers persist until the age of 90 where we see another sharp in
 
 end Jorge R
 
-#### Erik's Question: Does height play a role in the general health of smokers vs. non-smokers?
+### Erik's Question: Does height play a role in the general health of smokers vs. non-smokers?
 ```{r echo=FALSE}
 ggplot(data=cdc)+
 geom_bar(mapping=aes(x=height,fill=genhlth))+
@@ -72,4 +68,3 @@ more likely to be healthy. This was true of both smokers and non-smokers. There 
 non-smoker category which suggests that smokers are more inclined to be less healthy. 
 
 end Erik Svenneby
->>>>>>> 9dcfdaf34e524090e3328aa5b74cbf620056347a
