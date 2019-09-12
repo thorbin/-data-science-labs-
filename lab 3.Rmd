@@ -5,7 +5,9 @@ date: "10/9/2019"
 output: html_document
 ---
 # Black Swans lab 3
-## Smoking bad?
+## Overall Question: How does smoking relate to other categories (such as gender, age, height, etc.) in terms of health outcomes?
+
+
 #### Thorbin's Question: Is there a clear relationship between health and gender regardless of tobacco use? 
 ```{r echo=FALSE}
 library(tidyverse)
@@ -68,3 +70,44 @@ more likely to be healthy. This was true of both smokers and non-smokers. There 
 non-smoker category which suggests that smokers are more inclined to be less healthy. 
 
 end Erik Svenneby
+
+
+### Ryan' Question: Do health plans have a significant effect on the health of smokers?
+
+
+We first analyze the distribution of health plans among smokers and non-smokers. Are smokers more or less likely than non-smokers to have a health plan? The plot below attempts to visualize the clusters of smokers and non-smokers based on their overall health.
+
+
+```{r echo=FALSE}
+ggplot(data = cdc, mapping = aes(x = hlthplan, y = genhlth)) +
+  geom_point(mapping = aes(color = smoke100), position = "jitter")+ggtitle("Smokers and Non-Smokers")
+```
+
+
+From the above, it seems that the clustering of smokers and non-smokers in the various categories is fairly uniform. 
+
+We can analyze smokers only (see the plots below), to see how health plans effect smokers:
+
+
+```{r echo=FALSE}
+ggplot(data = cdc, mapping = aes(x = hlthplan, y = genhlth))+
+  geom_point(data = filter(cdc, smoke100 == "1"), aes(color=smoke100),  position = "jitter", show.legend = FALSE)+ggtitle("Smokers Only")
+```
+
+
+We can see that, among smokers with health plans, the bulk of the clustering occurs most obviously in the "good" and "very good" categories of health. However, we can see that this is also true, proportionally, for smokers without a health plan. In both columns, the points become sparser as the the health category approaches "poor". So there doesn't seem to be any significant difference of health for smokers with plans.  
+
+We can try to compare this with non-smokers to see if there are any obvious differences:
+
+```{r echo=FALSE}
+ggplot(data = cdc, mapping = aes(x = hlthplan, y = genhlth))+
+  geom_point(data = filter(cdc, smoke100 == "0"),  position = "jitter")+ggtitle("Non-Smokers Only")
+```
+
+
+
+We immediately see that the density of points in the right column is once again strongest in the "good" and "very good" categories, and overall it seems to follow a similar distribution to the previous chart. And although it appears that the "poor" category in the left column seems sparser, and the "excellent" category in the right column is somewhat denser (suggesting perhaps that non-smokers tend to be healthier overall than smokers), the proportionality *within* columns is unchanged and the overall trend remains steady: all four columns seem to cluster in a similar pattern--densest in the "good" and "very good" categories and sparsest in the "poor" category.
+
+In other words, the overall distribution of health between smokers and non-smokers does not seem to be obviously affected by the presence or absence of a health plan.
+
+end Ryan Bilkie
