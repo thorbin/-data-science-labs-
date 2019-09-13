@@ -132,3 +132,11 @@ ggplot(data=cdc) +
   Therefore, we can conclude that despite your weight, non-smokers are consistently healthier which also tells us that weight does not play a factor in the overall health of non-smokers vs smokers. 
 
   end Mandy Karako 
+  
+## Group conclusion: 
+
+Mandy conclusion: weight does not play a role in health between smokers and non smokers.
+Ryan conclusion: health plan does not play a role in health. 
+Erik conclusion: height appears to have a higher sense of personal health. this sense of health was prononced more in the non smoker category.
+Jorge conclusion: During middle life age ranges, there tend to be fewer smokers and therefore better health.
+Thorbin conclusion: accd. to the data it appears as though smoking in males leads to better end of life health where as in females smokers tend to have sort of an inverse cube relation to health and non smokers have a steep decline in health until their 60s then a small increase to death. Point being smoking at least  
