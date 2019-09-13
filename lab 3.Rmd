@@ -125,7 +125,7 @@ ggplot(data=cdc) +
   ggtitle("General Health of Non-Smokers vs Smokers Based on Weight")
 ```
 
-  These two graphs compare non-smokers (graph on the top) to smokers (graph on the bottom) based on height. Each bar represents how many 
+  These two graphs compare non-smokers (graph on the top) to smokers (graph on the bottom) based on weight. Each bar represents how many 
   people are in that weight range. The different colors on the bar represent the health of those people with that specific weight, ranging from 1-5, 1 being poor which is purple
   and 5 being excellent which is red. Conclusively, the graph shows that more people are non-smokers than smokers and that is consistent in every weight range. 
   If we focus on just two different weights, 150 pounds and 200 pounds, each weight class shows significantly more people in the "excellent" red range. 
