@@ -1,0 +1,164 @@
+---
+title: "Lab 3 STAT_2600"
+author: "Erik Svenneby,Jorge Robelo,Mandy Karako, Ryan Bilkie,Thorbin Atwell-Donaghey"
+date: "10/9/2019"
+output: html_document
+---
+# Black Swans lab 3
+## Overall Question: How does smoking relate to other categories (such as gender, age, height, etc.) in terms of health outcomes?
+### This question is important because smoking-related illness in the United States costs more than $300 billion a year, including nearly $170 billion in direct medical care for adults and $156 billion in lost productivity. Additionally, federal and local governments regularly spend millions of dollars on anti-smoking campaigns--in 2012 the CDC spent $52 million, while the state of California has spent about $20 million annually since 2000 on anti-tobacco advertising, and New York spent about $10 million annually between 2003 and 2009. This blanket approach might be improved by a more data-driven approach that specifically targets those demographics most affected by smoking.
+
+### Thorbin's Question: Is there a clear relationship between health and gender regardless of tobacco use? 
+```{r echo=FALSE}
+library(tidyverse)
+library(dplyr)
+source("http://www.openintro.org/stat/data/cdc.R")
+```
+```{r}
+first_step<-mutate(cdc,genhlth=case_when(genhlth=="poor"~1,genhlth=="fair"~2,genhlth=="good"~3,genhlth=="very good"~4,genhlth=="excellent"~5))
+second_step<-mutate(first_step,corr_health=case_when(abs(weight-wtdesire)==0~genhlth,abs(weight-wtdesire)<=10~genhlth,abs(weight-wtdesire)>10~genhlth-log(abs(weight-wtdesire),10)))
+cdc_transf<-mutate(second_step,gender=case_when(gender=="m"~1,gender=="f"~0),smoke100=case_when(smoke100==TRUE~"100 cig.club",smoke100==0~"non-smoker"))
+cdc_transf_male<-filter(cdc_transf,gender==1)
+cdc_transf_fem<-filter(cdc_transf,gender==0)
+## this section transforms cdc into a more useable data frame ##
+```
+
+After wrangling the self evaluated health indicator by subtracting the log base 10 of the absolute value of the difference between weight and desired weight,'corrected health' was obtained by altering the self rated health strings in an increasing value from 1 to 5 from poor to excellent. The reasoning behind this was that this would give a more accurate picture of what the actual health of the individual due to inaccurate self evaluation. A possible outlier situation includes under estimates of health from morbidly obese people, which would further obscure the true health of the individual(s).To minimize this error, log base 10 was selected. For those who have a desired weight 50 units below their current weight and already have a low general health score are likely to fall into the negative health score range. Additionally, differences between weight and desired weight that are close to 10 will have a considerable impact on corrected health score. To mitigate this, cases when the difference between weight and desired weight are less than 10 units are considered to be close enough to their self rated health value for it to be considered.
+
+```{r}
+## this section generates the plots ##
+ggplot(data=cdc_transf_male,mapping=aes(x=age,y=corr_health,color=smoke100))+geom_point()+geom_smooth(color="black")+facet_wrap(~smoke100)+ggtitle("A plot comparing male smokers to male non-smokers")+labs(y="Corrected health value",x= "age (years)")+theme(legend.title=element_blank())
+ggplot(data=cdc_transf_fem,mapping=aes(x=age,y=corr_health,color=smoke100))+geom_point()+geom_smooth(color="black")+facet_wrap(~smoke100)+ggtitle("A plot comparing female smokers to female non-smokers")+labs(y="Corrected health value",x= "age (years)")+theme(legend.title=element_blank())
+
+```
+
+  These plots give an idea of health as a function of age which are separated by sex of the surveyed. Clearly the smokers and non smokers in both male and female categories should be separate, which is why there are 4 plots designating the categories and sub categories (sex and sex that smoked/didnt smoke).
+It can be seen from the male category that there is a small incline in health around year 70 for those who have smoked 100 cigarettes, where as there is a comparatively large decline in health for those males who havent smoked 100 cigarettes in their life. An explanation for this is that perhaps surveyed males who have smoked recently started smoking as a stress respone, leading to under exaggerated general health perception, to the degree of defeating the health correction. It is interesting that this behavior is not seen in the female category where they both tend to agree on the increase in percieved health around year 65. Possible reasons for this include groups of people between health scores weighing heavily on the general trend line. Also interesting to note is the density of the plots. In all plots, the density represents the how close to a unity each surveyed person is.
+```{R}
+
+```
+  For the male non-smoker category, unity appears to be around 40 YOA where as in the smoker category unity is between 50 and 60 YOA. This indicates that at at least at the time of survey, more people who were smokers between the ages of 50 and 60 responded to the survey. If a conclusion is to be drawn for the male category, it would be that smoking males tended to have lower self-rated health but also tended to live longer whereas the opposite is true in the non smoker category. A potential rationale for this is the higher rate of suicide in males especially around mid life crises times which could shed some light on the 40 YOA unity for the non smoking males. Expanding on this, one could say that smoking appears to help males cope with mid life ailes which would normally result in suicidal ideation then action. To confirm this, cause of death would need to be obtained and added in the cdc data frame. 
+```{R}
+
+```
+  For the female categories, unity appears to be around 50 years in both categories and self rated health appears to be about the same, however, the relative density of the female non-smoker plot indicates that more females close to unity were alive to complete the survey. From the data shown, the conclusion for the female category would be that this density discrepancy is due to health related effects of smoking, to confirm this cause of death should be an added categorical variable to the cdc data frame. To get a better picture, more plots should be created showing one point score ranges and the associated trend lines. Due to this possible fatal error, this data is so far inconclusive.
+
+__conclusion__: while it is not clear what the mechanism behind the odd behavior in health for male and female non-smokers is, it appears as though both male and female smokers tend to have 2 inflection points at roughly the same ages. It was also noted that higher unity age was observed in the relative densities of the plots in male and female smoking populations. Depending on the time the survey was conducted, the inflection points could be due to either social pressures or noticed health effects due to smoking and/or other unhealthy life style choices. As for my individual question, there is some evidence to support that non smoking males tend to steadily decrease in percieved health where as non smoking females tend to have an inflection point around year 60 resulting in better health as age progresses for the females. This difference is best acconted for considering certain social stressors males may be prone to. For the limited categories available, it appears as though better health favors females when age begins to accumulate. To draw any well construted and robust conclusions, more in-depth plots of each eschelon of health need to be analyzed and fitted with a unique trend line with cause of death, weight,gender and smoking intensity considered.
+
+### jorge's Question: What is the relationship between age, general health, and smoking?
+```{r}
+ggplot(data = cdc) + 
+  geom_smooth(mapping = aes(x = age, y = smoke100))
+```
+
+This graph displays the relationship between age and smoking. 40 percent of people from ages 0-25 years old smoke. 
+Following the age of 30, there is a steady increase in the percentage of people that smoke. 
+This increase persists until approximately the age of 60 where it is followed by a sharp decline in the percentage of smokers. 
+The decline in smokers persists until the age of 90 where we see another sharp incline in the percentage of smokers. 
+
+```{r}
+## Jorge's plot ##
+ggplot(data=cdc) +
+  geom_bar(mapping=aes(x=age, fill=genhlth)) +
+  facet_wrap(~smoke100, nrow=2) +
+  ggtitle("Age vs Non-smokers and Smokers")
+```
+
+This graph displays the relationship between age and smoking. 40 percent of people from ages 0-25 years old smoke. 
+Following the age of 30 there is a steady increase in the percentage of people that smoke. 
+This increase persists approximately until the age of 60 where it is followed by a sharp decline in the percentage of smokers. 
+The decline in smokers persist until the age of 90 where we see another sharp incline in the percentage of smokers. 
+
+end Jorge R
+
+### Erik's Question: Does height play a role in the general health of smokers vs. non-smokers?
+```{r}
+## Erik's plot ##
+ggplot(data=cdc)+
+geom_bar(mapping=aes(x=height,fill=genhlth))+
+facet_wrap(~smoke100, nrow=2)+
+ggtitle("General Health of Smokers vs Non-Smokers Based on Height")
+```
+
+These two bar graphs show the number of people in each general health category at each height. The data shows that the majority of 
+people are clustered around average heights, which was expected, but there was a higher percentage of the top two health categories it 
+seems in the average to high average height demographic, which suggests that people in the average to high average height range are 
+more likely to be healthy. This was true of both smokers and non-smokers. There was also a higher percentage of healthy people in the 
+non-smoker category which suggests that smokers are more inclined to be less healthy. 
+
+end Erik Svenneby
+
+
+### Ryan's Question: Do health plans have a significant effect on the health of smokers?
+
+
+We first analyze the distribution of health plans among smokers and non-smokers. Are smokers more or less likely than non-smokers to have a health plan? The plot below attempts to visualize the clusters of smokers and non-smokers based on their overall health.
+
+
+```{r}
+## Ryan's plot 1 ##
+ggplot(data = cdc, mapping = aes(x = hlthplan, y = genhlth)) +
+  geom_point(mapping = aes(color = smoke100), position = "jitter")+ggtitle("Smokers and Non-Smokers")
+```
+
+
+From the above, it seems that the clustering of smokers and non-smokers in the various categories is fairly uniform. 
+
+We can analyze smokers only (see the plots below), to see how health plans effect smokers:
+
+
+```{r}
+## Ryan's plot 2 ##
+ggplot(data = cdc, mapping = aes(x = hlthplan, y = genhlth))+
+  geom_point(data = filter(cdc, smoke100 == "1"), aes(color=smoke100),  position = "jitter", show.legend = FALSE)+ggtitle("Smokers Only")
+```
+
+
+We can see that, among smokers with health plans, the bulk of the clustering occurs most obviously in the "good" and "very good" categories of health. However, we can see that this is also true, proportionally, for smokers without a health plan. In both columns, the points become sparser as the the health category approaches "poor". So there doesn't seem to be any significant difference of health for smokers with plans.  
+
+We can try to compare this with non-smokers to see if there are any obvious differences:
+
+```{r}
+ggplot(data = cdc, mapping = aes(x = hlthplan, y = genhlth))+
+  geom_point(data = filter(cdc, smoke100 == "0"),  position = "jitter")+ggtitle("Non-Smokers Only")
+```
+
+
+
+We immediately see that the density of points in the right column is once again strongest in the "good" and "very good" categories, and overall it seems to follow a similar distribution to the previous chart. And although it appears that the "poor" category in the left column seems sparser, and the "excellent" category in the right column is somewhat denser (suggesting perhaps that non-smokers tend to be healthier overall than smokers), the proportionality *within* columns is unchanged and the overall trend remains steady: all four columns seem to cluster in a similar pattern--densest in the "good" and "very good" categories and sparsest in the "poor" category.
+
+In other words, the overall distribution of health between smokers and non-smokers does not seem to be obviously affected by the presence or absence of a health plan.
+
+end Ryan Bilkie
+
+
+### Mandy's Question: "Does weight play a role in the general health of non-smokers vs. smokers?"
+```{R}
+## Mandy's plot ##
+ggplot(data=cdc) + 
+  geom_bar(mapping=aes(x=weight,fill=genhlth)) +
+  facet_wrap(~smoke100, nrow=2) +
+  ggtitle("General Health of Non-Smokers vs Smokers Based on Weight")
+```
+
+I, Mandy Karako, created two graphs comparing weight with the general health smokers and weight with the general health non-smokers. I used the ggplot, geom_bar, and facet_wrap functions in my code to create these graphs. The x-axis is the weight and the y axis is the amount of people in that weight class. These two graphs compare non-smokers (graph on the top which is labeled 0) to smokers (graph on the bottom which is labeled 1) based on weight. Each bar represents how many 
+  people are in that weight range. The different colors on the bar represent the health of those people with that specific weight, ranging from 1-5, 1 being poor which is purple
+  and 5 being excellent which is red. Conclusively, the graph shows that more people are non-smokers than smokers and that is consistent in every weight range. 
+  If we focus on just two different weights, 150 pounds and 200 pounds, each weight class shows significantly more people in the "excellent" red range. 
+  Therefore, we can conclude that despite your weight, non-smokers are consistently healthier which also tells us that weight does not play a factor in the overall health of non-smokers vs smokers. 
+
+  end Mandy Karako 
+  
+## Group conclusion: 
+
+  Mandy's analysis demonstrated weight does not have a marked influence on health between smoking and non smoking populations implying that weight and smoking tendancy are not related. Jorge's analysis indicated that generally, neglecting sex, health appears to be affected by smoking as visualized by his plot. Also interesting was that people of moderate unity (70 in) from average height tend to have higher proportions of higher health. For Individuals in both smoking and non-smoking categories this effect is less pronounced, leading to Erik's conclusion that smokers are more inclined to be less healthy. Thorbin's analysis showed that gender appears to play a role in non-smokers health with the female populations being favored by better percieved health. A problem came up though when trying to deduce what the health score actually meant. It was reasoned that the score was likely skewed by a measure of mental health suggesting that this category should be replaced with a metric obtained by verified physicians on a decent categorical scale (1-10). Also an important relationship worth exploring was left to Ryan, who showed through changes in plot density that possession of health insurance appeared to indicate a relationship between health in both smoking and non smoking populations demonstrating that health insurance does have an effect on health. This is based off the general density trend for both smokers and non smokers and for those who have and do not have health insurance. For smokers and non smokers who do not have health insurance, density appears to be greatest on the "good" health rating suggesting that smokers and non smokers who do not have health insurance are a little less healthy than their health insured counterparts based on the "very good" health unity in the insured population. This makes sense considering the insured's ability for regularly scheduled doctor visits. Combining these conclusions, it was agreed that a plot showing general health to age was the best way to summarize our results. For that we chose to submit the following plots as the team plots due to the fact that it took into consideration corrected health values based on other measured quantities. While it did produce some outliers, it was felt that it clearly displayed trends in health between smoking and non smoking populations with the added variable of gender, the latter of which wasnt exactly the focus of the group but was an important distinction to be made due to clear physiological differences and biological life events e.g. menopause.
+  
+## Team Plot
+```{R}
+ggplot(data=cdc_transf_male,mapping=aes(x=age,y=corr_health,color=smoke100))+geom_point()+geom_smooth(color="black")+facet_wrap(~smoke100)+ggtitle("A plot comparing male smokers to male non-smokers")+labs(y="Corrected health value",x= "age (years)")+theme(legend.title=element_blank())
+ggplot(data=cdc_transf_fem,mapping=aes(x=age,y=corr_health,color=smoke100))+geom_point()+geom_smooth(color="black")+facet_wrap(~smoke100)+ggtitle("A plot comparing female smokers to female non-smokers")+labs(y="Corrected health value",x= "age (years)")+theme(legend.title=element_blank())
+
+```
+
+## Team Recommendation: 
+Due to innaccuracy of measured variables in the given data frame, namely general health and smoke100, any conclusion drawn is pure speculation and will remain as such unless more detailed variables are added from reputable sources such as offices of medical professionals, Coroner's  offices etc. These changes would give a better metric of physical health and when combined with the weight of the person and data regarding smoking habits, would provide a very detailed data set to build useful plots clearly detailing the relationship between smoking and physical health. Our recommendation with the data collected in this report is to investigate reasons as to why or if smoking tends to increase quality of life for older males and set the appropriate societal changes into motion.
