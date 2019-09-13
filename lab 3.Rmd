@@ -8,7 +8,7 @@ output: html_document
 ## Overall Question: How does smoking relate to other categories (such as gender, age, height, etc.) in terms of health outcomes?
 
 
-#### Thorbin's Question: Is there a clear relationship between health and gender regardless of tobacco use? 
+### Thorbin's Question: Is there a clear relationship between health and gender regardless of tobacco use? 
 ```{r echo=FALSE}
 library(tidyverse)
 library(dplyr)
@@ -41,6 +41,7 @@ __conclusion__: while it is not clear what the mechanism behind the odd behavior
 ggplot(data = cdc) + 
   geom_smooth(mapping = aes(x = age, y = smoke100))
 ```
+
 This graph displays the relationship between age and smoking. 40 percent of people from ages between 0-25 smoke. 
 Following the age of 30, there is a steady increase in the percentage of people that smoke. 
 This increase persists until approximately the age of 60 where it is followed by a sharp decline in the percentage of smokers. 
@@ -50,6 +51,7 @@ The decline in smokers persists until the age of 90 where we see another sharp i
 ggplot(data = cdc) + 
   geom_smooth(mapping = aes(x = age, y = smoke100,  color = genhlth))+ggtitle("my graph 1 ")
 ```
+
 This graph displays the relationship between age and smoking. 40 percent of people from ages between 0-25 smoke. 
 Following the age of 30 there is a steady increase in the percentage of people that smoke. 
 This increase persists approximately until the age of 60 where it is followed by a sharp decline in the percentage of smokers. 
@@ -74,7 +76,7 @@ non-smoker category which suggests that smokers are more inclined to be less hea
 end Erik Svenneby
 
 
-### Ryan' Question: Do health plans have a significant effect on the health of smokers?
+### Ryan's Question: Do health plans have a significant effect on the health of smokers?
 
 
 We first analyze the distribution of health plans among smokers and non-smokers. Are smokers more or less likely than non-smokers to have a health plan? The plot below attempts to visualize the clusters of smokers and non-smokers based on their overall health.
@@ -115,16 +117,18 @@ In other words, the overall distribution of health between smokers and non-smoke
 end Ryan Bilkie
 
 
-##Mandy's Question: "Does weight play a role in the general health of non-smokers vs. smokers?"
+### Mandy's Question: "Does weight play a role in the general health of non-smokers vs. smokers?"
+```{R echo=FALSE}
 ggplot(data=cdc) + 
   geom_bar(mapping=aes(x=weight,fill=genhlth)) +
   facet_wrap(~smoke100, nrow=2) +
   ggtitle("General Health of Non-Smokers vs Smokers Based on Weight")
+```
 
-  #These two graphs compare non-smokers (graph on the top) to smokers (graph on the bottom) based on height. Each bar represents how many 
-  #people are in that weight range. The different colors on the bar represent the health of those people with that specific weight, ranging from 1-5, 1 being poor
-  #and 5 being excellent. Conclusively, the graph shows that more people are non-smokers than smokers and that is consistent in every weight range. 
-  #If we focus on just two different weights, 150 pounds and 200 pounds, each weight class shows significantly more people in the "excellent" red range. 
-  #Therefore, we can conclude that despite your weight, non-smokers are consistently healthier which also tells us that weight does not play a factor in the overall health of non-smokers vs smokers. 
+  These two graphs compare non-smokers (graph on the top) to smokers (graph on the bottom) based on height. Each bar represents how many 
+  people are in that weight range. The different colors on the bar represent the health of those people with that specific weight, ranging from 1-5, 1 being poor
+  and 5 being excellent. Conclusively, the graph shows that more people are non-smokers than smokers and that is consistent in every weight range. 
+  If we focus on just two different weights, 150 pounds and 200 pounds, each weight class shows significantly more people in the "excellent" red range. 
+  Therefore, we can conclude that despite your weight, non-smokers are consistently healthier which also tells us that weight does not play a factor in the overall health of non-smokers vs smokers. 
 
   end Mandy Karako 
