@@ -7,6 +7,8 @@ output: html_document
 # Black Swans lab 3
 ## Overall Question: How does smoking relate to other categories (such as gender, age, height, etc.) in terms of health outcomes?
 
+# This question is important because smoking-related illness in the United States costs more than $300 billion a year, including nearly $170 billion in direct medical care for adults and $156 billion in lost productivity. Additionally, federal and local governments regularly spend millions of dollars on anti-smoking campaigns--in 2012 the CDC spent $52 million, while the state of California has spent about $20 million annually since 2000 on anti-tobacco advertising, and New York spent about $10 million annually between 2003 and 2009. This blanket approach might be improved by a more data-driven approach that specifically targets those demographics most affected by smoking.
+
 
 ### Thorbin's Question: Is there a clear relationship between health and gender regardless of tobacco use? 
 ```{r echo=FALSE}
@@ -36,23 +38,23 @@ It can be seen from the male category that there is a small incline in health ar
 
 __conclusion__: while it is not clear what the mechanism behind the odd behavior in health for male and female non-smokers is, it appears as though it appears as though both male and female smokers tend to have 2 inflection points at roughly the same ages. Depending on the time the survey was taken, this could be due to either media influence or noticed health effects due to smoking or other unhealthy life style choices. As for the individual question, there is some evidence to support that males tend to steadily decrease in health where as females tend to have an inflection point around year 60, both ending at roughly the same health at year 100. To draw any well construted conclusions, more in-depth plots of each eschelon of health need to be analyzed and fitted with a unique trend line.
 
-### jorge's Question: What is the relationship between age, general health, and smoking?
+### jorge's Question: What the relationship between age general health and smoking?
 ```{r echo=FALSE}
 ggplot(data = cdc) + 
   geom_smooth(mapping = aes(x = age, y = smoke100))
 ```
 
-This graph displays the relationship between age and smoking. 40 percent of people from ages 0-25 years old smoke. 
+This graph displays the relationship between age and smoking. 40 percent of people from ages between 0-25 smoke. 
 Following the age of 30, there is a steady increase in the percentage of people that smoke. 
 This increase persists until approximately the age of 60 where it is followed by a sharp decline in the percentage of smokers. 
 The decline in smokers persists until the age of 90 where we see another sharp incline in the percentage of smokers. 
 
 ```{r echo=FALSE}
 ggplot(data = cdc) + 
-  geom_smooth(mapping = aes(x = age, y = ,  color = genhlth))+ggtitle("my graph 1")
+  geom_smooth(mapping = aes(x = age, y = smoke100,  color = genhlth))+ggtitle("my graph 1 ")
 ```
 
-This graph displays the relationship between age and smoking. 40 percent of people from ages 0-25 years old smoke. 
+This graph displays the relationship between age and smoking. 40 percent of people from ages between 0-25 smoke. 
 Following the age of 30 there is a steady increase in the percentage of people that smoke. 
 This increase persists approximately until the age of 60 where it is followed by a sharp decline in the percentage of smokers. 
 The decline in smokers persist until the age of 90 where we see another sharp incline in the percentage of smokers. 
@@ -78,6 +80,7 @@ end Erik Svenneby
 
 ### Ryan's Question: Do health plans have a significant effect on the health of smokers?
 
+I, Ryan Bilkie, created three plots illustrating the distribution of health plans among smokers and non-smokers and its relationship to overall health. The data showed that the health pattern was the same between smokers and non-smokers. I used the geom_point function with position = "jitter" to show a cluster of points and I compared the density of the categories, and I used color to differentiate smokers from non-smokers.
 
 We first analyze the distribution of health plans among smokers and non-smokers. Are smokers more or less likely than non-smokers to have a health plan? The plot below attempts to visualize the clusters of smokers and non-smokers based on their overall health.
 
@@ -125,7 +128,7 @@ ggplot(data=cdc) +
   ggtitle("General Health of Non-Smokers vs Smokers Based on Weight")
 ```
 
-I, Mandy Karako, created two graphs comparing weight with smokers and weight with non smokers. I used the ggplot, geom_bar, and facet_wrap funcitons in my code to create these graphs. The x-axis is the weight and the y axis is the amount of people in that weight class. These two graphs compare non-smokers (graph on the top which is labeled 0) to smokers (graph on the bottom which is labeled 1) based on weight. Each bar represents how many 
+  These two graphs compare non-smokers (graph on the top) to smokers (graph on the bottom) based on weight. Each bar represents how many 
   people are in that weight range. The different colors on the bar represent the health of those people with that specific weight, ranging from 1-5, 1 being poor which is purple
   and 5 being excellent which is red. Conclusively, the graph shows that more people are non-smokers than smokers and that is consistent in every weight range. 
   If we focus on just two different weights, 150 pounds and 200 pounds, each weight class shows significantly more people in the "excellent" red range. 
