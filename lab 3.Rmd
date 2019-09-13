@@ -36,23 +36,23 @@ It can be seen from the male category that there is a small incline in health ar
 
 __conclusion__: while it is not clear what the mechanism behind the odd behavior in health for male and female non-smokers is, it appears as though it appears as though both male and female smokers tend to have 2 inflection points at roughly the same ages. Depending on the time the survey was taken, this could be due to either media influence or noticed health effects due to smoking or other unhealthy life style choices. As for the individual question, there is some evidence to support that males tend to steadily decrease in health where as females tend to have an inflection point around year 60, both ending at roughly the same health at year 100. To draw any well construted conclusions, more in-depth plots of each eschelon of health need to be analyzed and fitted with a unique trend line.
 
-### jorge's Question: What the relationship between age general health and smoking?
+### jorge's Question: What is the relationship between age, general health, and smoking?
 ```{r echo=FALSE}
 ggplot(data = cdc) + 
   geom_smooth(mapping = aes(x = age, y = smoke100))
 ```
 
-This graph displays the relationship between age and smoking. 40 percent of people from ages between 0-25 smoke. 
+This graph displays the relationship between age and smoking. 40 percent of people from ages 0-25 years old smoke. 
 Following the age of 30, there is a steady increase in the percentage of people that smoke. 
 This increase persists until approximately the age of 60 where it is followed by a sharp decline in the percentage of smokers. 
 The decline in smokers persists until the age of 90 where we see another sharp incline in the percentage of smokers. 
 
 ```{r echo=FALSE}
 ggplot(data = cdc) + 
-  geom_smooth(mapping = aes(x = age, y = smoke100,  color = genhlth))+ggtitle("my graph 1 ")
+  geom_smooth(mapping = aes(x = age, y = ,  color = genhlth))+ggtitle("my graph 1")
 ```
 
-This graph displays the relationship between age and smoking. 40 percent of people from ages between 0-25 smoke. 
+This graph displays the relationship between age and smoking. 40 percent of people from ages 0-25 years old smoke. 
 Following the age of 30 there is a steady increase in the percentage of people that smoke. 
 This increase persists approximately until the age of 60 where it is followed by a sharp decline in the percentage of smokers. 
 The decline in smokers persist until the age of 90 where we see another sharp incline in the percentage of smokers. 
