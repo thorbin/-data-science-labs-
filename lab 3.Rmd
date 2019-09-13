@@ -113,3 +113,18 @@ We immediately see that the density of points in the right column is once again 
 In other words, the overall distribution of health between smokers and non-smokers does not seem to be obviously affected by the presence or absence of a health plan.
 
 end Ryan Bilkie
+
+
+##Mandy's Question: "Does weight play a role in the general health of non-smokers vs. smokers?"
+ggplot(data=cdc) + 
+  geom_bar(mapping=aes(x=weight,fill=genhlth)) +
+  facet_wrap(~smoke100, nrow=2) +
+  ggtitle("General Health of Non-Smokers vs Smokers Based on Weight")
+
+  #These two graphs compare non-smokers (graph on the top) to smokers (graph on the bottom) based on height. Each bar represents how many 
+  #people are in that weight range. The different colors on the bar represent the health of those people with that specific weight, ranging from 1-5, 1 being poor
+  #and 5 being excellent. Conclusively, the graph shows that more people are non-smokers than smokers and that is consistent in every weight range. 
+  #If we focus on just two different weights, 150 pounds and 200 pounds, each weight class shows significantly more people in the "excellent" red range. 
+  #Therefore, we can conclude that despite your weight, non-smokers are consistently healthier which also tells us that weight does not play a factor in the overall health of non-smokers vs smokers. 
+
+  end Mandy Karako 
