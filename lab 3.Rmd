@@ -6,7 +6,7 @@ output: html_document
 ---
 # Black Swans lab 3
 ## Overall Question: How does smoking relate to other categories (such as gender, age, height, etc.) in terms of health outcomes?
-
+### This question is important because smoking-related illness in the United States costs more than $300 billion a year, including nearly $170 billion in direct medical care for adults and $156 billion in lost productivity. Additionally, federal and local governments regularly spend millions of dollars on anti-smoking campaigns--in 2012 the CDC spent $52 million, while the state of California has spent about $20 million annually since 2000 on anti-tobacco advertising, and New York spent about $10 million annually between 2003 and 2009. This blanket approach might be improved by a more data-driven approach that specifically targets those demographics most affected by smoking.
 
 ### Thorbin's Question: Is there a clear relationship between health and gender regardless of tobacco use? 
 ```{r echo=FALSE}
