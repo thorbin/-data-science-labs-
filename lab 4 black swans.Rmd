@@ -35,3 +35,39 @@ ggplot(data=babies_matu,mapping=aes(x=inc,y=births,group=number,color=number,fil
   The same method described in the above section was used to generate a bar plot describing births per income bracket however this time gestation was filtered from values of 270 days and up. This yielded the data frame representing mature births (still or live). 
   
 Analysis: Looking at the mature births plot, it is immediatley obvious that in all income brackets, those who are on the darker colors of the spectrum (less smoking per day) have higher birth numbers. It is worth noting that this trend is observed between both categories however the mature birth category eclipses the premature birth category in terms of birth numbers for those who dont smoke. There is a notable exception in the mature categry belonging to subjects in the $5-7.5 k income bracket, this spike could perhaps be that these upper middle class people are able to have one party abstain from working leading to less stres on the mother during pregnancy. As for income based premature birth rate, since the same sort of trend in births peaks at the lower middle class, it can be said that generally economic class (in the mid 20th century) did not play an observable role in premature birth rates. Due to the massive deficit between number of mature and premature births in the non-smoker category for most economic classes, it is abundantly clear that a large proportion of over all births belong to non-smoking mothers indicating that tobacco use can lessen an expecting couples chances of a mature birth which affirms the Surgeon General's conclusion regarding likleyhood of mature births belonging to non smoking mothers. 
+
+
+### Ryan's question: Are income and education possible confounding variables?
+
+I, Ryan Bilkie, created several plots in an attempt to answer the question: "which variables are similar between smokers and non-smokers? Which are different?" 
+
+If two or more variables share a similar distribution with a separate variable, it is possible that we have a confounding variable, which means there might be a "hidden" causal factor. In this case, to answer the question whether smoking itself leads to bad birth outcomes (as the Surgeon General asserts), a proper analysis requires us to check other possible causes--for instance, do smokers tend to have less income, or less education? Could there be a race-related component? We cannot enumerate all possible causal factors, but if there is a close relationship to any of these three variables and the tendency to smoke, it might warrant further investigation as a causal mechanism.
+
+I first used a geom_smooth function to examine the relationship between income and smoking. My original hypothesis was that it was possible that lower-income people in the United States smoke more, and therefore the causal link with birth outcomes might be the lower overall health of lower-income people. The data showed clearly that this was false: 
+
+```{r}
+ggplot(data = babies)+
+  geom_smooth(mapping = aes(x = inc, y = number))
+```
+
+This shows that those with average and above-average incomes tend to smoke more than those with low incomes, so income cannot be the variable that confounds smoking with birth outcomes.  
+
+What about education? Is it possible that those with lower education tend to smoke more, and that it is the lack of education itself that is somehow causally responsible for bad birth outcomes (say, through improper nutrition, or some other factor casued by a lack of education)? I compared the mother's education on the x-axis to her tendency to smoke on the y-axis using a scatter plot:
+
+```{r}
+ggplot(data = babies)+
+  geom_point(mapping = aes(x = med, y = number, color = number), position = "jitter")
+```
+
+These data seem to also disconfirm my hypothesis--there is no obvious relationship between education levels and tendency to smoke. In fact, the distribution seems fairly even throughout, and the strongest cluster of non-smokers even seems to be located at the "2" variable, which represents, "high school graduate, no other schooling". On closer examination, there do seem to be more regular smokers in the 1 and 2 categories than in the 4-6 categories, and the "1" category (did not finish high school), even seems to be the only category weighted more in favor of smokers than non-smokers. So the relationship is weak, but it's possible that a mother's education level is a confounding variable, and this might warrant further investigation.
+
+Finally, I used a facet wrap to see if the distributions of smokers and non-smokers differs across races in the United States (with mother's education on the x-axis):
+
+```{r}
+ggplot(data = babies)+
+  geom_point(mapping = aes(x = inc, y = number, color = number))+
+  geom_smooth(mapping = aes(x = inc, y = number, color = number))+
+  facet_wrap(~ mrace)
+```
+
+The data show markedly different distributions between whites (0-5) and Mexicans (6), the latter of which smoke far less, regardless of income, whereas Asians seem to smoke more as income grows and blacks smoke less. So there is not uniform distribution between races as regards smoking trends, which might imply the need to further investigate potential confounding variables correlated to geographic, genetic or cultural differences and how they relate to birth outcomes.
