@@ -1,0 +1,37 @@
+---
+title: "lab 4 BlackSwans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "9/21/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library("tidyverse")
+library(dplyr)
+babies_1 <- read_csv("https://raw.githubusercontent.com/ervance1/Sp2018-Data-Science-repo/master/babies2a.dat")
+babies_1 <- rename(babies_1, bwtoz = `bwt/oz`)
+```
+### Thorbin's question: Is income and level of smoking related to number of mature births? 
+
+```{R} 
+#data frame creation block#
+babies<-babies_1
+babies_prem<-babies %>% filter(gestation<270,!is.na(gestation)) %>% group_by(inc,number) %>% summarize(births=sum(parity)) %>% group_by(number)
+babies_matu<-babies %>% filter(gestation>=270,!is.na(gestation)) %>% group_by(inc,number) %>% summarize(births=sum(parity)) %>% group_by(number)
+# these lines give total number of births to income grades differentiating between premature and mature births and level of smoking # 
+
+```
+Non-default layers used: dark theme, dodge position, stat=identity, fill=number, x,y,z,plot and legend labels.
+```{R}
+#plot chunk# 
+ggplot(data=babies_prem,mapping=aes(x=inc,y=births,group=number,color=number,fill=number))+geom_bar(stat="identity",position="dodge")+theme_dark()+ggtitle("Live premature births grouped by income braket")+xlab("Income bracket")+ylab("number of births")+labs(fill="smoking spectrum")
+```
+
+  This plot shows the premature birth numbers categorized by income bracket. This was accmplished by initially filtering gestation days to be less than 270. Grouping by number (and income), which is how many cigarettes were smoked a day for past and current smokers. Considering that the data represents only people who smoke, number is how many cigarettes the subjects smoke per day. Once grouped, parity which was the number of births (live or still) each subject produced was summed using a summary function to give a total number of births per income bracket. This resulting data frame was then again grouped by number to give a decent spread of smoking intensity representation per income bracket. 
+```{r}
+ggplot(data=babies_matu,mapping=aes(x=inc,y=births,group=number,color=number,fill=number))+geom_bar(stat="identity",position="dodge")+theme_dark()+ggtitle("Live mature births grouped by income braket")+xlab("Income bracket")+ylab("number of births")+labs(fill="smoking spectrum")
+```
+
+  The same method described in the above section was used to generate a bar plot describing births per income bracket however this time gestation was filtered from values of 270 days and up. This yielded the data frame representing mature births (still or live). 
+  
+Analysis: Looking at the mature births plot, it is immediatley obvious that in all income brackets, those who are on the darker colors of the spectrum (less smoking per day) have higher birth numbers. It is worth noting that this trend is observed between both categories however the mature birth category eclipses the premature birth category in terms of birth numbers for those who dont smoke. There is a notable exception in the mature categry belonging to subjects in the $5-7.5 k income bracket, this spike could perhaps be that these upper middle class people are able to have one party abstain from working leading to less stres on the mother during pregnancy.Due to the massive deficit between number of mature and premature births in the non-smoker category, it is abundantly clear that a large proportion of over all births belong to non-smoking mothers indicating that tobacco use can lessen an expecting couples chances of a mature birth. 
