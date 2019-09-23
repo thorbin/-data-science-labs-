@@ -147,7 +147,7 @@ ggplot(data=babies_nos,mapping=aes(x=gestation,y=bwtoz))+geom_smooth()+ggtitle("
 These plots ...
 
 
-## Start Mandy Karako 
+### Start Mandy Karako 
 ```{r}
 library(tidyverse)
 babies <- read_csv("https://raw.githubusercontent.com/ervance1/Sp2018-Data-Science-repo/master/babies2a.dat")           
@@ -156,38 +156,39 @@ view(babies)
 babies<-na.omit(babies)
 ```
 
-## Mandy's Questions: How does education level of a mother effect smoking? And in turn, how does smoking effect premature births? How does the marital status of the mother effect premature births? 
+### Mandy's Questions: How does education level of a mother effect smoking? And in turn, how does smoking effect premature births? How does the marital status of the mother effect premature births? 
 
-## I, Mandy Karako, examined a bunch of different variables in regards to premature deaths, including the educational level of the mother, the marital status, and whether or not the mother smoked. I created graphs and descriptions. My graphs and descriptions are below: 
+I, Mandy Karako, examined a bunch of different variables in regards to premature deaths, including the educational level of the mother, the marital status, and whether or not the mother smoked. I created graphs and descriptions. My graphs and descriptions are below: 
 ```{r}
 ggplot(data=babies)+
   geom_bar(mapping=aes(x=med))
 ```
-## This graph simply displays the count of mothers in each educational category. We find from this bar graph that most of the mothers in this data set are only highschool graduates, which is not statistically shocking. We also find that very few mothers went to trade school, and little to none had less than an eighth grade education. 
+This graph simply displays the count of mothers in each educational category. We find from this bar graph that most of the mothers in this data set are only highschool graduates, which is not statistically shocking. We also find that very few mothers went to trade school, and little to none had less than an eighth grade education. 
 
 ```{r}
 ggplot(data=babies)+
   geom_bar(mapping=aes(x=med, fill=smoke))+ 
   facet_wrap(~smoke)
 ```
+This graph shows the number of women that smoke or don't smoke in each educational category. I created a bar graph using the geom_bar() function then used the facet_wrap(~smoke) function to seperate the smokers and non smokers. 0 if they don't smoke and 1 if they do. In almost every category of education, there are more non-smokers than smokers. However, in the "did not graduate highschool" category, which is 1 on the x-axis, the amount of mothers that smoked is double that of non-smokers. In the "high school graduate + trade school" category, which is 3 on the x-axis, more of those women smoke than don't smoke. We will keep an eye out for those categories when examining premature babies with educational categories of the moms.    
 
-## This graph shows the number of women that smoke or don't smoke in each educational category. I created a bar graph using the geom_bar() function then used the facet_wrap(~smoke) function to seperate the smokers and non smokers. 0 if they don't smoke and 1 if they do. In almost every category of education, there are more non-smokers than smokers. However, in the "did not graduate highschool" category, which is 1 on the x-axis, the amount of mothers that smoked is double that of non-smokers. In the "high school graduate + trade school" category, which is 3 on the x-axis, more of those women smoke than don't smoke. We will keep an eye out for those categories when examining premature babies with educational categories of the moms.    
 ```{r}
 ggplot(data=babies)+
   geom_bar(mapping=aes(x=Premature))+
   facet_wrap(~med)
 ```
-## This graph shows the number of premature and not premature babies in each educational category. I used the geom_bar() function to examine the number of premature babies on the x-axis. I then used facet_wrap(~med) to divide up the bar graphs into subgraphs to examine premature babies in each education category. Statistically, this is difficult to compare because there are going to be more premature babies in the "high school graduate, no other school" category because that category has the most mothers assigned to it. So, the best way to compare is to look at the ratio between mothers with premature babies and total amount of mothers. It looks like the category "8th to 12th grade. did not graduate highschool" had the largest percentage of mothers with premature babies for the sub group. 
+This graph shows the number of premature and not premature babies in each educational category. I used the geom_bar() function to examine the number of premature babies on the x-axis. I then used facet_wrap(~med) to divide up the bar graphs into subgraphs to examine premature babies in each education category. Statistically, this is difficult to compare because there are going to be more premature babies in the "high school graduate, no other school" category because that category has the most mothers assigned to it. So, the best way to compare is to look at the ratio between mothers with premature babies and total amount of mothers. It looks like the category "8th to 12th grade. did not graduate highschool" had the largest percentage of mothers with premature babies for the sub group. 
+
 ```{r}
 ggplot(data=babies)+
   geom_jitter(mapping=aes(x=Premature, y=number, color = Premature))+
   facet_wrap(~med)
 ```
-## This graph shows the number of premature and not premature babies in each educational category but in dot plot form. I used the geom_jitter function to take a better look at the data and facet_wrap to divide the graphs into subclasses of education categories. This is just another way to look at comparing premature babies and the education level of mothers. 
+This graph shows the number of premature and not premature babies in each educational category but in dot plot form. I used the geom_jitter function to take a better look at the data and facet_wrap to divide the graphs into subclasses of education categories. This is just another way to look at comparing premature babies and the education level of mothers. 
 
 ```{r}
 ggplot(data=babies)+
   geom_jitter(mapping=aes(x=marital, y= number, color = Premature))
 ```
-## This graph shows marital status of mothers and if the baby was premature or not. I used the geom_jitter function to make the data more visible. Conclusively, looking at marital status proved to be very difficult because almost all the mothers were in 1 which is married. All in all, the marital status of the mother data set was inconclusive when comparing to smoking or premature births because there wasn't any disparity in the data. 
-
+This graph shows marital status of mothers and if the baby was premature or not. I used the geom_jitter function to make the data more visible. Conclusively, looking at marital status proved to be very difficult because almost all the mothers were in 1 which is married. All in all, the marital status of the mother data set was inconclusive when comparing to smoking or premature births because there wasn't any disparity in the data. 
+### End Mandy Karako 
