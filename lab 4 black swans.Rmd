@@ -13,7 +13,7 @@ babies_1 <- rename(babies_1, bwtoz = `bwt/oz`)
 ```
 ## Team's Recommendation: 
 
-We find that, in general, the data seem to support the Surgeon General's claim that smoking is a cause of premature birth and lower birth-weights. We have been able to conclusively rule out the most obvious of the potentially-confounding variables--income--, as a potential underlying cause, although some similar variables, such as education and race, are not as clear-cut and warrant further investigation as playing some sort of causal role in birthing outcomes. Nevertheless, the data clearly show that the percentage of premature babies coming smoking mothers is significantly higher than those of non-smoking monthers, and they also have smaller birthweights. 
+We find that, in general, the data seem to support the Surgeon General's claim that smoking is a cause both of premature birth and lower birthweights. We have been able to conclusively rule out the most obvious of the potentially-confounding variables--income-- as a potential underlying cause, although some similar variables, such as education and race, are not as clear-cut and warrant further investigation as playing some sort of causal role in birthing outcomes. Nevertheless, the data clearly show that the percentage of premature babies coming smoking mothers is significantly higher than those of non-smoking monthers, and they also have smaller birthweights. 
 
 
 
