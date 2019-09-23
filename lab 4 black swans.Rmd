@@ -73,7 +73,7 @@ ggplot(data = babies)+
 The data show markedly different distributions between whites (0-5) and Mexicans (6), the latter of which smoke far less, regardless of income, whereas Asians seem to smoke more as income grows and Blacks smoke less. So there is not uniform distribution between races as regards smoking trends, which might imply the need to further investigate potential confounding variables correlated to geographic, genetic or cultural differences and how they relate to birth outcomes.
 
 
-# Jorges Question- exploring if mothers race correlates with premature deliveries, groups smoking and nonsmoking, levels 6(white, black, mexican, asian, mix, unknown)
+### Jorges Question- exploring if mothers race correlates with premature deliveries, groups smoking and nonsmoking, levels 6(white, black, mexican, asian, mix, unknown)
 view(babies)
 ```{r}
 babies_1<-babies %>% filter (smoke==1)
@@ -84,8 +84,9 @@ babies_2
 ```
 
 
-#smoked
+
 ```{r}
+#smoked
 ggplot(data = babies_1) +
   geom_histogram(mapping = aes(x = mrace), binwidth = 0.5) # total distribution of mraces (mother race) that smoked
 
