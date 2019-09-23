@@ -11,6 +11,11 @@ library(dplyr)
 babies_1 <- read_csv("https://raw.githubusercontent.com/ervance1/Sp2018-Data-Science-repo/master/babies2a.dat")
 babies_1 <- rename(babies_1, bwtoz = `bwt/oz`)
 ```
+## Team's Recommendation: 
+
+
+
+
 ### Thorbin's question: Is income and level of smoking intensity related to number of mature/immature births? 
 
 ```{R} 
@@ -192,5 +197,5 @@ ggplot(data=babies)+
 ```
 This graph shows marital status of mothers and if the baby was premature or not. I used the geom_jitter function to make the data more visible. Conclusively, looking at marital status proved to be very difficult because almost all the mothers were in 1 which is married. All in all, the marital status of the mother data set was inconclusive when comparing to smoking or premature births because there wasn't any disparity in the data. 
 
-My final analyis: Mother's who did not graduate high school had the highest smoking rates and the mother's who did not graduate high school had the largest percentage of premature babies. This could show that smoking rates do effect whether a baby is born premature or not, but it is not entirely conclusive. However, it is definitely an interesting comparison that could prove to be conclusive with further research and data. 
+My final analyis: Mother's who did not graduate high school had the highest smoking rates and the mother's who did not graduate high school had the largest percentage of premature babies. This could show that smoking rates do effect whether a baby is born premature or not, but it is not entirely conclusive. However, it is definitely an interesting comparison that could prove to be conclusive with further research and data. Conclusively, I agree with the claim the Surgeon General made about smoking mothers having premature babies. 
 ### End Mandy Karako 
