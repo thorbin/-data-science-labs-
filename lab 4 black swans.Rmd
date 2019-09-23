@@ -75,7 +75,7 @@ The data show markedly different distributions between whites (0-5) and Mexicans
 
 # Jorges Question- exploring if mothers race corralates with premature deliveries, groups smoking and nonsmoking, levels 6(white, black, mexican, asian, mix, unknown)
 view(babies)
-```
+```{r}
 babies_1<-babies %>% filter (smoke==1)
 babies_2<-babies %>% filter (smoke==0)
 babies_1
@@ -85,7 +85,7 @@ babies_2
 
 
 #smoked
-```
+```{r}
 ggplot(data = babies_1) +
   geom_histogram(mapping = aes(x = mrace), binwidth = 0.5) # total distribution of mraces (mother race) that smoked
 
@@ -96,7 +96,7 @@ mrace_smoked <- babies_1 %>%
 mrace_smoked #  getting the mean of mraces with premature birth - smoked 
 ```
 #nonsmoked
-```
+```{r}
 ggplot(data = babies_2) +
   geom_histogram(mapping = aes(x = mrace), binwidth = 0.5) #total distribution of mrace nonsmoke
 
@@ -107,13 +107,12 @@ mrace_Nosmoked <- babies_2 %>%
 mrace_Nosmoked #  getting the mean of mraces with premature birth - nonsmoked
 
 ```
-# by compering the means in both groups of mothers race, smoking and nonsmoking, we can see that poeple who were categorized as white (mrace <=5)
+# By compering the means in both groups of mothers race, smoking and nonsmoking, we can see that poeple who were categorized as White (mrace <=5)
 # and Asian (mrace==8) have higher rates of premature birth in the 1960's than the rest of the survayed groups. 
 # however, all groups tend to have more frequent premature births if the mothers smoked dispite the mother race. 
-# further investigations should examine how race became biology, a situational factor, in the case of Whites and asians and how it affected birth and the offspirngs wieght
-# during this time period. This would help locate confounding variables. 
+# further investigations should examine how race became biology, a situational factor, in the case of Whites and asians and how it affected birth and the offspirngs wieght during this time period. This would help locate confounding variables. 
 
-```
+```{r}
 ggplot(data = babies_1) + 
   stat_summary(
     mapping = aes(x = mrace, y = gestation),
@@ -124,7 +123,7 @@ ggplot(data = babies_1) +
 ```
 # in the smoking group we can obseve that the 9th point (asian group) has porportialy grater variability towards having babies under 270 lb than the rest of the groups, however the white
 # groups (0-5), and the black group have around the same variablility and distribution. finaly group 6 (mexicans) had the highest birth wights.
-```
+```{r}
 ggplot(data = babies_2) + 
   stat_summary(
     mapping = aes(x = mrace, y = gestation),
