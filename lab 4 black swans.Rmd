@@ -136,12 +136,20 @@ ggplot(data = babies_2) +
 ```
 In the non-smoking group, we can obseve that the 9th point (asian group) has porportialy greater variability towards having babies under 270 lb 
 
-### Erik's question: What is the relationship between birth weight in ounces and gestation period from the perspective f non-smoking and smoking parties? 
+### Erik's question: What is the relationship between birth weight in ounces and gestation period from the perspective of non-smoking and smoking parties? 
 
 ```{R}
+#data frame creation block# 
 babies_smoke<-filter(babies,smoke==1)
 babies_nos<-filter(babies,smoke==0)
+```
+```{R}
 ggplot(data=babies_smoke,mapping=aes(x=gestation,y=bwtoz))+geom_smooth()+ggtitle("Gestation vs. Birth Weight for Smokers")
+```
+This plot shows that the average birth weight is around 120 (troy?) ounces at on average 310 days gestating. Upon initial inspection it appears as though the bulk of these babies are born in healthy gestation terms, while this is true, a significant portion is also born under weight and under gestated. The following plot provides grounds for comparison.
+```{R}
 ggplot(data=babies_nos,mapping=aes(x=gestation,y=bwtoz))+geom_smooth()+ggtitle("Gestation vs. Birth Weigh for Non-Smokers")
 ```
-These plots ...
+Compared to the previous plot, a bizarre uptick in birth weight around 150 days appears. The best possible exlanation is that these are still born babies that died in the womb, there is no way a baby born after only 5-6 months would survive long on their own. As to why this trend is not seen in the smoker category is a mystery. From the large peak centered at about 275 days, it appears as though the majority of babies are born after term and at a healthy weight followed by a steep drop off in weight past 300 days of gestation. Judging from the curvature of the non-smokers curve, it would appear as though more babies are born past the 270 day marker as compared to the smoker category. My reasoning is as follows: the arclength of the curve represents the number of births because each point takes up a differential distance (maybe?) and when summed up in an integral the length would correspond to all the people considered in the survey. Since curvature is clearly larger for the non-smoker category, and both categories cover approxamately the same domain, non smokers have more subjects belonging to ideal birthing conditions at higher birth weights. The relationship between birth weight in ounces and gestation and smoking appears to be that neglecting possible still births, birth weight and gestation for non-smokers appear to be maximized at 270 days and 130 ounces where as smokers appear to maximize at 130 ounces and 300 days with steady increase from the conception period. 
+Conclusion:
+From the curvature arguement, it appears as though smokers have fewer people represented at healtier birth weights compared to the non-smoker category indicating that smoking decreases the birth weight and gestation periods which supports both of the surgeon general's claims.  
