@@ -1,0 +1,215 @@
+---
+title: "lab 4 BlackSwans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "9/21/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library("tidyverse")
+library(dplyr)
+babies_1 <- read_csv("https://raw.githubusercontent.com/ervance1/Sp2018-Data-Science-repo/master/babies2a.dat")
+babies_1 <- rename(babies_1, bwtoz = `bwt/oz`)
+
+```
+## Team's Recommendation: 
+Statistically, birth rates are higher for non-smoking mothers. There are more babies coming from nonsmoking mothers, but data shows there are more premature babies coming from smoking mothers. So, the percentage of premature babies coming from smoking mothers is higher than non smoking mothers. Data also shows babies with mothers who smoke do have, on average, smaller birth weights at every gestational age. However, we aren't sure it was completely necessary to seperate those two variable. If mothers who smoke are showing a greater chance of having premature babies, then that effects the birth weight in ounces variable. It is not seperate. Since the variable for premature babies effects birth weight in ounces, the weight variable (or the permature variable) is not extremely useful and almost redundant. So, analyzing other factors like income, mother's education, race, etc. further analyzes and interprets General Surgeon's claim. Our recommendation for General Surgeon's analysis and data is to investigate other factors to see what groups (race, income, etc.) are smoking more and if those groups are having children. 
+
+
+
+
+### Thorbin's question: Is income and level of smoking intensity related to number of mature/immature births? 
+
+```{R} 
+#data frame creation block#
+babies<-babies_1
+babies_prem<-babies %>% filter(gestation<270,!is.na(gestation)) %>% group_by(inc,number) %>% summarize(births=sum(parity)) %>% group_by(number)
+babies_matu<-babies %>% filter(gestation>=270,!is.na(gestation)) %>% group_by(inc,number) %>% summarize(births=sum(parity)) %>% group_by(number)
+# these lines give total number of births to income grades differentiating between premature and mature births and level of smoking # 
+
+```
+Non-default layers used: dark theme, dodge position, stat=identity, fill=number, x,y,z,plot and legend labels.
+```{R}
+#plot chunk# 
+ggplot(data=babies_prem,mapping=aes(x=inc,y=births,group=number,color=number,fill=number))+geom_bar(stat="identity",position="dodge")+theme_dark()+ggtitle("Premature births grouped by income bracket")+xlab("Income bracket")+ylab("number of births")+labs(fill="smoking intensity spectrum")
+```
+## I Thorbin,
+  This plot shows the premature birth numbers categorized by income bracket. This was accomplished by initially filtering gestation days to be less than 270. Grouping by number (and income), which is how many cigarettes were smoked a day for past and current smokers. Considering that the data represents only people who smoke, number is how many cigarettes the subjects smoke per day. Once grouped, parity which was the number of births (live or still) each subject produced was summed using a summary function to give a total number of births per income bracket. This resulting data frame was then again grouped by number to give a decent spread of smoking intensity representation per income bracket. 
+```{r}
+ggplot(data=babies_matu,mapping=aes(x=inc,y=births,group=number,color=number,fill=number))+geom_bar(stat="identity",position="dodge")+theme_dark()+ggtitle("Mature births grouped by income bracket")+xlab("Income bracket")+ylab("number of births")+labs(fill="smoking intensity spectrum")
+```
+
+  The same method described in the above section was used to generate a bar plot describing births per income bracket. However, this time gestation was filtered from values of 270 days and up. This yielded the data frame representing mature births (still or live). 
+  
+Analysis: Looking at the mature births plot, it is immediatley obvious that in all income brackets, those who are on the darker colors of the spectrum (less smoking per day) have higher birth numbers compared to their smoking peers. It is worth noting that this trend is observed between both categories however the exception being that the mature birth category eclipses the premature birth category in terms of birth numbers for those who dont smoke. There is a notable inconsistency in the mature categry belonging to subjects in the $5-7.5 k income bracket, this mature birth spike could perhaps be explained by the fact that upper middle class people, while still needing to work, are able to have one party (presumably the mother) abstain from strenuous activity leading to less stres on the mother during pregnancy. It is also worth noting that even for smokers, mature births are the slight majority, but when the dilation factor between smokers and non smokers in terms of mature birth proportion is considered, the conclusion that smokers tend to have lower mature birth rates remains nearly monolithic (as far as I can tell). As for income based premature birth rate, since the same sort of trend in births peak at the lower middle class, it can be said that generally, economic class (in the mid 20th century) did not play an observable role in premature birth rates. Due to the massive deficit between number of mature and premature births in the non-smoker category, represented by most economic classes, it is abundantly clear that a large proportion of over all  mature births belong to non-smoking (relatively speaking) mothers indicating that tobacco use can lessen an expecting couples chances of a mature birth. This affirms the Surgeon General's conclusion regarding likleyhood of mature births belonging to non-smoking mothers. 
+
+
+### Ryan's question: Are income and education possible confounding variables?
+
+I, Ryan Bilkie, created several plots in an attempt to answer the question: "which variables are similar between smokers and non-smokers? Which are different?" 
+
+If two or more variables share a similar distribution with a separate variable, it is possible that we have a confounding variable, which means there might be a "hidden" causal factor. In this case, to answer the question whether smoking itself leads to bad birth outcomes (as the Surgeon General asserts), a proper analysis requires us to check other possible causes--for instance, do smokers tend to have less income, or less education? Could there be a race-related component? We cannot enumerate all possible causal factors, but if there is a close relationship to any of these three variables and the tendency to smoke, it might warrant further investigation as a causal mechanism.
+
+I first used a geom_smooth function to examine the relationship between income and smoking. My original hypothesis was that it was possible that lower-income people in the United States smoke more, and therefore the causal link with birth outcomes might be the lower overall health of lower-income people. The data showed clearly that this was false: 
+
+```{r}
+ggplot(data = babies)+
+  geom_smooth(mapping = aes(x = inc, y = number))
+```
+
+This shows that those with average and above-average incomes tend to smoke more than those with low incomes, so income cannot be the variable that confounds smoking with birth outcomes.  
+
+What about education? Is it possible that those with lower education tend to smoke more, and that it is the lack of education itself that is somehow causally responsible for bad birth outcomes (say, through improper nutrition, or some other factor casued by a lack of education)? I compared the mother's education on the x-axis to her tendency to smoke on the y-axis using a scatter plot:
+
+```{r}
+ggplot(data = babies)+
+  geom_point(mapping = aes(x = med, y = number, color = number), position = "jitter")
+```
+
+These data seem to also disconfirm my hypothesis--there is no obvious relationship between education levels and tendency to smoke. In fact, the distribution seems fairly even throughout, and the strongest cluster of non-smokers even seems to be located at the "2" variable, which represents, "high school graduate, no other schooling". On closer examination, there do seem to be more regular smokers in the 1 and 2 categories than in the 4-6 categories, and the "1" category (did not finish high school), even seems to be the only category weighted more in favor of smokers than non-smokers. So the relationship is weak, but it's possible that a mother's education level is a confounding variable, and this might warrant further investigation.
+
+Finally, I used a facet wrap to see if the distributions of smokers and non-smokers differs across races in the United States (with mother's education on the x-axis):
+
+```{r}
+ggplot(data = babies)+
+  geom_point(mapping = aes(x = inc, y = number, color = number))+
+  geom_smooth(mapping = aes(x = inc, y = number, color = number))+
+  facet_wrap(~ mrace)
+```
+
+The data show markedly different distributions between whites (0-5) and Mexicans (6), the latter of which smoke far less, regardless of income, whereas Asians seem to smoke more as income grows and Blacks smoke less. So there is not uniform distribution between races as regards smoking trends, which might imply the need to further investigate potential confounding variables correlated to geographic, genetic or cultural differences and how they relate to birth outcomes.
+
+
+### Jorges Question- exploring if mothers race correlates with premature deliveries, groups smoking and nonsmoking, levels 6(white, black, mexican, asian, mix, unknown)
+view(babies)
+```{r}
+babies_1<-babies %>% filter (smoke==1)
+babies_2<-babies %>% filter (smoke==0)
+babies_1
+babies_2
+
+```
+
+```{r}
+#smoked
+ggplot(data = babies_1) +
+  geom_histogram(mapping = aes(x = mrace), binwidth = 0.5) # total distribution of mraces (mother race) that smoked
+
+mrace_smoked <- babies_1 %>%
+  group_by(mrace, smoke==1,) %>% 
+  summarize(mean(Premature))
+
+mrace_smoked #  getting the mean of mraces with premature birth - smoked 
+```
+
+```{r}
+#nonsmoked#
+ggplot(data = babies_2) +
+  geom_histogram(mapping = aes(x = mrace), binwidth = 0.5) #total distribution of mrace nonsmoke
+
+mrace_Nosmoked <- babies_2 %>%
+  group_by(mrace, smoke==0) %>% 
+  summarize(mean(Premature))
+
+mrace_Nosmoked #  getting the mean of mraces with premature birth - nonsmoked
+
+```
+
+By comparing the means in both groups of mothers race, smoking and nonsmoking, we can see that people who were categorized as White (mrace <=5)
+ and Asian (mrace==8) have higher rates of premature birth in the 1960s than the rest of the surveyed groups. 
+ However, all groups tend to have more frequent premature births if the mothers smoked despite the mother's race. 
+Further investigations should examine how race became biology, a situational factor, in the case of Whites and Asians and how it affected birth and the offspring's weight during this period. This would help locate confounding variables.  Finally, it seems that the distribution among race categories varies to a significant de degree. meaning that those groups that smaller sample size may not display accurate representation, thus this is why the Asian category shows more premature birth.  
+
+```{r}
+ggplot(data = babies_1) + 
+  stat_summary(
+    mapping = aes(x = mrace, y = gestation),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  )
+```
+
+In the smoking group, we observe that the 9th point (Asian group) has greater variability towards having babies under 270 lb than the rest of the groups, however, the White
+groups (0-5), and the black group have around the same variability and distribution. Finally, group 6 (Mexicans) had the highest birth weights.
+```{r}
+ggplot(data = babies_2) + 
+  stat_summary(
+    mapping = aes(x = mrace, y = gestation),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  )
+```
+
+In the non-smoking group, we can obseve that the 9th point (asian group) has porportialy greater variability towards having babies under 270 lb 
+
+### Erik's question: What is the relationship between birth weight in ounces and gestation period from the perspective f non-smoking and smoking parties? 
+
+```{R}
+babies_smoke<-filter(babies,smoke==1)
+babies_nos<-filter(babies,smoke==0)
+ggplot(data=babies_smoke,mapping=aes(x=gestation,y=bwtoz))+geom_smooth()+ggtitle("Gestation vs. Birth Weight for Smokers")
+ggplot(data=babies_nos,mapping=aes(x=gestation,y=bwtoz))+geom_smooth()+ggtitle("Gestation vs. Birth Weigh for Non-Smokers")
+```
+
+Compared to the previous plot, a bizarre uptick in birth weight around 150 days appears. The best possible exlanation is that these are still born babies that died in the womb, there is no way a baby born after only 5-6 months would survive long on their own. As to why this trend is not seen in the smoker category is a mystery. From the large peak centered at about 275 days, it appears as though the majority of babies are born after term and at a healthy weight followed by a steep drop off in weight past 300 days of gestation. Judging from the curvature of the non-smokers curve, it would appear as though more babies are born past the 270 day marker as compared to the smoker category. My reasoning is as follows: the arclength of the curve represents the number of births because each point takes up a differential distance (maybe?) and when summed up in an integral the length would correspond to all the people considered in the survey. Since curvature is clearly larger for the non-smoker category, and both categories cover approxamately the same domain, non smokers have more subjects belonging to ideal birthing conditions at higher birth weights. The relationship between birth weight in ounces and gestation and smoking appears to be that neglecting possible still births, birth weight and gestation for non-smokers appear to be maximized at 270 days and 130 ounces where as smokers appear to maximize at 130 ounces and 300 days with steady increase from the conception period. 
+Conclusion:
+From the curvature arguement, it appears as though smokers have fewer people represented at healtier birth weights compared to the non-smoker category indicating that smoking decreases the birth weight and gestation periods which supports both of the surgeon general's claims.  
+
+These plots ...
+
+
+
+```{r}
+library(tidyverse)
+babies <- read_csv("https://raw.githubusercontent.com/ervance1/Sp2018-Data-Science-repo/master/babies2a.dat")           
+babies <- rename(babies, bwtoz = `bwt/oz`)
+view(babies)
+babies<-na.omit(babies)
+```
+
+### Mandy's Questions: How does education level of a mother effect smoking? And in turn, how does smoking effect premature births? How does the marital status of the mother effect premature births? 
+
+I, Mandy Karako, examined a bunch of different variables in regards to premature births, including the educational level of the mother, the marital status, and whether or not the mother smoked. I created graphs and descriptions. My graphs and descriptions are below: 
+```{r}
+ggplot(data=babies)+
+  geom_bar(mapping=aes(x=med))
+```
+This graph simply displays the count of mothers in each educational category. We find from this bar graph that most of the mothers in this data set are only highschool graduates, which is not statistically shocking. We also find that very few mothers went to trade school, and little to none had less than an eighth grade education. 
+
+```{r}
+ggplot(data=babies)+
+  geom_bar(mapping=aes(x=med, fill=smoke))+ 
+  facet_wrap(~smoke)
+```
+This graph shows the number of women that smoke or don't smoke in each educational category. I created a bar graph using the geom_bar() function then used the facet_wrap(~smoke) function to seperate the smokers and non smokers. 0 if they don't smoke and 1 if they do. In almost every category of education, there are more non-smokers than smokers. However, in the "did not graduate highschool" category, which is 1 on the x-axis, the amount of mothers that smoked is double that of non-smokers. In the "high school graduate + trade school" category, which is 3 on the x-axis, more of those women smoke than don't smoke. We will keep an eye out for those categories when examining premature babies with educational categories of the moms.    
+
+```{r}
+ggplot(data=babies)+
+  geom_bar(mapping=aes(x=Premature))+
+  facet_wrap(~med)
+```
+This graph shows the number of premature and not premature babies in each educational category. I used the geom_bar() function to examine the number of premature babies on the x-axis. I then used facet_wrap(~med) to divide up the bar graphs into subgraphs to examine premature babies in each education category. Statistically, this is difficult to compare because there are going to be more premature babies in the "high school graduate, no other school" category because that category has the most mothers assigned to it. So, the best way to compare is to look at the ratio between mothers with premature babies and total amount of mothers. It looks like the category "8th to 12th grade. did not graduate highschool" had the largest percentage of mothers with premature babies for the sub group. 
+
+```{r}
+ggplot(data=babies)+
+  geom_jitter(mapping=aes(x=Premature, y=number, color = Premature))+
+  facet_wrap(~med)
+```
+This graph shows the number of premature and not premature babies in each educational category but in dot plot form. I used the geom_jitter function to take a better look at the data and facet_wrap to divide the graphs into subclasses of education categories. This is just another way to look at comparing premature babies and the education level of mothers. 
+
+```{r}
+ggplot(data=babies)+
+  geom_jitter(mapping=aes(x=marital, y= number, color = Premature))
+
+```
+This graph shows marital status of mothers and if the baby was premature or not. I used the geom_jitter function to make the data more visible. Conclusively, looking at marital status proved to be very difficult because almost all the mothers were in 1 which is married. All in all, the marital status of the mother data set was inconclusive when comparing to smoking or premature births because there wasn't any disparity in the data. 
+
+My final analyis: Mother's who did not graduate high school had the highest smoking rates and the mother's who did not graduate high school had the largest percentage of premature babies. This could show that smoking rates do effect whether a baby is born premature or not, but it is not entirely conclusive. However, it is definitely an interesting comparison that could prove to be conclusive with further research and data. Conclusively, I agree with the claim the Surgeon General made about smoking mothers having premature babies. 
+
+
+
+## Concluding remarks: 
+
+The surgeon General found that smoking poses a significant threat to a Woman's likleyhood of having both a mature birth and a birth of healthy weight. Thorbin's analysis showed in general, that in proportion to any other non-zero smoking intensity value, mothers who smoked less had the higher amount of births. Expounding on this, it was found that a significant deficit existed between all smoking intensities between mature and premature births, a notable exception being non smoking mothers belonging to the $2.5k income group, an explanation for this outlier was not able to be derived from Thorbin's data. Despite this 'outlier', Thorbin's data clearly showed that by sheer magnitude of mature births of non smoking mothers, a clear relationship existed between smoking intensity and mature births where as no immediate relationship between income and mature births was discerned. Since this analysis did not include race or education considerations Ryan's analysis agreed with Thorbin's analysis of the absence of a relationship between births and income. However Ryan went further and examined the possibility of a confounding variable in education, smoking tendancy and race. Ryan found that there existed no definitive relationship between these variables which suggested that race and education based on race were not confounding variables to the surgeon general's findings. However, he did notice that that Asian populations tended to smoke heavily. This is where Jorge's analysis comes in handy. Jorge's plots showed a marked tendancy of Asians toward lower gestation periods, which when combined with Ryan's observation that Asians tended to smoke more intensely, appears to be an indication of veracity in the surgeon general's findings. Erik's Analysis appeared to again show that the number of people gathered around healthy birth weights and gestation periods was greater in the non-smoking population suggesting again that the derived data agreed with the surgeon general's findings. While Ryan probed the possibility of education on a discreet scale, Mandy's Analysis focused on the possibility of education level alone possibly acting as a confounding variable. She found that the category corresponding to education between grades 8 and 12 had the highest percentage of mothers with premature babies, Her final analysis pointed out that she found that mothers who did not graduate highschool in fact had the highest level of smoking intensity which when considering the previous tad of data, appears to align with the surgeon generals finding that smoking increases a womans chance of having a pre mature birth. Our combined efforts to test the surgeon generals results have resulted in unanimous verdict that smoking in fact does increase a mothers likleyhood of not only expreiencing early birth but also decreased birth weight. It is clear that the group reccomendation would be to not smoke while pregnant. 
