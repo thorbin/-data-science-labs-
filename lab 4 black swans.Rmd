@@ -12,6 +12,7 @@ babies_1 <- read_csv("https://raw.githubusercontent.com/ervance1/Sp2018-Data-Sci
 babies_1 <- rename(babies_1, bwtoz = `bwt/oz`)
 ```
 ## Team's Recommendation: 
+Statistically, birth rates are higher for non-smoking mothers. There are more babies coming from nonsmoking mothers, but data shows there are more premature babies coming from smoking mothers. So, the percentage of premature babies coming from smoking mothers is higher than non smoking mothers. Data also shows babies with mothers who smoke do have, on average, smaller birth weights at every gestational age. However, we aren't sure it was completely necessary to seperate those two variable. If mothers who smoke are showing a greater chance of having premature babies, then that effects the birth weight in ounces variable. It is not seperate. Since the variable for premature babies effects birth weight in ounces, the weight variable (or the permature variable) is not extremely useful and almost redundant. So, analyzing other factors like income, mother's education, race, etc. further analyzes and interprets General Surgeon's claim. Our recommendation for General Surgeon's analysis and data is to investigate other factors to see what groups (race, income, etc.) are smoking more and if those groups are having children. 
 
 
 
@@ -32,7 +33,7 @@ Non-default layers used: dark theme, dodge position, stat=identity, fill=number,
 ggplot(data=babies_prem,mapping=aes(x=inc,y=births,group=number,color=number,fill=number))+geom_bar(stat="identity",position="dodge")+theme_dark()+ggtitle("Premature births grouped by income bracket")+xlab("Income bracket")+ylab("number of births")+labs(fill="smoking intensity spectrum")
 ```
 
-  This plot shows the premature birth numbers categorized by income bracket. This was accmplished by initially filtering gestation days to be less than 270. Grouping by number (and income), which is how many cigarettes were smoked a day for past and current smokers. Considering that the data represents only people who smoke, number is how many cigarettes the subjects smoke per day. Once grouped, parity which was the number of births (live or still) each subject produced was summed using a summary function to give a total number of births per income bracket. This resulting data frame was then again grouped by number to give a decent spread of smoking intensity representation per income bracket. 
+  This plot shows the premature birth numbers categorized by income bracket. This was accomplished by initially filtering gestation days to be less than 270. Grouping by number (and income), which is how many cigarettes were smoked a day for past and current smokers. Considering that the data represents only people who smoke, number is how many cigarettes the subjects smoke per day. Once grouped, parity which was the number of births (live or still) each subject produced was summed using a summary function to give a total number of births per income bracket. This resulting data frame was then again grouped by number to give a decent spread of smoking intensity representation per income bracket. 
 ```{r}
 ggplot(data=babies_matu,mapping=aes(x=inc,y=births,group=number,color=number,fill=number))+geom_bar(stat="identity",position="dodge")+theme_dark()+ggtitle("Mature births grouped by income bracket")+xlab("Income bracket")+ylab("number of births")+labs(fill="smoking intensity spectrum")
 ```
@@ -141,25 +142,14 @@ ggplot(data = babies_2) +
 ```
 In the non-smoking group, we can obseve that the 9th point (asian group) has porportialy greater variability towards having babies under 270 lb 
 
-### Erik's question: What is the relationship between birth weight in ounces and gestation period from the perspective of non-smoking and smoking parties? 
+### Erik's question: What is the relationship between birth weight in ounces and gestation period from the perspective f non-smoking and smoking parties? 
 
 ```{R}
-#data frame creation block# 
 babies_smoke<-filter(babies,smoke==1)
 babies_nos<-filter(babies,smoke==0)
-```
-```{R}
 ggplot(data=babies_smoke,mapping=aes(x=gestation,y=bwtoz))+geom_smooth()+ggtitle("Gestation vs. Birth Weight for Smokers")
-```
-This plot shows that the average birth weight is around 120 (troy?) ounces at on average 310 days gestating. Upon initial inspection it appears as though the bulk of these babies are born in healthy gestation terms, while this is true, a significant portion is also born under weight and under gestated. The following plot provides grounds for comparison.
-```{R}
 ggplot(data=babies_nos,mapping=aes(x=gestation,y=bwtoz))+geom_smooth()+ggtitle("Gestation vs. Birth Weigh for Non-Smokers")
 ```
-<<<<<<< HEAD
-Compared to the previous plot, a bizarre uptick in birth weight around 150 days appears. The best possible exlanation is that these are still born babies that died in the womb, there is no way a baby born after only 5-6 months would survive long on their own. As to why this trend is not seen in the smoker category is a mystery. From the large peak centered at about 275 days, it appears as though the majority of babies are born after term and at a healthy weight followed by a steep drop off in weight past 300 days of gestation. Judging from the curvature of the non-smokers curve, it would appear as though more babies are born past the 270 day marker as compared to the smoker category. My reasoning is as follows: the arclength of the curve represents the number of births because each point takes up a differential distance (maybe?) and when summed up in an integral the length would correspond to all the people considered in the survey. Since curvature is clearly larger for the non-smoker category, and both categories cover approxamately the same domain, non smokers have more subjects belonging to ideal birthing conditions at higher birth weights. The relationship between birth weight in ounces and gestation and smoking appears to be that neglecting possible still births, birth weight and gestation for non-smokers appear to be maximized at 270 days and 130 ounces where as smokers appear to maximize at 130 ounces and 300 days with steady increase from the conception period. 
-Conclusion:
-From the curvature arguement, it appears as though smokers have fewer people represented at healtier birth weights compared to the non-smoker category indicating that smoking decreases the birth weight and gestation periods which supports both of the surgeon general's claims.  
-=======
 These plots ...
 
 
@@ -210,4 +200,3 @@ This graph shows marital status of mothers and if the baby was premature or not.
 
 My final analyis: Mother's who did not graduate high school had the highest smoking rates and the mother's who did not graduate high school had the largest percentage of premature babies. This could show that smoking rates do effect whether a baby is born premature or not, but it is not entirely conclusive. However, it is definitely an interesting comparison that could prove to be conclusive with further research and data. Conclusively, I agree with the claim the Surgeon General made about smoking mothers having premature babies. 
 ### End Mandy Karako 
->>>>>>> 6929d7e5ea943448a1d5da2a24ca3ba0ba8ac776
