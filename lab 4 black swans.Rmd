@@ -136,3 +136,12 @@ ggplot(data = babies_2) +
 ```
 In the non-smoking group, we can obseve that the 9th point (asian group) has porportialy greater variability towards having babies under 270 lb 
 
+### Erik's question: What is the relationship between birth weight in ounces and gestation period from the perspective f non-smoking and smoking parties? 
+
+```{R}
+babies_smoke<-filter(babies,smoke==1)
+babies_nos<-filter(babies,smoke==0)
+ggplot(data=babies_smoke,mapping=aes(x=gestation,y=bwtoz))+geom_smooth()+ggtitle("Gestation vs. Birth Weight for Smokers")
+ggplot(data=babies_nos,mapping=aes(x=gestation,y=bwtoz))+geom_smooth()+ggtitle("Gestation vs. Birth Weigh for Non-Smokers")
+```
+These plots ...
