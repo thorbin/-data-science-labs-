@@ -11,15 +11,6 @@ library(tidyverse)
 milk <- read.csv('state_milk_production.csv')
 
 
-#pass external data set into a local variale/data frame
-
-View(milk)
-#checking the contents of milk 
-
-head(milk)
-# what does head do? it display the a sample of the first observations
-tail(milk)
-# tail does the inverse. 
 
 #-------------*
 #1 , display the distribution of the yearly milk production (in millions #of pounds) for your birth-year. 
@@ -43,27 +34,9 @@ ggplot(data = milk1994, aes(x = milk_million)) +
 
 #--------------*
 
-#2possible approaches: do a group #by state then get the mean median min max
-# 2.1 we get the data from milk then we group by state
-# 2.1.1 the median
-median_state <- milk %>%
-  group_by(state) %>%
-  summarise(Med = median(milk_million)) %>%
-  as_tibble()
-median_state
-
-#2.1.2 the mean 
-mean_state<-milk %>%
-  group_by(state) %>%
-  summarise(Mean = mean(milk_million)) %>%
-  as_tibble()
-mean_state
-# repetative...
-#we can do it all at once 
-
-#getting the mean median min and max for all the states in the whole dataset. if you try to get the mean median... by using your birth year wont work cuz for each year every state has one observation. to get the mean of anythingwe need at least to intances of an observation
-
-#2.2.0
+#possible approaches: do a group #by state then get the mean median min max
+# 2.1.0 we get the data from milk then we group by state
+#getting the mean median min and max for all the states in the whole dataset... if you try to get the mean median... by using your birth year wont work cuz for each year every state has one observation. to get the mean of anythingwe need at least to intances of an observation
 
 summary_milk <- milk %>% 
   group_by(state) %>% 
@@ -137,7 +110,7 @@ arrange(summary_milk, (Mean))
 milk2017 <- milk %>%
   filter(year %in% c('2017')) 
 
-view(milk2017)
+view(milk2017)# checking if data frame is apropiate 
 
 arrange(milk2017, desc(milk_million))
 
