@@ -1,0 +1,22 @@
+---
+title: "Lab 5 Black Swans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "9/26/2019"
+output: html_document
+---
+### Thorbin's Birth year: 1998
+```{r setup, include=FALSE}
+library("tidyverse")
+milk <- read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-29/state_milk_production.csv")
+head(milk)
+```
+
+```{R}
+#filtering milk from 1998#
+milk_98<-milk %>% group_by(state,year) %>% mutate(milk_tot_state=sum(milk_produced)) %>% summarise(milk_avg_Mlbs=sum(milk_produced/(n()*10^6))) %>% filter(year==1998) %>% ungroup() %>% mutate(milk_tot=sum(milk_avg_Mlbs)) 
+```
+
+```{r}
+#plot chunk#
+ggplot(data=milk_98)+geom_bar(mapping=aes(x=state,y=milk_avg_Mlbs),stat="identity")+theme(axis.text.x = element_text(angle = 60, hjust = 1))+labs(y="average milk production (Mlbs)",title ="milk averages by state in Mega pounds (Mlbs) in 1998")
+```
