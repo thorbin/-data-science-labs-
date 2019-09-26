@@ -1,0 +1,149 @@
+#download the zip file, unzip it, and place it some where wich is easy to locate. 
+
+#to set your working directory hit/press “session” (next to file,edit..) and select #...tidytuesday/data/2019/2019-01-29/state_milk_production.csv
+
+getwd()
+# working on a MAC, output : [1] "/Users/joro7386/Documents/tidytuesday-master/data/2019/2019-01-29"
+
+library(tidyverse) 
+#laod tidyverse to use it funtions 
+
+milk <- read.csv('state_milk_production.csv')
+
+
+#pass external data set into a local variale/data frame
+
+View(milk)
+#checking the contents of milk 
+
+head(milk)
+# what does head do? it display the a sample of the first observations
+tail(milk)
+# tail does the inverse. 
+
+#-------------*
+#1 , display the distribution of the yearly milk production (in millions #of pounds) for your birth-year. 
+
+milk <- milk %>%
+  mutate(milk_million = milk_produced/1000000) #in millions #of pounds
+
+milk1994 <- milk %>%
+  filter(year == 1994) # change the year to the year you are born 
+
+view(milk1994)
+
+ggplot(data = milk1994, aes(x = milk_million)) +
+  geom_histogram(bins = 15) + 
+  ggtitle('Histogram of milk produced in 1994 by state') #setting  yearly milk production (in millions of pounds) for your birth-year.
+
+ggplot(data = milk1994, aes(x = milk_million)) +
+  geom_density() + 
+  ggtitle('Distribution estimate of milk produced in 1994 by state') #same as above but using densaty 
+
+
+#--------------*
+
+#2possible approaches: do a group #by state then get the mean median min max
+# 2.1 we get the data from milk then we group by state
+# 2.1.1 the median
+median_state <- milk %>%
+  group_by(state) %>%
+  summarise(Med = median(milk_million)) %>%
+  as_tibble()
+median_state
+
+#2.1.2 the mean 
+mean_state<-milk %>%
+  group_by(state) %>%
+  summarise(Mean = mean(milk_million)) %>%
+  as_tibble()
+mean_state
+# repetative...
+#we can do it all at once 
+
+#getting the mean median min and max for all the states in the whole dataset. if you try to get the mean median... by using your birth year wont work cuz for each year every state has one observation. to get the mean of anythingwe need at least to intances of an observation
+
+#2.2.0
+
+summary_milk <- milk %>% 
+  group_by(state) %>% 
+  summarise(lower = min(milk_million), upper = max(milk_million), Mean = mean(milk_million), Median = median(milk_million))
+
+view(summary_milk)
+
+
+#visual rep 1
+ggplot(data = milk) +
+  geom_bar(mapping = aes(x = state, y = milk_million), stat = "identity")+
+  facet_wrap(~ state, nrow = 5)
+
+#visual rep 2
+ggplot(data = milk) + 
+  stat_summary(
+    mapping = aes(x = state, y = milk_million),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  )+
+  facet_wrap(~ state, nrow = 5)
+
+#we still need the state that produced the most milk and least 
+
+#state that produce the most milk 
+arrange(summary_milk, desc(Mean))
+
+#state that produce the least milk
+arrange(summary_milk, (Mean))
+
+
+#--------------------------------------------------------------------
+#3.0.0
+#as a team... select 5 states
+#assinging new data frame for the selected 5 states 
+
+states5milk <- milk %>%
+  filter(state %in% c('Colorado','California','Maryland','Massachusetts','Florida')) %>%
+  select(state, year, milk_million)
+
+ggplot(data = states5milk, aes(x = year, y = milk_million, colour = state)) +
+  geom_smooth( method = "lm",
+               size=0.5)+
+  geom_point(size=0.09) + 
+  ggtitle('Pounds of milk over time by state') +
+  xlab('Year') +
+  ylab('Milk Produced (Million lb)')
+
+#this works 
+
+#4.0.0
+#Then using the whole dataset, report the following on the front page.
+
+#4.1.0, The year when the most milk was produced in the United States.
+
+years_milk <- milk %>% 
+  group_by(year) %>% 
+  summarise(lower = min(milk_million), upper = max(milk_million), Mean = mean(milk_million), Median = median(milk_million))
+
+view(years_milk)
+
+#the year that produce the most milk 
+arrange(years_milk, desc(Mean))
+
+#The year when the least milk was produced in the United States.
+arrange(summary_milk, (Mean))
+
+#In 2017, report the 5 states that produced the most milk. (Hint: Use arrange)
+
+milk2017 <- milk %>%
+  filter(year %in% c('2017')) 
+
+view(milk2017)
+
+arrange(milk2017, desc(milk_million))
+
+#In 2017, report the 5 states that produced the least milk. (Hint: Use arrange)
+
+arrange(milk2017, (milk_million))
+
+
+#end
