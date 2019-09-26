@@ -78,6 +78,7 @@ states5milk <- milk %>%
   filter(state %in% c('Colorado','California','Maryland','Massachusetts','Florida')) %>%
   select(state, year, milk_million)
 
+
 ggplot(data = states5milk, aes(x = year, y = milk_million, colour = state)) +
   geom_smooth( method = "lm",
                size=0.5)+
@@ -85,6 +86,21 @@ ggplot(data = states5milk, aes(x = year, y = milk_million, colour = state)) +
   ggtitle('Pounds of milk over time by state') +
   xlab('Year') +
   ylab('Milk Produced (Million lb)')
+
+#for all the states....messy 
+allSmilk<-milk %>%
+  select(state, year, milk_million)
+
+ggplot(data = allSmilk, aes(x = year, y = milk_million, colour = state)) +
+  geom_smooth( method = "lm",
+               size=0.5)+
+  geom_point(size=0.09) + 
+  ggtitle('Pounds of milk over time by state') +
+  xlab('Year') +
+  ylab('Milk Produced (Million lb)')+
+  facet_wrap(~ state, nrow = 5)
+
+
 
 #this works 
 
