@@ -1,56 +1,79 @@
-#download the zip file, unzip it, and place it some where wich is easy to locate. 
+---
+title: "lab_5_MR"
+author: "Jorge Robelo"
+date: "9/29/2019"
+output: html_document
+---
 
-#to set your working directory hit/press “session” (next to file,edit..) and select #...tidytuesday/data/2019/2019-01-29/state_milk_production.csv
-
-getwd()
-# working on a MAC, output : [1] "/Users/joro7386/Documents/tidytuesday-master/data/2019/2019-01-29"
-
+#setup
+```{r}
 library(tidyverse) 
 #laod tidyverse to use it funtions 
 
 milk <- read.csv('state_milk_production.csv')
 
+```
 
 
-#-------------*
-#1 , display the distribution of the yearly milk production (in millions #of pounds) for your birth-year. 
+
+#1  Displaying the distribution of the yearly milk production (in millions #of pounds) for my birth-year.
+```{r}
 
 milk <- milk %>%
-  mutate(milk_million = milk_produced/1000000) #in millions #of pounds
+  mutate(milk_million = milk_produced/1000000) #in millions of pounds
 
 milk1994 <- milk %>%
   filter(year == 1994) # change the year to the year you are born 
 
 view(milk1994)
 
+```
+#1.1 Displaying the mean of the median max and min of milk production in 1994
+
+```{r}
+suma1994 <-milk1994%>%
+  summarise(lower = min(milk_million), upper = max(milk_million), Mean = mean(milk_million), Median = median(milk_million))
+suma1994
+```
+
+#1.1.1 Displaying  yearly milk production distribution and densaty (in millions of pounds) for 1994.
+```{r}
 ggplot(data = milk1994, aes(x = milk_million)) +
   geom_histogram(bins = 15) + 
-  ggtitle('Histogram of milk produced in 1994 by state') #setting  yearly milk production (in millions of pounds) for your birth-year.
+  ggtitle('Histogram of milk produced in 1994 by state') 
 
 ggplot(data = milk1994, aes(x = milk_million)) +
   geom_density() + 
-  ggtitle('Distribution estimate of milk produced in 1994 by state') #same as above but using densaty 
+  ggtitle('Distribution estimate of milk produced in 1994 by state')
+```
 
-
-#--------------*
-
-#possible approaches: do a group #by state then get the mean median min max
-# 2.1.0 we get the data from milk then we group by state
-#getting the mean median min and max for all the states in the whole dataset... if you try to get the mean median... by using your birth year wont work cuz for each year every state has one observation. to get the mean of anythingwe need at least to intances of an observation
-
+#Reporting the average milk produced by each state, the median milk produced be each state, the state that produced the most milk, and the state that produced the least amount of milk.
+```{r}
 summary_milk <- milk %>% 
   group_by(state) %>% 
   summarise(lower = min(milk_million), upper = max(milk_million), Mean = mean(milk_million), Median = median(milk_million))
 
 view(summary_milk)
+```
 
+#State that produce the most milk 
+```{r}
+arrange(summary_milk, desc(Mean))
 
+```
+
+#State that produce the least milk
+```{r }
+arrange(summary_milk, (Mean))
+```
 #visual rep 1
+```{r }
 ggplot(data = milk) +
   geom_bar(mapping = aes(x = state, y = milk_million), stat = "identity")+
   facet_wrap(~ state, nrow = 5)
-
+```
 #visual rep 2
+```{r }
 ggplot(data = milk) + 
   stat_summary(
     mapping = aes(x = state, y = milk_million),
@@ -59,21 +82,15 @@ ggplot(data = milk) +
     fun.y = median
   )+
   facet_wrap(~ state, nrow = 5)
+```
+#end Jorge individual
 
-#we still need the state that produced the most milk and least 
-
-#state that produce the most milk 
-arrange(summary_milk, desc(Mean))
-
-#state that produce the least milk
+```{r }
 arrange(summary_milk, (Mean))
 
-
-#--------------------------------------------------------------------
-#3.0.0
-#as a team... select 5 states
-#assinging new data frame for the selected 5 states 
-
+```
+#As a team, select 5 states
+```{r}
 states5milk <- milk %>%
   filter(state %in% c('Colorado','California','Maryland','Massachusetts','Florida')) %>%
   select(state, year, milk_million)
@@ -87,41 +104,62 @@ ggplot(data = states5milk, aes(x = year, y = milk_million, colour = state)) +
   xlab('Year') +
   ylab('Milk Produced (Million lb)')
 
-#for all the states....messy 
+```
+
+```{r}
 allSmilk<-milk %>%
+  select( year, milk_million)
+
+ggplot(data = allSmilk, aes(x = year, y = milk_million)) +
+  geom_smooth( method = "lm",
+               size=0.9)+
+  geom_point(size=0.09) + 
+  ggtitle('Pounds of milk over time by years for all states') +
+  xlab('Year') +
+  ylab('Milk Produced (Million lb)')
+
+```
+
+```{r}
+allSmilk2<-milk %>%
   select(state, year, milk_million)
 
-ggplot(data = allSmilk, aes(x = year, y = milk_million, colour = state)) +
+ggplot(data = allSmilk2, aes(x = year, y = milk_million, colour = state)) +
   geom_smooth( method = "lm",
                size=0.5)+
   geom_point(size=0.09) + 
   ggtitle('Pounds of milk over time by state') +
   xlab('Year') +
   ylab('Milk Produced (Million lb)')+
+  theme(legend.position = "none")+
   facet_wrap(~ state, nrow = 5)
 
 
 
-#this works 
+```
+#The year when the most milk was produced in the United States.
 
-#4.0.0
-#Then using the whole dataset, report the following on the front page.
-
-#4.1.0, The year when the most milk was produced in the United States.
-
+```{r}
 years_milk <- milk %>% 
   group_by(year) %>% 
   summarise(lower = min(milk_million), upper = max(milk_million), Mean = mean(milk_million), Median = median(milk_million))
 
 view(years_milk)
 
-#the year that produce the most milk 
+```
+#The year that produce the most milk 
+```{r pressure, echo=FALSE}
 arrange(years_milk, desc(Mean))
 
+```
 #The year when the least milk was produced in the United States.
+```{r}
+
 arrange(summary_milk, (Mean))
 
-#In 2017, report the 5 states that produced the most milk. (Hint: Use arrange)
+```
+#In 2017, the 5 states that produced the most milk. 
+```{r}
 
 milk2017 <- milk %>%
   filter(year %in% c('2017')) 
@@ -130,9 +168,14 @@ view(milk2017)# checking if data frame is apropiate
 
 arrange(milk2017, desc(milk_million))
 
-#In 2017, report the 5 states that produced the least milk. (Hint: Use arrange)
-
+```
+#In 2017, the 5 states that produced the least milk.
+```{r}
 arrange(milk2017, (milk_million))
+```
 
-
-#end
+##analasys Jorge: Trends surrounding the production of milk throughout the United States of America has serious implication concerning the local availability of milk.
+#                 It seems that as the year passes most states have a constant mean in milk production. However, California, Wisconsin, New Mexico, Idaho, and NewYork display a #                 strong positive correlation in milk production as time goes by. 
+#                 The inherent problem of producing a disproportionally large amount of milk in a few states is that if transportation cost would increase then those states    #                 that don't have local access a large amount of milk production will not be able to meet the demands of milk consumption.
+#                 Ultimately this will have a negative impact in that sector of the economy. 
+#end Jorge 
