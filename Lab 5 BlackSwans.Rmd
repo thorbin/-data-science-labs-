@@ -35,10 +35,7 @@ largest milk production for 1998: California
 milk_1997 <- milk %>%
   filter(year == 1997)
 ```
-## Then, I used ggplot and geom_histogram to view the milk produced in millions in the year 1997. 
-## Hisogram graphs show the frequency a value in the data set occurs. In this case, most states produced below 
-## 5 billion gallons of milk in 1997, with some outliers of course. There were 3 states that produced over 10 billion 
-## gallons of milk. 
+## Then, I used ggplot and geom_histogram to view the milk produced in millions in the year 1997. Histogram graphs show the frequency a value in the data set occurs. In this case, most states produced below 5 billion gallons of milk in 1997, with some outliers of course. There were 3 states that produced over 10 billion gallons of milk. 
 ```{r}
 # histogram graph of the count 
 ggplot(data = milk_1997, aes(x = milk_million, fill= state)) +
@@ -94,7 +91,7 @@ ggplot(df, aes(state, outcome))+
   geom_col(mapping=aes(fill=state))+
   ggtitle("Mean Milk Produced by Alaska and California")
 ``` 
-## Mandy's analysis: For the year 1997, most state produced below 5 billion gallons a year while there were some producing over 10 billion. The state that produced the most milk in 1997 was California. The state that produced the least amount of milk was Alaska. This was to be expected considering the population difference of Alaska and California. Alaska's populaton in 1997 was just over half a million, while California's was over 30 million. More people, means more milk. It also shows that the size of the state in square mileage has nothing to do with the amount of milk produced, considering that Alaska is a very big state. 
+## Mandy's analysis: For the year 1997, most states produced below 5 billion gallons a year while there were some producing over 10 billion. The histogram and density graphs showed this well. The state that produced the most milk in 1997 was California. The state that produced the least amount of milk was Alaska. This was to be expected considering the population difference of Alaska and California. Alaska's populaton in 1997 was just over half a million, while California's was over 30 million. More people, means more milk. It also shows that the size of the state in square mileage has nothing to do with the amount of milk produced, considering that Alaska is a very big state. 
 
 
 
