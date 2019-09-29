@@ -10,7 +10,8 @@ output: html_document
 library(tidyverse) 
 #laod tidyverse to use it funtions 
 
-milk <- read.csv('state_milk_production.csv')
+milk <- read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-29/state_milk_production.csv")
+head(milk)
 
 ```
 #As a team, select 5 states
