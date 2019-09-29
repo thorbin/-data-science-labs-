@@ -28,28 +28,34 @@ largest milk production for 1998: California
 
 ## Mandy's Birth Year - 1997 
 ## I, Mandy Karako, looked at milk production per state for the the year 1997, my birth year. 
-
+```{r setup, include= FALSE}
+library(tidyverse)
+milk <- state_milk_production
+#Add a column for millions of milk in pounds
+milk %>%
+  mutate(milk_million = milk_produced/1000000)
+```
 ## First, I used the filter function to extract my year from the data set:
 ```{r}
-# filter milk to my birth year: 1997
+#filter milk to my birth year: 1997
 milk_1997 <- milk %>%
   filter(year == 1997)
 ```
-## Then, I used ggplot and geom_histogram to view the milk produced in millions in the year 1997. Histogram graphs show the frequency a value in the data set occurs. In this case, most states produced below 5 billion gallons of milk in 1997, with some outliers of course. There were 3 states that produced over 10 billion gallons of milk. 
+## Then, I used ggplot and geom_histogram to view the milk produced in millions in the year 1997. Histogram graphs show the frequency a value in the data set occurs. In this case, most states produced below 5 billion pounds of milk in 1997, with some outliers of course. There were 3 states that produced over 10 billion pounds of milk. 
 ```{r}
 # histogram graph of the count 
 ggplot(data = milk_1997, aes(x = milk_million, fill= state)) +
   geom_histogram(bins = 15) + 
   ggtitle('Milk Produced in 1997 by State')
 ```
-## I used the geom_density function in ggplot to view the data in a different way. The density graph gave me the same results, showing that most states produced below 5 billion gallons in 1997. The graph also shows the outliers above 10 billion. 
+## I used the geom_density function in ggplot to view the data in a different way. The density graph gave me the same results, showing that most states produced below 5 billion pounds in 1997. The graph also shows the outliers above 10 billion. 
 ```{r}
 # geom density graph 
 ggplot(data = milk_1997, aes(x = milk_million)) +
   geom_density() + 
   ggtitle('Distribution Estimate of Milk Produced in 1997 by State')
 ```
-## Next, I used the summarise function to extract the max, min, mean, and median gallons of milk each state produced. 
+## Next, I used the summarise function to extract the max, min, mean, and median pounds of milk each state produced. 
 ```{r}
 #summarize data 
 summarize_milk_1997 <- milk %>% 
@@ -91,7 +97,7 @@ ggplot(df, aes(state, outcome))+
   geom_col(mapping=aes(fill=state))+
   ggtitle("Mean Milk Produced by Alaska and California")
 ``` 
-## Mandy's analysis: For the year 1997, most states produced below 5 billion gallons a year while there were some producing over 10 billion. The histogram and density graphs showed this well. The state that produced the most milk in 1997 was California. The state that produced the least amount of milk was Alaska. This was to be expected considering the population difference of Alaska and California. Alaska's populaton in 1997 was just over half a million, while California's was over 30 million. More people, means more milk. It also shows that the size of the state in square mileage has nothing to do with the amount of milk produced, considering that Alaska is a very big state. 
+## Mandy's analysis: For the year 1997, most states produced below 5 billion pounds a year while there were some producing over 10 billion. The histogram and density graphs showed this well. The state that produced the most milk in 1997 was California. The state that produced the least amount of milk was Alaska. This was to be expected considering the population difference of Alaska and California. Alaska's populaton in 1997 was just over half a million, while California's was over 30 million. More people, means more milk. It also shows that the size of the state in square mileage has nothing to do with the amount of milk produced, considering that Alaska is a very big state. 
 
 
 
