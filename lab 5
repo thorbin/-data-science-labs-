@@ -196,3 +196,43 @@ arrange(milk2017, (milk_million))
 #                 The inherent problem of producing a disproportionally large amount of milk in a few states is that if transportation cost would increase then those states    #                 that don't have local access a large amount of milk production will not be able to meet the demands of milk consumption.
 #                 Ultimately this will have a negative impact in that sector of the economy. 
 #end Jorge 
+
+
+# Start Mandy 
+
+# filter milk to my birth year: 1997
+```{r}
+milk_1997 <- milk %>%
+  filter(year == 1997)
+```
+# histogram graph of the count 
+```{r}
+ggplot(data = milk_1997, aes(x = milk_million)) +
+  geom_histogram(bins = 15) + 
+  ggtitle('Milk Produced in 1997 by State')
+```
+# geom density graph 
+```{r}
+ggplot(data = milk_1997, aes(x = milk_million)) +
+  geom_density() + 
+  ggtitle('Distribution Estimate of Milk Produced in 1997 by State')
+```
+#summarize data 
+```{r}
+summarize_milk_1997 <- milk %>% 
+  group_by(state) %>% 
+  summarise(lower = min(milk_million), upper = max(milk_million), Mean = mean(milk_million), Median = median(milk_million))
+```
+```{r}
+view(summarize_milk_1997)
+```
+#State that produced the most milk in 1997: 
+```{r}
+arrange(summarize_milk_1997, desc(Mean)) #California 
+```
+#State that produced the least milk in 1997: 
+```{r}
+arrange(summarize_milk_1997, Mean) #Alaska
+```
+
+
