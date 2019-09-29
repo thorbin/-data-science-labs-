@@ -102,6 +102,24 @@ Smallest milk production for 1998: Alaska
 largest milk production for 1998: California
 ##end Thorbin's Individual
 
+##begin Ryan's individual part
+
+### Ryan's Birth year: 1988
+
+```{r}
+#filtering milk from 1988#
+milk_88<-milk %>% group_by(state,year) %>% mutate(milk_tot_state=sum(milk_produced)) %>% summarise(milk_avg_Mlbs=sum(milk_produced/(n()*10^6))) %>% filter(year==1988) %>% ungroup() %>% mutate(milk_tot=sum(milk_avg_Mlbs)) 
+```
+
+```{r}
+#plot chunk#
+ggplot(data=milk_88)+geom_bar(mapping=aes(x=state,y=milk_avg_Mlbs),stat="identity")+theme(axis.text.x = element_text(angle = 60, hjust = 1))+labs(y="average milk production (Mlbs)",title ="Distribution of milk production by state in 1988")
+milk_as_vector<-milk_88 %>% select(milk_avg_Mlbs) %>% pull(milk_avg_Mlbs)
+```
+In addition to the averages for each state displayed above, we can use inline code to find the median milk production (across the states), is `r median(milk_as_vector)`, and we can see that the state that produced the most milk (`r max(milk_as_vector)`) is West Virginia, while the state that produced the least (`r min(milk_as_vector)`) is Alaska.
+
+##end Ryan's individual part
+
 ```{r} 
 arrange(summary_milk, (Mean))
 
