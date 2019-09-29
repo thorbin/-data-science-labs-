@@ -85,7 +85,24 @@ ggplot(data = milk) +
 ```
 #end Jorge individual
 
-```{r }
+##begin Thorbin's Individual
+```{R}
+#filtering milk from 1998#
+milk_98<-milk %>% group_by(state,year) %>% mutate(milk_tot_state=sum(milk_produced)) %>% summarise(milk_avg_Mlbs=sum(milk_produced/(n()*10^6))) %>% filter(year==1998) %>% ungroup() %>% mutate(milk_tot=sum(milk_avg_Mlbs)) 
+```
+
+```{r}
+#plot chunk#
+ggplot(data=milk_98)+geom_bar(mapping=aes(x=state,y=milk_avg_Mlbs),stat="identity")+theme(axis.text.x = element_text(angle = 60, hjust = 1))+labs(y="average milk production (Mlbs)",title ="milk averages by state in Mega pounds (Mlbs) in 1998")
+milk_as_vector<-milk_98 %>% select(milk_avg_Mlbs) %>% pull(milk_avg_Mlbs)
+median(milk_as_vector)
+```
+Median for 1998: 1411.5 Mlbs
+Smallest milk production for 1998: Alaska
+largest milk production for 1998: California
+##end Thorbin's Individual
+
+```{r} 
 arrange(summary_milk, (Mean))
 
 ```
