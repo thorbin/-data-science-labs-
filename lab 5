@@ -1,6 +1,6 @@
 ---
 title: "lab_5_MR"
-author: "Jorge Robelo"
+author: "Jorge, Thorbin, Ryan, and Mandy "
 date: "9/29/2019"
 output: html_document
 ---
@@ -13,9 +13,100 @@ library(tidyverse)
 milk <- read.csv('state_milk_production.csv')
 
 ```
+#As a team, select 5 states
+```{r}
+states5milk <- milk %>%
+  filter(state %in% c('Colorado','California','Maryland','Massachusetts','Florida')) %>%
+  select(state, year, milk_million)
+
+
+ggplot(data = states5milk, aes(x = year, y = milk_million, colour = state)) +
+  geom_smooth( method = "lm",
+               size=0.5)+
+  geom_point(size=0.09) + 
+  ggtitle('Pounds of milk over time by state') +
+  xlab('Year') +
+  ylab('Milk Produced (Million lb)')
+
+```
+
+```{r}
+allSmilk<-milk %>%
+  select( year, milk_million)
+
+ggplot(data = allSmilk, aes(x = year, y = milk_million)) +
+  geom_smooth( method = "lm",
+               size=0.9)+
+  geom_point(size=0.09) + 
+  ggtitle('Pounds of milk over time by years for all states') +
+  xlab('Year') +
+  ylab('Milk Produced (Million lb)')
+
+```
+
+```{r}
+allSmilk2<-milk %>%
+  select(state, year, milk_million)
+
+ggplot(data = allSmilk2, aes(x = year, y = milk_million, colour = state)) +
+  geom_smooth( method = "lm",
+               size=0.5)+
+  geom_point(size=0.09) + 
+  ggtitle('Pounds of milk over time by state') +
+  xlab('Year') +
+  ylab('Milk Produced (Million lb)')+
+  theme(legend.position = "none")+
+  facet_wrap(~ state, nrow = 5)
 
 
 
+```
+#The year when the most milk was produced in the United States.
+
+```{r}
+years_milk <- milk %>% 
+  group_by(year) %>% 
+  summarise(lower = min(milk_million), upper = max(milk_million), Mean = mean(milk_million), Median = median(milk_million))
+
+view(years_milk)
+
+```
+#The year that produce the most milk 
+```{r pressure, echo=FALSE}
+arrange(years_milk, desc(Mean))
+
+```
+#The year when the least milk was produced in the United States.
+```{r}
+
+arrange(summary_milk, (Mean))
+
+```
+#In 2017, the 5 states that produced the most milk. 
+```{r}
+
+milk2017 <- milk %>%
+  filter(year %in% c('2017')) 
+
+view(milk2017)# checking if data frame is apropiate 
+
+arrange(milk2017, desc(milk_million))
+
+```
+#In 2017, the 5 states that produced the least milk.
+```{r}
+arrange(milk2017, (milk_million))
+```
+
+#analasys : Trends surrounding the production of milk throughout the United States of America has serious implication concerning the local availability of milk.
+#                 It seems that as the year passes most states have a constant mean in milk production. However, California, Wisconsin, New Mexico, Idaho, and NewYork display a #                 strong positive correlation in milk production as time goes by. 
+#                 The inherent problem of producing a disproportionally large amount of milk in a few states is that if transportation cost would increase then those states    #                 that don't have local access a large amount of milk production will not be able to meet the demands of milk consumption.
+#                 Ultimately this will have a negative impact in that sector of the economy. 
+
+
+
+
+# start Jorge
 #1  Displaying the distribution of the yearly milk production (in millions #of pounds) for my birth-year.
 ```{r}
 
@@ -119,102 +210,6 @@ milk_as_vector<-milk_88 %>% select(milk_avg_Mlbs) %>% pull(milk_avg_Mlbs)
 In addition to the averages for each state displayed above, we can use inline code to find the median milk production (across the states), is `r median(milk_as_vector)`, and we can see that the state that produced the most milk (`r max(milk_as_vector)`) is West Virginia, while the state that produced the least (`r min(milk_as_vector)`) is Alaska.
 
 ##end Ryan's individual part
-
-```{r} 
-arrange(summary_milk, (Mean))
-
-```
-#As a team, select 5 states
-```{r}
-states5milk <- milk %>%
-  filter(state %in% c('Colorado','California','Maryland','Massachusetts','Florida')) %>%
-  select(state, year, milk_million)
-
-
-ggplot(data = states5milk, aes(x = year, y = milk_million, colour = state)) +
-  geom_smooth( method = "lm",
-               size=0.5)+
-  geom_point(size=0.09) + 
-  ggtitle('Pounds of milk over time by state') +
-  xlab('Year') +
-  ylab('Milk Produced (Million lb)')
-
-```
-
-```{r}
-allSmilk<-milk %>%
-  select( year, milk_million)
-
-ggplot(data = allSmilk, aes(x = year, y = milk_million)) +
-  geom_smooth( method = "lm",
-               size=0.9)+
-  geom_point(size=0.09) + 
-  ggtitle('Pounds of milk over time by years for all states') +
-  xlab('Year') +
-  ylab('Milk Produced (Million lb)')
-
-```
-
-```{r}
-allSmilk2<-milk %>%
-  select(state, year, milk_million)
-
-ggplot(data = allSmilk2, aes(x = year, y = milk_million, colour = state)) +
-  geom_smooth( method = "lm",
-               size=0.5)+
-  geom_point(size=0.09) + 
-  ggtitle('Pounds of milk over time by state') +
-  xlab('Year') +
-  ylab('Milk Produced (Million lb)')+
-  theme(legend.position = "none")+
-  facet_wrap(~ state, nrow = 5)
-
-
-
-```
-#The year when the most milk was produced in the United States.
-
-```{r}
-years_milk <- milk %>% 
-  group_by(year) %>% 
-  summarise(lower = min(milk_million), upper = max(milk_million), Mean = mean(milk_million), Median = median(milk_million))
-
-view(years_milk)
-
-```
-#The year that produce the most milk 
-```{r pressure, echo=FALSE}
-arrange(years_milk, desc(Mean))
-
-```
-#The year when the least milk was produced in the United States.
-```{r}
-
-arrange(summary_milk, (Mean))
-
-```
-#In 2017, the 5 states that produced the most milk. 
-```{r}
-
-milk2017 <- milk %>%
-  filter(year %in% c('2017')) 
-
-view(milk2017)# checking if data frame is apropiate 
-
-arrange(milk2017, desc(milk_million))
-
-```
-#In 2017, the 5 states that produced the least milk.
-```{r}
-arrange(milk2017, (milk_million))
-```
-
-##analasys Jorge: Trends surrounding the production of milk throughout the United States of America has serious implication concerning the local availability of milk.
-#                 It seems that as the year passes most states have a constant mean in milk production. However, California, Wisconsin, New Mexico, Idaho, and NewYork display a #                 strong positive correlation in milk production as time goes by. 
-#                 The inherent problem of producing a disproportionally large amount of milk in a few states is that if transportation cost would increase then those states    #                 that don't have local access a large amount of milk production will not be able to meet the demands of milk consumption.
-#                 Ultimately this will have a negative impact in that sector of the economy. 
-#end Jorge 
-
 
 # Start Mandy 
 
