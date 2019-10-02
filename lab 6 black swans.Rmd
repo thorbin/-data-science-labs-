@@ -12,7 +12,7 @@ COflights <- read_csv("https://files.osf.io/v1/resources/3z5as4pej8/providers/os
 
 
 
-##jorge raw code 
+##jorge raw code, there are significant differences in arrival to DEN when looking at individual months. There are no significant differences in whether a flight arrived early or late in relation with the distance travels
 ```{r}
 #Note: the DIA manangers do not care about flights into or out of other airports in Colorado. They only care about DEN flights.
 library(tidyverse)
