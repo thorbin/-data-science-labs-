@@ -37,8 +37,8 @@ Thorbin's Conclusion:
   
   For 2017 it appears as though weather delays and month have a confounding relationship. My analysis confirmed a well documented observation that the weather tends to be more severely incliment in the winter months which certainly had an effect on the weather delays at DIA for 2017. 
   
- # Jorge's Analysis 
- # Declaration: How does individual months affect arriving flights ( destination is DEN ) at DIA in term of being delayed and early? How does distance affect arriving flights ( destination is DEN ) at DIA in term of being delayed and early?  
+# Jorge's Analysis 
+# Declaration: How does individual months affect arriving flights ( destination is DEN ) at DIA in term of being delayed and early? How does distance affect arriving flights ( destination is DEN ) at DIA in term of being delayed and early?  
 
 # Flights that arrive at DEN 
 ```{r}
