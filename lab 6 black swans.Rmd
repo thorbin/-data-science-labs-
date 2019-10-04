@@ -19,9 +19,11 @@ output: html_document
 
 The individual findings below establish certain causal factors in the expectation of a delayed flight and disestablish other factors
 which one might have expected. Surprisingly, as Ryan's and Jorge's analyses reveal, the distance of any given flight does not play 
-a conclusive causal role, whereas the carrier one chooses almost certainly does. Jorge also found that the months that were on average delayed correlated to the months that have higher demand in-flight due to vacations and related holidays. Thorbin's analysis demonstrates how the variable "month" is confounded with weather, with inclement weather playing the actual causal role leading to delays. Finally, Mandy's analysis shows the surprising result that the major airports also experience the most delays; however, it is demonstrably not the volume of traffic in these airports that is the causal factor, so it must be something else. Combined with the other findings, it's possible that a greater percentage of the "problem airlines"--those with a tendency towards delay--fly into and out of the major airports, which is a reasonable assumption.
+a conclusive causal role, whereas the carrier one chooses almost certainly does. Thorbin's analysis demonstrates how the variable "month" is confounded with weather, with inclement weather playing the actual causal role leading to delays. Finally, Mandy's analysis shows the surprising result that the major airports also experience the most delays; however, it is demonstrably not the volume of traffic in these airports that is the causal factor, so it must be something else. Combined with the other findings, it's possible that a greater percentage of the "problem airlines"--those with a tendency towards delay--fly into and out of the major airports, which is a reasonable assumption.
 
 Taken together, these data and findings suggest that the joint probability of using a certain carrier, during certain weather, and flying through a major airport, will result in the greatest probability of a delay.
+
+Customers have an expectiation that their flights arrive on time, and so it is incumbent upong managers of airports and airlines understand the causes of delays so that they can take the relevant actions necessary to improve air travel. Our recommendation is that managers look at the management of certain individual carriers and how their timeliness might be improved upon, as well as anticipate the likelihood of a delay in those months that have inclement weather. It is also important to analyze the management of those airports that are underperforming in order to understand why they experience so many delays.
 
 ## Ryan's analysis: carrier vs. distance
 
@@ -197,7 +199,7 @@ Once again, the distance factor does not alter the probability of a delay, which
 
 #end Ryan
 
-## Thorbin's Declaration: How does seasonal weather (month) affect the delay of flights out of DIA? 
+## Thorbin's Declaration: How does seasonal weather (month) affect the availibility of flights? 
 ```{r}
 #code chunk#
 COflights_month<-COflights %>%group_by(MONTH)%>%filter(ARR_DELAY!="NA") %>% summarise(total_flights=n())
@@ -473,10 +475,9 @@ APRarrLate<-filter(lateflights, MONTH %in% c(4))
 ggplot(data = earlyflights) +
   geom_histogram(mapping = aes(x = MONTH), binwidth = .1 )
 ```
-
-findings # 1.2: It seems that flight that are between the march and november have the lowest counts of early arrivals. 
-it is hard to tell as to why this might be happening however, weather around this time a year in denver has more snowfall than the rest of the yaer which affects airport trafic. 
-maybe there is a positive corralation between flights being less early and taxi out during this time a year.  
+# findings # 1.2: It seems that flight that are between the march and november have the lowest counts of early arrivals. 
+# it is hard to tell as to why this might be happening however, weather around this time a year in denver has more snowfall than the rest of the yaer which affects airport trafic. 
+#maybe there is a positive corralation between flights being less early and taxi out during this time a year.  
 
 # end of arrivals by month
 
@@ -536,16 +537,16 @@ earlyLesser<-filter(earlyflights, DISTANCE <= 909.031 )
 #percengated of flight that where late that travals <= 909.031
 (LL/countLate*100)
 ```
-findings #2: it seems that in both conditions (late and early arrivals) percentage difrance in flights that flew to DEN with a distance grater and lesser than 909.031 don't differ
-thus, flights that flew less than 909.031 tended to both more late and ealry. this is probably because most flights to DEN fly under 900 miles. This information is not usefull to DIA. but at the very least we can disregade DIstance as a contributing factor 
+# findings #2: it seems that in both conditions (late and early arrivals) percentage difrance in flights that flew to DEN with a distance grater and lesser than 909.031 don't differ
+# thus, flights that flew less than 909.031 tended to both more late and ealry. this is probably because most flights to DEN fly under 900 miles. This information is not usefull to DIA. but at the very least we can disregade DIstance as a contributing factor 
 
- Recommendations and Conclusions: There is are significant between months in the flights that arrive late at Denver airport. Additionally, there is are significant between months in the flights that arrive early at Denver airport. The months that were on average later correlated to the months that have higher demand in-flight due to vacations and related holidays. For this scenario, it's recommended increasing staff to mitigate efficiency in human traffic. The months that arrived early where January and February. These months tend to have heavy winters those might be a possible explanation as to why there are fewer early fights. 
+# Recommendations and Conclusions: There is are significant between months in the flights that arrive late at Denver airport. Additionally, there is are significant between months in the flights that arrive early at Denver airport. The months that were on average later correlated to the months that have higher demand in-flight due to vacations and related holidays. For this scenario, it's recommended increasing staff to mitigate efficiency in human traffic. The months that arrived early where January and February. These months tend to have heavy winters those might be a possible explanation as to why there are fewer early fights. 
 Finally, there was no significant difference in distance and where a flight arrived late or early. 
 
 ###end Jorge 
 
 # Start Mandy 
- I, Mandy Karako, compared flight delays from Denver to destinations (airports). My main question was how does destination airport effect arrival delays from Denver? 
+# I, Mandy Karako, compared flight delays from Denver to destinations (airports). My main question was how does destination airport effect arrival delays from Denver? 
 
 # Filter colorado flights to make origin always equal Denver and filter out destination equaling Denver. 
 ```{r}
@@ -620,7 +621,7 @@ count(DENflights%>%filter(DEST=="PHX")) #9,446 flights
 count(DENflights%>%filter(DEST=="SEA")) #6,802 flights
 count(DENflights%>%filter(DEST=="SLC")) #9,366 flights
 ```
-Mandy's Analysis: The top 5 airports for late flights from Denver were SFO, LAX, PHX, SEA, and SLC. The probability of a late flight leaving from Denver and arriving in SFO was 5.3%. The probability of a flight leaving from Denver, arriving in SFO, and also being late was .87%, which is pretty high considering the amount of flights leaving Denver. What I found interesting was that of the top 5 airports for late arrivals from Denver, SFO ranked 4th on number of flights recieved. LAX received the most flights but had a less chance of a flight being late. SLC received almost 2,000 more flights than SFO and 3.1% of late flights from Denver were arriving there. With that information, I can conclude that the number of flights a specific destination received did not effect how many late arrivals occured. Destination airport can play a role in late arrival of flights from Denver, but it is not conclusive. All that this data can conclude is that San Fransisco received the most late flights from Denver. I can hypothesize that the bigger the aiport, the more delayed flights there are, but further data would need to be explored to conclude that. 
+# Mandy's Analysis: The top 5 airports for late flights from Denver were SFO, LAX, PHX, SEA, and SLC. The probability of a late flight leaving from Denver and arriving in SFO was 5.3%. The probability of a flight leaving from Denver, arriving in SFO, and also being late was .87%, which is pretty high considering the amount of flights leaving Denver. What I found interesting was that of the top 5 airports for late arrivals from Denver, SFO ranked 4th on number of flights recieved. LAX received the most flights but had a less chance of a flight being late. SLC received almost 2,000 more flights than SFO and 3.1% of late flights from Denver were arriving there. With that information, I can conclude that the number of flights a specific destination received did not effect how many late arrivals occured. Destination airport can play a role in late arrival of flights from Denver, but it is not conclusive. All that this data can conclude is that San Fransisco received the most late flights from Denver. I can hypothesize that the bigger the aiport, the more delayed flights there are, but further data would need to be explored to conclude that. 
 
 
           
