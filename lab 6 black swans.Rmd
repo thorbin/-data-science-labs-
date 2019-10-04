@@ -351,6 +351,9 @@ earlyLesser<-filter(earlyflights, DISTANCE <= 909.031 )
 # findings #2: it seems that in both conditions (late and early arrivals) percentage difrance in flights that flew to DEN with a distance grater and lesser than 909.031 don't differ
 # thus, flights that flew less than 909.031 tended to both more late and ealry. this is probably because most flights to DEN fly under 900 miles. This information is not usefull to DIA. but at the very least we can disregade DIstance as a contributing factor 
 
+# Recommendations and Conclusions: There is are significant between months in the flights that arrive late at Denver airport. Additionally, there is are significant between months in the flights that arrive early at Denver airport. The months that were on average later correlated to the months that have higher demand in-flight due to vacations and related holidays. For this scenario, it's recommended increasing staff to mitigate efficiency in human traffic. The months that arrived early where January and February. These months tend to have heavy winters those might be a possible explanation as to why there are fewer early fights. 
+Finally, there was no significant difference in distance and where a flight arrived late or early. 
+
 ###end Jorge 
 
 # Start Mandy 
