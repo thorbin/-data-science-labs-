@@ -10,6 +10,193 @@ library(tidyverse)
 library(dplyr)
 COflights <- read_csv("https://files.osf.io/v1/resources/3z5as4pej8/providers/osfstorage/5a8ca28f57103100104584db")
 ```
+
+---
+title: "Lab6markdown"
+output: html_document
+---
+### Introduction
+
+The individual findings below establish certain causal factors in the expectation of a delayed flight and disestablish other factors
+which one might have expected. Surprisingly, as Ryan's and Jorge's analyses reveal, the distance of any given flight does not play 
+a conclusive causal role, whereas the carrier one chooses almost certainly does. Thorbin's analysis demonstrates how the variable "month" is confounded with weather, with inclement weather playing the actual causal role leading to delays. Finally, Mandy's analysis shows the surprising result that the major airports also experience the most delays; however, it is demonstrably not the volume of traffic in these airports that is the causal factor, so it must be something else. Combined with the other findings, it's possible that a greater percentage of the "problem airlines"--those with a tendency towards delay--fly into and out of the major airports, which is a reasonable assumption.
+
+Taken together, these data and findings suggest that the joint probability of using a certain carrier, during certain weather, and flying through a major airport, will result in the greatest probability of a delay.
+
+## Ryan's analysis: carrier vs. distance
+
+What variable(s) is the probability of a delayed flight dependent on? To start to answer this question, I first performed some exploratory data analysis, restricting my data set to Denver flights and then looking at a box plot showing those airlines that are prone to delay.
+
+```{r}
+DENflights <- COflights %>% filter(ORIGIN == "DEN" | DEST == "DEN")
+DENflights <- mutate(DENflights, ARR_DELAY_LOG = ARR_DELAY >= 15 )
+
+  
+
+ggplot(DENflights) + geom_boxplot(aes(CARRIER, ARR_DELAY))
+  labs(title = 'Total time of delay by carrier',
+       subtitle = 'Departure delay',
+       xlab='Total time of departure delay',
+       ylab='Airline Carrier')
+```
+
+We see from the above that some carriers (United, American, Skywest and Delta) have many outlying points causing long delays (even though this doesn't significantly affect their respective means necessarily). What factors do they share in common? It's worth noting that airlines such as Alaska and JetBlue have fewer of these long delays. It might be reasonable to assume that these airlines fly domestically more than the first set of airlines, which presumably have many more long-distance flights. Therefore, it's worth exploring how distance affects delays.
+
+Below, I've plotted the relationship between distance and delays.
+
+
+```{r}
+ggplot(DENflights) + 
+  geom_smooth(mapping=aes(x=DISTANCE, y=ARR_DELAY))
+```
+
+Surprisingly, a very long-distance flight tends to result in less of a delay, after a certain point. It's possible that the longer the flight, the more opportunity a pilot has to make up time in the air. Is it possible that it's simply that certain airlines are more poorly managed than others, leading to more delays? To test this, I filtered Denver flights into the number of arrivals that had a delay of greater than 15 minutes. We are looking for P(Delay|Carrier =x), the conditional probability that there is a delay given the use of any of the given carriers:
+
+```{r}
+UA_flights <-DENflights %>% filter(CARRIER=="UA")
+UA_delays <- DENflights %>% filter(CARRIER == "UA" & ARR_DELAY>=15)
+Prob_UA <- count(UA_delays)/(count(UA_flights))
+Prob_UA <- as.numeric(Prob_UA)
+
+
+B6_flights <-DENflights %>% filter(CARRIER=="B6")
+B6_delays <- DENflights %>% filter(CARRIER == "B6" & ARR_DELAY>=15)
+Prob_B6 <- count(B6_delays)/(count(B6_flights))
+Prob_B6 <- as.numeric(Prob_B6)
+
+
+
+AA_flights <-DENflights %>% filter(CARRIER=="AA")
+AA_delays <- DENflights %>% filter(CARRIER == "AA" & ARR_DELAY>=15)
+Prob_AA <- count(AA_delays)/(count(AA_flights))
+Prob_AA <- as.numeric(Prob_AA)
+
+
+AS_flights <-DENflights %>% filter(CARRIER=="AS")
+AS_delays <- DENflights %>% filter(CARRIER == "AS" & ARR_DELAY>=15)
+Prob_AS <- count(AS_delays)/(count(AS_flights))
+Prob_AS <- as.numeric(Prob_AS)
+
+
+WN_flights <-DENflights %>% filter(CARRIER=="WN")
+WN_delays <- DENflights %>% filter(CARRIER == "WN" & ARR_DELAY>=15)
+Prob_WN <- count(WN_delays)/(count(WN_flights))
+Prob_WN <- as.numeric(Prob_WN)
+
+
+DL_flights <-DENflights %>% filter(CARRIER=="DL")
+DL_delays <- DENflights %>% filter(CARRIER == "DL" & ARR_DELAY>=15)
+Prob_DL <- count(DL_delays)/(count(DL_flights))
+Prob_DL <- as.numeric(Prob_DL)
+
+
+NK_flights <-DENflights %>% filter(CARRIER=="NK")
+NK_delays <- DENflights %>% filter(CARRIER == "NK" & ARR_DELAY>=15)
+Prob_NK <- count(NK_delays)/count(NK_flights)
+Prob_NK <- as.numeric(Prob_NK)
+
+
+F9_flights <-DENflights %>% filter(CARRIER=="F9")
+F9_delays <- DENflights %>% filter(CARRIER == "F9" & ARR_DELAY>=15)
+Prob_F9 <- count(F9_delays)/(count(F9_flights))
+Prob_F9 <- as.numeric(Prob_F9)
+
+
+OO_flights <-DENflights %>% filter(CARRIER=="OO")
+OO_delays <- DENflights %>% filter(CARRIER == "OO" & ARR_DELAY>=15)
+Prob_OO <- count(OO_delays)/count(OO_flights)
+Prob_OO <- as.numeric(Prob_OO)
+
+
+VX_flights <-DENflights %>% filter(CARRIER=="VX")
+VX_delays <- DENflights %>% filter(CARRIER == "VX" & ARR_DELAY>=15)
+Prob_VX <- count(VX_delays)/count(VX_flights)
+Prob_VX <- as.numeric(Prob_VX)
+
+
+df <- data.frame( names= c('AA','AS','B6','DL','F9','NK','OO','UA','VX','WN'), probs=c(Prob_AA,Prob_AS,Prob_B6,Prob_DL,Prob_F9,Prob_NK,Prob_OO,Prob_UA,Prob_VX,Prob_WN) )
+ggplot(df) + geom_col(aes(names,probs))
+```
+
+
+Evidently, a flyer's probability of experiencing a delay is much higher if she chooses to use JetBlue or Virgin than if she chooses Delta or United. So the causal variable seems to have more to do with the carrier itself than distance of the flight. 
+
+To confirm this and complete our analysis, we must find P(Delay|Carrier ==x AND Distance <2000), or the conditional probability of a delay
+given the joint probability of using a certain carrier and taking a short-distance flight:
+
+
+```{r}
+AA_shortflights <-DENflights %>% filter(CARRIER=="AA" & DISTANCE <2000)
+AA_shortdelays <- AA_shortflights %>% filter(CARRIER == "AA" & ARR_DELAY>=15)
+ShortProb_AA <- count(AA_shortdelays)/(count(AA_shortflights))
+ShortProb_AA <- as.numeric(ShortProb_AA)
+
+
+AS_shortflights <-DENflights %>% filter(CARRIER=="AS" & DISTANCE <2000)
+AS_shortdelays <- AS_shortflights %>% filter(CARRIER == "AS" & ARR_DELAY>=15)
+ShortProb_AS <- count(AS_shortdelays)/count(AS_shortflights)
+ShortProb_AS <- as.numeric(ShortProb_AS)
+
+
+B6_shortflights <-DENflights %>% filter(CARRIER=="B6" & DISTANCE <2000)
+B6_shortdelays <- B6_shortflights %>% filter(CARRIER == "B6" & ARR_DELAY>=15)
+ShortProb_B6 <- count(B6_shortdelays)/count(B6_shortflights)
+ShortProb_B6 <- as.numeric(ShortProb_B6)
+
+
+DL_shortflights <-DENflights %>% filter(CARRIER=="DL" & DISTANCE <1000)
+DL_shortdelays <- DL_shortflights %>% filter(CARRIER == "DL" & ARR_DELAY>=15)
+ShortProb_DL <- count(DL_shortdelays)/count(DL_shortflights)
+ShortProb_DL <- as.numeric(ShortProb_DL)
+
+
+F9_shortflights <-DENflights %>% filter(CARRIER=="F9" & DISTANCE <1000)
+F9_shortdelays <- F9_shortflights %>% filter(CARRIER == "F9" & ARR_DELAY>=15)
+ShortProb_F9 <- count(F9_shortdelays)/count(F9_shortflights)
+ShortProb_F9 <- as.numeric(ShortProb_F9)
+
+
+NK_shortflights <-DENflights %>% filter(CARRIER=="NK" & DISTANCE <1000)
+NK_shortdelays <- NK_shortflights %>% filter(CARRIER == "NK" & ARR_DELAY>=15)
+ShortProb_NK <- count(NK_shortdelays)/count(NK_shortflights)
+ShortProb_NK <- as.numeric(ShortProb_NK)
+
+
+OO_shortflights <-DENflights %>% filter(CARRIER=="OO" & DISTANCE <1000)
+OO_shortdelays <- OO_shortflights %>% filter(CARRIER == "OO" & ARR_DELAY>=15)
+ShortProb_OO <- count(OO_shortdelays)/count(OO_shortflights)
+ShortProb_OO <- as.numeric(ShortProb_OO)
+
+
+UA_shortflights <-DENflights %>% filter(CARRIER=="UA" & DISTANCE <1000)
+UA_shortdelays <- UA_shortflights %>% filter(CARRIER == "UA" & ARR_DELAY>=15)
+ShortProb_UA <- count(UA_shortdelays)/count(UA_shortflights)
+ShortProb_UA <- as.numeric(ShortProb_UA)
+
+
+VX_shortflights <-DENflights %>% filter(CARRIER=="VX" & DISTANCE <1000)
+VX_shortdelays <- VX_shortflights %>% filter(CARRIER == "VX" & ARR_DELAY>=15)
+ShortProb_VX <- count(VX_shortdelays)/count(VX_shortflights)
+ShortProb_VX <- as.numeric(ShortProb_VX)
+
+
+WN_shortflights <-DENflights %>% filter(CARRIER=="WN" & DISTANCE <1000)
+WN_shortdelays <- WN_shortflights %>% filter(CARRIER == "WN" & ARR_DELAY>=15)
+ShortProb_WN <- count(WN_shortdelays)/count(WN_shortflights)
+ShortProb_WN <- as.numeric(ShortProb_WN)
+
+
+df2 <- data.frame(names= c('AA','AS','B6','DL','F9','NK','OO','UA','VX','WN'), probs2=c(ShortProb_AA,ShortProb_AS,ShortProb_B6,ShortProb_DL,ShortProb_F9,ShortProb_NK,ShortProb_OO,ShortProb_UA,ShortProb_VX,ShortProb_WN) )
+ggplot(df2) + geom_col(aes(names,probs2))
+
+
+```
+
+
+Once again, the distance factor does not alter the probability of a delay, which is more conditioned on the airline. Thus, our initial analysis is confirmed that the causal factor in a delay is the airline itself and not the flight's distance.
+
+#end Ryan
+
 ## Thorbin's Declaration: How does seasonal weather (month) affect the availibility of flights? 
 ```{r}
 #code chunk#
