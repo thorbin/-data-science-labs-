@@ -352,3 +352,84 @@ earlyLesser<-filter(earlyflights, DISTANCE <= 909.031 )
 # thus, flights that flew less than 909.031 tended to both more late and ealry. this is probably because most flights to DEN fly under 900 miles. This information is not usefull to DIA. but at the very least we can disregade DIstance as a contributing factor 
 
 ###end Jorge 
+
+# Start Mandy 
+# I, Mandy Karako, compared flight delays from Denver to destinations (airports). My main question was how does destination airport effect arrival delays from Denver? 
+
+# Filter colorado flights to make origin always equal Denver and filter out destination equaling Denver. 
+```{r}
+DENflights <- filter(COflights, DEST !="DEN"|ORIGIN=="DEN")
+```
+# Add a True/False variable indicating if a flight was late or not.
+```{r}
+DENflights <- DENflights %>% mutate(ARR_DELAY_LOG=(ARR_DELAY>=15))
+```
+# Denver flights that air delays were greater than or equal to 15 minutes.
+```{r}
+LATEflights <- filter(DENflights, ARR_DELAY >=15)
+```
+# Late arrivals based off destination. Desination does not equal Denver. I don't want to observe Denver as a destination for this comparison because I found it to be a huge outlier. 
+```{r}
+LATEflights <- LATEflights %>% filter(DEST !="DEN")
+```
+# Bar graph of the count of late flight arrivals to each destination. 
+```{r}
+ggplot(data=LATEflights)+
+  geom_bar(
+    mapping=aes(x= DEST, fill=DEST),
+    position = "dodge"
+    )+
+  ggtitle("Count of Arrival of Late Flights From Denver to Different Airports")
+```
+# Total number of late flights coming from Denver. 
+```{r}
+count(LATEflights) #41,376 late flights
+```
+# Number of late flights per destination.  
+```{r}
+LATEflights.DEST <- LATEflights%>%count(DEST)
+view(LATEflights.DEST)
+```
+# Seeing which destination had the most late flight arrivals from Denver.
+```{r}
+LATEflights.DEST%>%arrange(desc(n)) ## SFO was the destination with the most late flights from Denver. 
+```
+## Top five airports for arrival delays
+```{r}
+SFO <- 2213/count(LATEflights)*100 # about 5.3% of flights that are late from Denver are arriving to SFO. 
+LAX <- 2056/count(LATEflights)*100 # about 5.0% of flights that are late from Denver are arriving to LAX.
+PHX <- 1383/count(LATEflights)*100 # about 3.3% of flights that are late from Denver are arriving to PHX.
+SEA <- 1346/count(LATEflights)*100 # about 3.25% of flights that are late from Denver are arriving to SEA.
+SLC <- 1296/count(LATEflights)*100 # about 3.1% of flights that are late from Denver are arriving to SLC.  
+```
+## Percentage of late flights.
+```{r}
+count(LATEflights)/count(DENflights)*100 # 16.3% of total flights from Denver are late (excluding flights arriving to Denver).
+```
+## Percentage of total flights that are late that are going to SFO, LAX, PHX, SEA, SLC.
+```{r}
+2213/count(DENflights)*100 #SFO = .87%
+2056/count(DENflights)*100 #LAX = .81%
+1383/count(DENflights)*100 #PHX = .54%
+1346/count(DENflights)*100 #SEA = .53%
+1296/count(DENflights)*100 #SLC = .51%
+```
+# Probability that a late flight from Denver will be traveling to SFO, LAX, PHX, SEA, or SLC.
+```{r}
+df <-data.frame(Airport = c("SFO","LAX", "PHX", "SEA", "SLC"), Percentage = c(5.3,5,3.3,3.25,3.1))
+ggplot(df,mapping=aes(x=Airport, y=Percentage))+
+  geom_col()+
+  ggtitle("Probability That a Late Flight From Denver Will be Traveling to LAX, PHX, SEA, SFO, or SLC")
+```
+# Number of flights each airport is receiving from Denver. 
+```{r}
+count(DENflights%>%filter(DEST=="SFO")) #7,719 flights
+count(DENflights%>%filter(DEST=="LAX")) #10,597 flights
+count(DENflights%>%filter(DEST=="PHX")) #9,446 flights
+count(DENflights%>%filter(DEST=="SEA")) #6,802 flights
+count(DENflights%>%filter(DEST=="SLC")) #9,366 flights
+```
+# Mandy's Analysis: The top 5 airports for late flights from Denver were SFO, LAX, PHX, SEA, and SLC. The probability of a late flight leaving from Denver and arriving in SFO was 5.3%. The probability of a flight leaving from Denver, arriving in SFO, and also being late was .87%, which is pretty high considering the amount of flights leaving Denver. What I found interesting was that of the top 5 airports for late arrivals from Denver, SFO ranked 4th on number of flights recieved. LAX received the most flights but had a less chance of a flight being late. SLC received almost 2,000 more flights than SFO and 3.1% of late flights from Denver were arriving there. With that information, I can conclude that the number of flights a specific destination received did not effect how many late arrivals occured. Destination airport can play a role in late arrival of flights from Denver, but it is not conclusive. All that this data can conclude is that San Fransisco received the most late flights from Denver. I can hypothesize that the bigger the aiport, the more delayed flights there are, but further data would need to be explored to conclude that. 
+
+
+          
