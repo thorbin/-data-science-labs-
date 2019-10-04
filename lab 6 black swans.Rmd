@@ -349,6 +349,6 @@ earlyLesser<-filter(earlyflights, DISTANCE <= 909.031 )
 (LL/countLate*100)
 ```
 # findings #2: it seems that in both conditions (late and early arrivals) percentage difrance in flights that flew to DEN with a distance grater and lesser than 909.031 don't differ
-# thus, flights that flew less than 909.031 tended to both more late and ealry. this is probably because most flights to DEN fly under 900 miles. This information is not usefull to DEN. but at the very least we can disregade DIstance as a contributing factor 
+# thus, flights that flew less than 909.031 tended to both more late and ealry. this is probably because most flights to DEN fly under 900 miles. This information is not usefull to DIA. but at the very least we can disregade DIstance as a contributing factor 
 
 ###end Jorge 
