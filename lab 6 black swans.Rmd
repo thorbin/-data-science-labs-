@@ -35,7 +35,7 @@ Thorbin's Analysis:
   
 Thorbin's Conclusion:
   
-  For 2017 it appears as though weather delays and month have a confounding relationship. My analysis confirmed a well documented observation that the weather tends to be more severely incliment in the winter months which certainly had an effect on the weather delays at DIA for 2017. 
+  For 2017 it appears as though weather delays and month have a covariant relationship. My analysis confirmed a well documented observation that the weather tends to be more severely incliment in the winter months which certainly had an effect on the weather delays at DIA for 2017. 
   
  ###Jorge's Analysis 
 
