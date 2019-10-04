@@ -19,11 +19,9 @@ output: html_document
 
 The individual findings below establish certain causal factors in the expectation of a delayed flight and disestablish other factors
 which one might have expected. Surprisingly, as Ryan's and Jorge's analyses reveal, the distance of any given flight does not play 
-a conclusive causal role, whereas the carrier one chooses almost certainly does. Thorbin's analysis demonstrates how the variable "month" is confounded with weather, with inclement weather playing the actual causal role leading to delays. Finally, Mandy's analysis shows the surprising result that the major airports also experience the most delays; however, it is demonstrably not the volume of traffic in these airports that is the causal factor, so it must be something else. Combined with the other findings, it's possible that a greater percentage of the "problem airlines"--those with a tendency towards delay--fly into and out of the major airports, which is a reasonable assumption.
+a conclusive causal role, whereas the carrier one chooses almost certainly does. Jorge also found that the months that were on average delayed correlated to the months that have higher demand in-flight due to vacations and related holidays. Thorbin's analysis demonstrates how the variable "month" is confounded with weather, with inclement weather playing the actual causal role leading to delays. Finally, Mandy's analysis shows the surprising result that the major airports also experience the most delays; however, it is demonstrably not the volume of traffic in these airports that is the causal factor, so it must be something else. Combined with the other findings, it's possible that a greater percentage of the "problem airlines"--those with a tendency towards delay--fly into and out of the major airports, which is a reasonable assumption.
 
 Taken together, these data and findings suggest that the joint probability of using a certain carrier, during certain weather, and flying through a major airport, will result in the greatest probability of a delay.
-
-Our recommendation is that managers look at the management of individual carriers and how their timeliness might be improved upon, as well as anticipate the likelihood of a delay in those months that have inclement weather.
 
 ## Ryan's analysis: carrier vs. distance
 
