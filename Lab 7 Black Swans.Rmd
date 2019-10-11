@@ -9,10 +9,218 @@ output: html_document
 library(tidyverse)
 library(dplyr)
 power<-read_csv2("/Users/thorbinatwell-donaghey/Desktop/household_power_consumption.txt")
-#thorbins import delete before you load# 
-
+#thorbins import# 
+stringpathPC <-  "C:/Users/chele robelo/Documents/stats/lab 7/household_power_consumption.txt"
+#Jorge's import#
 ```
 
+Jorge's Analysis: 
+#A variable containing the string datatype  (that hold information to the correct path in which the document is located) 
+# Parsing and formatting the file to an appropriate dataset/dataframe.
+# values with " " and "?" are NA
+data1 <- read_delim(file = stringpathPC, delim=';', na = c('', '?'),
+                    col_types = cols(
+                      Date = col_date(format="%d/%m/%Y"),
+                      Time = col_time(format="%H:%M:%S"),
+                      Global_active_power = col_double(),
+                      Global_reactive_power = col_double(),
+                      Voltage = col_double(),
+                      Global_intensity = col_double(),
+                      Sub_metering_1 = col_double(),
+                      Sub_metering_2 = col_double(),
+                      Sub_metering_3 = col_double()
+                    ))
 
-```{r}
-```
+#Renaming Variables for better reference 
+
+data1<-rename(data1, KitchenApl = Sub_metering_1)
+
+data1<-rename(data1, LaundryApl = Sub_metering_2)
+
+data1<-rename(data1, Water_Heater_AirCon = Sub_metering_3)
+
+
+#Varible Descriptions :
+#   KitchenApl : kitchen appliances, consitst of mainly a dishwasher, an oven and a microwave (hot plates are not electric but gas powered).
+#   LaundryApl : a washing-machine, a tumble-drier, a refrigerator and a light.
+#   Water_Heater_AirCon : corresponds to an electric water-heater and an air-conditioner.
+
+
+
+# Checking if data types are appropriate  
+
+typeof(data1$Date)
+typeof(data1$Time)
+typeof(data1$Voltage)
+
+# We can also use a tibble
+
+as.tibble(data1)
+
+#  Interestingly; the function, typeof, output Date as a double but the Tibble gives me its own data type. 
+# Possible explanation: the new data type is using or is a derivative of the new data type from double data types that probably consists of the individual elements of the new data types, respectively: format="%d/%m/%Y" and %H:%M:%S" ...
+
+#Exploring the Data
+
+ggplot(data1, aes(x=Voltage )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.01)+
+  geom_density(alpha=.2, fill="#FF6666") 
+
+ggplot(data1) + geom_point(aes(Date, Voltage))
+
+#It seems that most of the time the French household consumed 240-243 V. V: Volts 
+
+ggplot(data1, aes(x=KitchenApl )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, 1.4))
+
+#I still need to change the discriptions and lables 
+
+#It seems the distribution varies in two sections and it is not a normal distribution, this could suggest that most kitchen appliances most of the time use less than 5 Watts per hour, 
+#But to a lesser extent, the minority of the time the household use 38 Watts per hour
+
+#parsing through the variable, year, to derive out new values 
+
+data1 <- data1 %>% mutate(year=substr(Date,1,4), month=substr(Date, 6,7), day=substr(Date, 9,10))
+
+#parsing through the variable, hour, to derive out new values 
+
+data1 <- data1 %>% mutate(hour=substr(Time,1,2), minute=substr(Time, 4,5), second=substr(Time, 7,8))
+
+#Updating data set
+#Casting the appropriate  data type
+data1 <- data1 %>% mutate( day=as.integer(day),
+                           month=as.integer(month),
+                           year=as.integer(year),
+                           hour=as.integer(hour),
+                           minute=as.integer(minute),
+                           second=as.integer(second))
+
+
+
+library(lubridate)
+data1 <- data1 %>% mutate(datetime=make_datetime(year, month, day, hour, minute, second))
+
+#crating a new datatype to form a new variable that all-inclusive with respect to data and time
+
+
+
+ggplot(data1, aes(Voltage)) + facet_wrap(~month, scales = 'free_x') +
+  geom_histogram(binwidth = function(x) 2 * IQR(x) / (length(x)^(1/3))) # this looks usfull
+
+
+#ggplot(data_2days) + geom_line(aes(datetime, Sub_metering_1)) + 
+#  geom_line(aes(datetime, Sub_metering_2), col='blue') + 
+#  geom_line(aes(datetime, Sub_metering_3), col='red')+ ylim(c(0,40))
+
+
+#### 
+
+###
+#Primary Analasys - Jorge R
+#exploring how voltage changes over the month on ave
+
+data_by_month <- data1 %>% select(month, Voltage) %>% 
+  group_by(month) %>% summarise(mean.voltage=mean(Voltage, na.rm=TRUE))
+
+ggplot(data_by_month) + geom_point(aes(month, mean.voltage))
+
+#Primary Analasys - Jorge R
+#exploring how wattege changes over the months on ave while obverving water-heater and an air-conditioner use. 
+
+data_by_month_lun <- data1 %>% select(month, Water_Heater_AirCon) %>% 
+  group_by(month) %>% summarise(mean.Water_Heater_AirCon=mean(Water_Heater_AirCon, na.rm=TRUE))
+
+ggplot(data_by_month_lun) + geom_point(aes(month, mean.Water_Heater_AirCon))
+
+
+#exploring on ave how wattege changes per month while obverving kitchen appliances use. 
+
+data_by_month_kichApp <- data1 %>% select(month, KitchenApl) %>% 
+  group_by(month) %>% summarise(mean.KitchenApl=mean(KitchenApl, na.rm=TRUE))
+
+ggplot(data_by_month_kichApp) + geom_point(aes(month, mean.KitchenApl))
+
+#exploring on ave how wattege changes per month while obverving a washing-machine, a tumble-drier, a refrigerator and a light use. 
+
+data_by_month_lundApp <- data1 %>% select(month, LaundryApl) %>% 
+  group_by(month) %>% summarise(mean.LaundryApl=mean(LaundryApl, na.rm=TRUE))
+
+ggplot(data_by_month_lundApp) + geom_point(aes(month, mean.LaundryApl))
+
+
+
+#On average for the months of July and Aug for all appliances use less wattage from the rest of the months to a significant degree. 
+#the range of wattage use is approximately from .25 to 1 in July and august for all appliances except for appliances in the LaundryApl variable which still mention a relatively lower position in those two months. 
+#While the rest of the months maintained a higher range in wattage consumption relative to July and August. 
+#we can speculate that the members of this household are mostly not present during those two months. 
+#giving the information above I am interested in finding out what specific appliances might still be consuming wattage despite the low consumption? 
+#thus, assuming that the tenets of the french household are not residing during July and August, are there ways to reduce consumption wattage even further?
+
+WaJulAgu <- data1 %>% filter( month %in% c(7,8) )
+
+ggplot(WaJulAgu) + geom_linerange(aes(month, Water_Heater_AirCon))
+
+ggplot(WaJulAgu, aes(x=KitchenApl )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))
+
+ggplot(WaJulAgu, aes(x=LaundryApl )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))
+
+ggplot(WaJulAgu, aes(x=Water_Heater_AirCon )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))
+
+#Now let us compare it to the months that use more wattage and try to hypothesis a valid explanation base on graphical behavior. 
+
+high_consuming_wat_months <- data1 %>% filter( month %in% c(1,2,3,4,5,6,9,10,11,12) )
+
+ggplot(high_consuming_wat_months, aes(x=KitchenApl )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))
+
+ggplot(high_consuming_wat_months, aes(x=LaundryApl )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))
+
+ggplot(high_consuming_wat_months, aes(x=Water_Heater_AirCon )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))
+
+#checking for ave wattage consumption in both months for all appliances
+
+# ave for Water_Heater_AirCon
+
+summarise(high_consuming_wat_months, watteg_consumption = mean(Water_Heater_AirCon, na.rm = TRUE))
+
+summarise(WaJulAgu, watteg_consumption = mean(Water_Heater_AirCon, na.rm = TRUE))
+
+#-ave for LaundryApl
+
+summarise(high_consuming_wat_months, watteg_consumption = mean(LaundryApl, na.rm = TRUE))
+
+summarise(WaJulAgu, watteg_consumption = mean(LaundryApl, na.rm = TRUE))
+
+#-ave for KitchenApl
+
+summarise(high_consuming_wat_months, watteg_consumption = mean(KitchenApl, na.rm = TRUE))
+
+summarise(WaJulAgu, watteg_consumption = mean(KitchenApl, na.rm = TRUE))
+
+
+
+#Final analysis: After observing both sets months, it is clear that the months that exclude July and August have a higher degree of consuming wattage, however, there seems to be pulsing at a different level of wattages consumption in both sets with July and August having a significantly smaller density at each puls. 
+# Given the constancy in both sets of observation it could be hypothesized that there are appliances that are plugged in and not in use still consume wattage. this phenomenon is referred to as "phantom" electricity 
+# if this is the case one could recommend to unplug appliance that doesn't require for them to be plug at all time such as dryer and washer machine. If the refrigerator does not have any times that could be disconnected as well. this will reduce or remove some of the pulses seen in the months for July and August 
+
+
+
