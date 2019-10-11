@@ -1,0 +1,18 @@
+---
+title: "Lab 7 Black Swans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "10/10/2019"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+power<-read_csv2("/Users/thorbinatwell-donaghey/Desktop/household_power_consumption.txt")
+#thorbins import delete before you load# 
+
+```
+
+
+```{r}
+```
