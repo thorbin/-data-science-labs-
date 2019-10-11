@@ -8,9 +8,9 @@ output: html_document
 ```{r}
 library(tidyverse)
 library(dplyr)
-power<-read_csv2("/Users/thorbinatwell-donaghey/Desktop/household_power_consumption.txt")
+power<-read_csv2("/Users/thorbinatwell-donaghey/Desktop/household_power_consumption.txt",na='?')
 #Thorbins import# 
-stringpathPC <-  "C:/Users/chele robelo/Documents/stats/lab 7/household_power_consumption.txt"
+#stringpathPC <-  "C:/Users/chele robelo/Documents/stats/lab 7/household_power_consumption.txt"#
 #Jorge's import#
 ```
 
@@ -221,6 +221,11 @@ summarise(WaJulAgu, watteg_consumption = mean(KitchenApl, na.rm = TRUE))
 #Final analysis: After observing both sets months, it is clear that the months that exclude July and August have a higher degree of consuming wattage, however, there seems to be pulsing at a different level of wattages consumption in both sets with July and August having a significantly smaller density at each puls. 
 # Given the constancy in both sets of observation it could be hypothesized that there are appliances that are plugged in and not in use still consume wattage. this phenomenon is referred to as "phantom" electricity 
 # if this is the case one could recommend to unplug appliance that doesn't require for them to be plug at all time such as dryer and washer machine. If the refrigerator does not have any times that could be disconnected as well. this will reduce or remove some of the pulses seen in the months for July and August 
+##End Jorge
 
+####Thorbin's Analysis
 
+##### Question: Is meter data a possible frontier for govt. or otherwise programs to reward more eco-friendly house holds and in turn incentivise reduced energy consumption?
+
+Things to consider: RMS voltage/power/current over the entire time surveyed to gauge 'average' electricity useage. Values above this RMS would show higher averages of electricity consumption indicating an increased presence at home, it should be easy to compare multiple house holds RMS value if we can see explicit fluctuations in RMS power consumption in just one house especially in a day to day capacity. 
 
