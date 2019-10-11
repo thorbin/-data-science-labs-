@@ -9,7 +9,7 @@ output: html_document
 library(tidyverse)
 library(dplyr)
 power<-read_csv2("/Users/thorbinatwell-donaghey/Desktop/household_power_consumption.txt")
-#thorbins import# 
+#Thorbins import# 
 stringpathPC <-  "C:/Users/chele robelo/Documents/stats/lab 7/household_power_consumption.txt"
 #Jorge's import#
 ```
