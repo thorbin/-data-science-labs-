@@ -1,0 +1,627 @@
+---
+title: "Lab 6 Black Swans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "10/1/2019"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+COflights <- read_csv("https://files.osf.io/v1/resources/3z5as4pej8/providers/osfstorage/5a8ca28f57103100104584db")
+```
+
+---
+title: "Lab6markdown"
+output: html_document
+---
+### Introduction
+
+The individual findings below establish certain causal factors in the expectation of a delayed flight and disestablish other factors
+which one might have expected. Surprisingly, as Ryan's and Jorge's analyses reveal, the distance of any given flight does not play 
+a conclusive causal role, whereas the carrier one chooses almost certainly does. Thorbin's analysis demonstrates how the variable "month" is confounded with weather, with inclement weather playing the actual causal role leading to delays. Finally, Mandy's analysis shows the surprising result that the major airports also experience the most delays; however, it is demonstrably not the volume of traffic in these airports that is the causal factor, so it must be something else. Combined with the other findings, it's possible that a greater percentage of the "problem airlines"--those with a tendency towards delay--fly into and out of the major airports, which is a reasonable assumption.
+
+Taken together, these data and findings suggest that the joint probability of using a certain carrier, during certain weather, and flying through a major airport, will result in the greatest probability of a delay.
+
+Customers have an expectiation that their flights arrive on time, and so it is incumbent upong managers of airports and airlines understand the causes of delays so that they can take the relevant actions necessary to improve air travel. Our recommendation is that managers look at the management of certain individual carriers and how their timeliness might be improved upon, as well as anticipate the likelihood of a delay in those months that have inclement weather. It is also important to analyze the management of those airports that are underperforming in order to understand why they experience so many delays.
+
+## Ryan's analysis: carrier vs. distance
+
+What variable(s) is the probability of a delayed flight dependent on? To start to answer this question, I first performed some exploratory data analysis, restricting my data set to Denver flights and then looking at a box plot showing those airlines that are prone to delay.
+
+```{r}
+DENflights <- COflights %>% filter(ORIGIN == "DEN" | DEST == "DEN")
+DENflights <- mutate(DENflights, ARR_DELAY_LOG = ARR_DELAY >= 15 )
+
+  
+
+ggplot(DENflights) + geom_boxplot(aes(CARRIER, ARR_DELAY))
+  labs(title = 'Total time of delay by carrier',
+       subtitle = 'Departure delay',
+       xlab='Total time of departure delay',
+       ylab='Airline Carrier')
+```
+
+We see from the above that some carriers (United, American, Skywest and Delta) have many outlying points causing long delays (even though this doesn't significantly affect their respective means necessarily). What factors do they share in common? It's worth noting that airlines such as Alaska and JetBlue have fewer of these long delays. It might be reasonable to assume that these airlines fly domestically more than the first set of airlines, which presumably have many more long-distance flights. Therefore, it's worth exploring how distance affects delays.
+
+Below, I've plotted the relationship between distance and delays.
+
+
+```{r}
+ggplot(DENflights) + 
+  geom_smooth(mapping=aes(x=DISTANCE, y=ARR_DELAY))
+```
+
+Surprisingly, a very long-distance flight tends to result in less of a delay, after a certain point. It's possible that the longer the flight, the more opportunity a pilot has to make up time in the air. Is it possible that it's simply that certain airlines are more poorly managed than others, leading to more delays? To test this, I filtered Denver flights into the number of arrivals that had a delay of greater than 15 minutes. We are looking for P(Delay|Carrier =x), the conditional probability that there is a delay given the use of any of the given carriers:
+
+```{r}
+UA_flights <-DENflights %>% filter(CARRIER=="UA")
+UA_delays <- DENflights %>% filter(CARRIER == "UA" & ARR_DELAY>=15)
+Prob_UA <- count(UA_delays)/(count(UA_flights))
+Prob_UA <- as.numeric(Prob_UA)
+
+
+B6_flights <-DENflights %>% filter(CARRIER=="B6")
+B6_delays <- DENflights %>% filter(CARRIER == "B6" & ARR_DELAY>=15)
+Prob_B6 <- count(B6_delays)/(count(B6_flights))
+Prob_B6 <- as.numeric(Prob_B6)
+
+
+
+AA_flights <-DENflights %>% filter(CARRIER=="AA")
+AA_delays <- DENflights %>% filter(CARRIER == "AA" & ARR_DELAY>=15)
+Prob_AA <- count(AA_delays)/(count(AA_flights))
+Prob_AA <- as.numeric(Prob_AA)
+
+
+AS_flights <-DENflights %>% filter(CARRIER=="AS")
+AS_delays <- DENflights %>% filter(CARRIER == "AS" & ARR_DELAY>=15)
+Prob_AS <- count(AS_delays)/(count(AS_flights))
+Prob_AS <- as.numeric(Prob_AS)
+
+
+WN_flights <-DENflights %>% filter(CARRIER=="WN")
+WN_delays <- DENflights %>% filter(CARRIER == "WN" & ARR_DELAY>=15)
+Prob_WN <- count(WN_delays)/(count(WN_flights))
+Prob_WN <- as.numeric(Prob_WN)
+
+
+DL_flights <-DENflights %>% filter(CARRIER=="DL")
+DL_delays <- DENflights %>% filter(CARRIER == "DL" & ARR_DELAY>=15)
+Prob_DL <- count(DL_delays)/(count(DL_flights))
+Prob_DL <- as.numeric(Prob_DL)
+
+
+NK_flights <-DENflights %>% filter(CARRIER=="NK")
+NK_delays <- DENflights %>% filter(CARRIER == "NK" & ARR_DELAY>=15)
+Prob_NK <- count(NK_delays)/count(NK_flights)
+Prob_NK <- as.numeric(Prob_NK)
+
+
+F9_flights <-DENflights %>% filter(CARRIER=="F9")
+F9_delays <- DENflights %>% filter(CARRIER == "F9" & ARR_DELAY>=15)
+Prob_F9 <- count(F9_delays)/(count(F9_flights))
+Prob_F9 <- as.numeric(Prob_F9)
+
+
+OO_flights <-DENflights %>% filter(CARRIER=="OO")
+OO_delays <- DENflights %>% filter(CARRIER == "OO" & ARR_DELAY>=15)
+Prob_OO <- count(OO_delays)/count(OO_flights)
+Prob_OO <- as.numeric(Prob_OO)
+
+
+VX_flights <-DENflights %>% filter(CARRIER=="VX")
+VX_delays <- DENflights %>% filter(CARRIER == "VX" & ARR_DELAY>=15)
+Prob_VX <- count(VX_delays)/count(VX_flights)
+Prob_VX <- as.numeric(Prob_VX)
+
+
+df <- data.frame( names= c('AA','AS','B6','DL','F9','NK','OO','UA','VX','WN'), probs=c(Prob_AA,Prob_AS,Prob_B6,Prob_DL,Prob_F9,Prob_NK,Prob_OO,Prob_UA,Prob_VX,Prob_WN) )
+ggplot(df) + geom_col(aes(names,probs))
+```
+
+
+Evidently, a flyer's probability of experiencing a delay is much higher if she chooses to use JetBlue or Virgin than if she chooses Delta or United. So the causal variable seems to have more to do with the carrier itself than distance of the flight. 
+
+To confirm this and complete our analysis, we must find P(Delay|Carrier ==x AND Distance <2000), or the conditional probability of a delay
+given the joint probability of using a certain carrier and taking a short-distance flight:
+
+
+```{r}
+AA_shortflights <-DENflights %>% filter(CARRIER=="AA" & DISTANCE <2000)
+AA_shortdelays <- AA_shortflights %>% filter(CARRIER == "AA" & ARR_DELAY>=15)
+ShortProb_AA <- count(AA_shortdelays)/(count(AA_shortflights))
+ShortProb_AA <- as.numeric(ShortProb_AA)
+
+
+AS_shortflights <-DENflights %>% filter(CARRIER=="AS" & DISTANCE <2000)
+AS_shortdelays <- AS_shortflights %>% filter(CARRIER == "AS" & ARR_DELAY>=15)
+ShortProb_AS <- count(AS_shortdelays)/count(AS_shortflights)
+ShortProb_AS <- as.numeric(ShortProb_AS)
+
+
+B6_shortflights <-DENflights %>% filter(CARRIER=="B6" & DISTANCE <2000)
+B6_shortdelays <- B6_shortflights %>% filter(CARRIER == "B6" & ARR_DELAY>=15)
+ShortProb_B6 <- count(B6_shortdelays)/count(B6_shortflights)
+ShortProb_B6 <- as.numeric(ShortProb_B6)
+
+
+DL_shortflights <-DENflights %>% filter(CARRIER=="DL" & DISTANCE <1000)
+DL_shortdelays <- DL_shortflights %>% filter(CARRIER == "DL" & ARR_DELAY>=15)
+ShortProb_DL <- count(DL_shortdelays)/count(DL_shortflights)
+ShortProb_DL <- as.numeric(ShortProb_DL)
+
+
+F9_shortflights <-DENflights %>% filter(CARRIER=="F9" & DISTANCE <1000)
+F9_shortdelays <- F9_shortflights %>% filter(CARRIER == "F9" & ARR_DELAY>=15)
+ShortProb_F9 <- count(F9_shortdelays)/count(F9_shortflights)
+ShortProb_F9 <- as.numeric(ShortProb_F9)
+
+
+NK_shortflights <-DENflights %>% filter(CARRIER=="NK" & DISTANCE <1000)
+NK_shortdelays <- NK_shortflights %>% filter(CARRIER == "NK" & ARR_DELAY>=15)
+ShortProb_NK <- count(NK_shortdelays)/count(NK_shortflights)
+ShortProb_NK <- as.numeric(ShortProb_NK)
+
+
+OO_shortflights <-DENflights %>% filter(CARRIER=="OO" & DISTANCE <1000)
+OO_shortdelays <- OO_shortflights %>% filter(CARRIER == "OO" & ARR_DELAY>=15)
+ShortProb_OO <- count(OO_shortdelays)/count(OO_shortflights)
+ShortProb_OO <- as.numeric(ShortProb_OO)
+
+
+UA_shortflights <-DENflights %>% filter(CARRIER=="UA" & DISTANCE <1000)
+UA_shortdelays <- UA_shortflights %>% filter(CARRIER == "UA" & ARR_DELAY>=15)
+ShortProb_UA <- count(UA_shortdelays)/count(UA_shortflights)
+ShortProb_UA <- as.numeric(ShortProb_UA)
+
+
+VX_shortflights <-DENflights %>% filter(CARRIER=="VX" & DISTANCE <1000)
+VX_shortdelays <- VX_shortflights %>% filter(CARRIER == "VX" & ARR_DELAY>=15)
+ShortProb_VX <- count(VX_shortdelays)/count(VX_shortflights)
+ShortProb_VX <- as.numeric(ShortProb_VX)
+
+
+WN_shortflights <-DENflights %>% filter(CARRIER=="WN" & DISTANCE <1000)
+WN_shortdelays <- WN_shortflights %>% filter(CARRIER == "WN" & ARR_DELAY>=15)
+ShortProb_WN <- count(WN_shortdelays)/count(WN_shortflights)
+ShortProb_WN <- as.numeric(ShortProb_WN)
+
+
+df2 <- data.frame(names= c('AA','AS','B6','DL','F9','NK','OO','UA','VX','WN'), probs2=c(ShortProb_AA,ShortProb_AS,ShortProb_B6,ShortProb_DL,ShortProb_F9,ShortProb_NK,ShortProb_OO,ShortProb_UA,ShortProb_VX,ShortProb_WN) )
+ggplot(df2) + geom_col(aes(names,probs2))
+
+
+```
+
+
+Once again, the distance factor does not alter the probability of a delay, which is more conditioned on the airline. Thus, our initial analysis is confirmed that the causal factor in a delay is the airline itself and not the flight's distance.
+
+#end Ryan
+
+## Thorbin's Declaration: How does seasonal weather (month) affect the availibility of flights? 
+```{r}
+#code chunk#
+COflights_month<-COflights %>%group_by(MONTH)%>%filter(ARR_DELAY!="NA") %>% summarise(total_flights=n())
+#created tibble targeting all flights#
+total_flights<-COflights_month$"total_flights"
+#extracted number of flights per month as a 1x tibble# 
+COflights_month_WD <-COflights %>% group_by(MONTH)%>% filter(WEATHER_DELAY!="NA",WEATHER_DELAY>0) %>% summarise(total_WD_flights=n())
+total_WD_flights<-COflights_month_WD$"total_WD_flights"
+#did the same thing as above but for weather delayed flights# 
+useable_tibble<-tibble(month=1:12,'total weather delayed flights'=total_WD_flights,"total flights"=total_flights,g=(total_WD_flights/total_flights)*100)
+#combined the 1x's and made a new tibble with just the variables I wanted with the respective conditional probabilities of having a delayed flight due to weather in the respective month #
+```
+
+```{r}
+#plot chunk#
+ggplot(data=useable_tibble,mapping=aes(x=month,y=g))+geom_col()+scale_x_continuous(breaks=1:12)+ylab("probability percentage of a flight being weather delayed")+ggtitle("probability of a flight from DIA being delayed due to weather by month in '17")
+```
+non-defaults used: scale_x_continuous(), title 
+
+Thorbin's Analysis: 
+  I was attempting to show that weather had a significant impact on a flights ability to fly out on time. To gather this data, I filtered the given data set for all flights that were initially at DIA (filtered out arrival times that were NA) and grouped the resulting data set by month. A similar method was used for flights specifically grounded/delayed due to weather delay. This was done by taking out all weather delays that evaluated to a numarical value of zero (including NA's), then grouped by month. Once both data frames were grouped by month, summary and n() were used to gather the total amount of flights that were at DIA per given month. The exact same method was applied to the weather delayed flights. These counts were then extracted with df$ which yielded two 1x tibbles which were then combined into a final 3x tibble. The resulting 3rd column was the conditional probability of flights being cancelled due to weather in each month of 2017. The conditions were specified as flights belonging to a certain month and flights that also belonged to that month being delayed by weather. It was found that months 1,2,7,8 and 12 (Jan,Feb,Jul,Aug,Dec) had the highest probability of being delayed by weather. The initial hypothesis was that these delays would be significantly more dominant in the winter months than they were shown to be. This was a bit surprising considering that generally there is no snow in July or August. This is possibly due to rather windy or possibly poor air quality days (the latter due to changes in air density). Also interesting was that for the months of March-June there were also rather high probabilities of flight delays due to weather. This could have been due to freak snow/wind storms that occured randomly which clearly would raise the weather delay probability for which ever month rouge storms occured in. Remaining are the months of September through November. These months show the lowest probability of having weather delays. As someone who has lived in Colorado their entire life, I can argue that these months have been observed by me to have generally the least severe incliment weather (at least in the plains). If this were true (neglecting rogue storms), then certainly these months at DIA would possess a lower percentage of flights delayed by weather, which in hindsight is what appears to have occurred. 
+  
+Thorbin's Conclusion:
+  
+  For 2017 it appears as though weather delays and month have a confounding relationship. My analysis confirmed a well documented observation that the weather tends to be more severely incliment in the winter months which certainly had an effect on the weather delays at DIA for 2017. 
+  
+# Jorge's Analysis 
+# Declaration: How does individual months affect arriving flights ( destination is DEN ) at DIA in term of being delayed and early? How does distance affect arriving flights ( destination is DEN ) at DIA in term of being delayed and early?  
+
+# Flights that arrive at DEN 
+```{r}
+DENfights<-filter(COflights, DEST == "DEN")
+as_tibble(DENfights)
+```
+
+# Delayed, flight that arrives 15 minutes or more from shedualed time
+#                                &
+# Early, On-time means any flight arriving early or within 14 minutes 
+```{r  echo=FALSE}
+lateflights<-filter(DENfights, ARR_DELAY >= 15)
+earlyflights<-filter(DENfights, ARR_DELAY <= 14)
+```
+# Count of flights that arrives 15 minutes or more from shedual time
+```{r}
+(countLate<-count(lateflights))
+```
+# Count of flights arriving early or within 14 minutes
+```{r}
+(countEarly<-count(earlyflights))
+```
+# Total count of flight that that arrived in DEN
+```{r}
+(Countotal<-count(DENfights))
+```
+# The Percentage of flights that arrived early 
+# 83.46712 %
+```{r}
+(percOfearlyflight<-countEarly/Countotal*100) #%
+```
+# The Percentage of flights that arrived late 
+# 15.65756 %
+```{r}
+(percOflateflight<-countLate/Countotal*100) #%
+```
+# ------Analysing months- J R
+
+# ------Late arrivals by month 
+#It seems that months that are closer to international holidays or vacations   tend to have a higher    percentage of flights that are late  
+#       Thus, JAN, MAY, JUNE, JULY, AGU (august), and DEC (dicember) have the highest acounts flights            arriving late proportionate to the rest. 
+
+
+```{r}
+ggplot(data = lateflights) +
+  geom_histogram(mapping = aes(x = MONTH), binwidth = .1 ) +
+  ggtitle('Distribution of flights that arrived more than 15 min late to DEN ') + labs(title = "Distribution of flights that arrived more than 15 min late to DEN by month",
+              subtitle = "histogram by months",
+              caption = "Data source: COflights ")+ theme(
+  plot.title = element_text(color = "blue", size = 12, face = "bold"),
+  plot.subtitle = element_text(color = "black"),
+  plot.caption = element_text(color = "green", face = "italic")
+)
+```
+
+
+# Results 1.1 : It seems that months that are closer to international holidays or vacations tend to have a higher percentage of flights that are late  
+
+#   Thus, JAN, MAY, JUNE, JULY, AGU (august), and DEC (dicember) have the highest acounts flights arriving late proportionate to the rest. 
+
+#Lets take a closer look: Percentage distribution of Individual Months that arrived late (>=15)
+
+# verifing results with %
+
+# Jan
+```{r echo=FALSE}
+JANArrLate<-filter(lateflights, MONTH %in% c(1))
+```
+# Persentage of flights that where late in JAN in all the flight that where late
+# We can see that late flights in JAN make a significant percentage of all lfights that where late (10%)
+```{r}
+(perJANarrLate<-count(JANArrLate)/countLate)
+```
+# Similarly we can see that from all the flights in JAN had a 1.7 percent chance of being late. 
+```{r}
+(perJANarrLateTotal<-count(JANArrLate)/Countotal)
+```
+
+# May
+```{r}
+MAYArrLate<-filter(lateflights, MONTH %in% c(5))
+```
+# Persentage of flights that where late in MAY in all the flights that where late 
+# We can see that late flights in MAY make a significant percentage of all lfights that where late (9%)
+```{r}
+(perMAYarrLate<-count(MAYArrLate)/countLate)
+```
+# Similarly we can see that from all the flights in MAY had a 1.5 percent chance of being late. 
+```{r}
+(perMAYarrLateTotal<-count(MAYArrLate)/Countotal)
+```
+
+# June
+```{r}
+JUNArrLate<-filter(lateflights, MONTH %in% c(6))
+```
+# Persentage of flights that where late in JUN in all the flight that where late 
+# We can see that late flights in JUN make a significant percentage of all lfights that where late (9.9%)
+```{r}
+(perJUNarrLate<-count(JUNArrLate)/countLate)
+```
+# Similarly we can see that from all the flight flight in JUN had a 1.7 percent chance of being late.
+```{r}
+(perJUNarrLateTotal<-count(JUNArrLate)/Countotal)
+```
+
+# July
+```{r}
+JULYArrLate<-filter(lateflights, MONTH %in% c(7))
+```
+#Persentage of flights that where late in JUN in all the flight that where late 
+#We can see that late flights in JULY make a significant percentage of all fights that where late (10.8%)
+```{r}
+(perJULYarrLate<-count(JULYArrLate)/countLate)
+```
+#Similarly we can see that from all the flight flight in JULY had a 1.7 percent chance of being late.
+```{r}
+(perJULYarrLateTotal<-count(JULYArrLate)/Countotal)
+```
+# August
+```{r}
+AUGArrLate<-filter(lateflights, MONTH %in% c(8))
+```
+# Persentage of flights that where late in AUG in all the flight that where late 
+# We can see that late flights in AUG make a significant percentage of all fights that where late (11.2%)
+```{r}
+(perAUGarrLate<-count(AUGArrLate)/countLate)
+```
+# Similarly we can see that from all the flight flight in AUG had a 1.75 percent chance of being late.
+```{r}
+(perAUGarrLateTotal<-count(AUGArrLate)/Countotal)
+```
+# December 
+```{r}
+DICArrLate<-filter(lateflights, MONTH %in% c(12))
+```
+# Persentage of flights that where late in DEC in all the flight that where late 
+# We can see that late flights in DEC make a significant percentage of all fights that where late (9.3%)
+```{r}
+(perDICarrLate<-count(DICArrLate)/countLate)
+```
+# Similarly we can see that from all the flight flight in DEC had a 1.4 percent chance of being late.
+```{r}
+(perDICarrLateTotal<-count(DICArrLate)/Countotal)
+```
+
+# mean persentage of the month that have higher tendacy of arriving late.  1.58 percent chance of being late 
+```{r}
+(((perDICarrLateTotal+perAUGarrLateTotal+perJULYarrLateTotal+perJUNarrLateTotal+perMAYarrLateTotal)/5)*100)
+```
+
+# feb, march, april, sep, oct, and nov all have less chance of flights arriving late. lets verify
+
+
+# FEB
+```{r}
+FEBArrLate<-filter(lateflights, MONTH %in% c(2))
+```
+# Persentage of flights that where late in FEB in all the flight that where late 
+# We can see that late flights in FEB make a less significant percentage of all fights that where late (6.17%)
+```{r}
+(perFEBarrLate<-count(FEBArrLate)/countLate)
+```
+# Similarly we can see that from all the flight flight in FEB had a 0.1 percent chance of being late.
+```{r}
+(perFEBarrLateTotal<-count(FEBArrLate)/Countotal)
+```
+# March
+```{r}
+MARarrLate<-filter(lateflights, MONTH %in% c(3))
+```
+# Persentage of flights that where late in March in all the flight that where late 
+# We can see that late flights in March make a less significant percentage of all fights that where late (8.64%)
+```{r}
+(perMARarrLate<-count(MARarrLate)/countLate)
+```
+# Similarly we can see that from all the flight flight in March had a 1.35 percent chance of being late.
+```{r}
+(perMARarrLateTotal<-count(MARarrLate)/Countotal)
+```
+
+# September
+```{r}
+SEParrLate<-filter(lateflights, MONTH %in% c(9))
+```
+# persentage of flights that where late in September in all the flight that where late 
+# we can see that late flights in September make a less significant percentage of all fights that where late (5.56%)
+```{r}
+(perSEParrLate<-count(SEParrLate)/countLate)
+```
+# similarly we can see that from all the flight flight in September had a 0.8 percent chance of being late.
+```{r}
+(perSEParrLateTotal<-count(SEParrLate)/Countotal)
+```
+
+# October 
+```{r}
+OCTarrLate<-filter(lateflights, MONTH %in% c(10))
+```
+# persentage of flights that where late in October in all the flight that where late 
+# we can see that late flights in October make a less significant percentage of all fights that where late (7.04%)
+```{r}
+(perOCTarrLate<-count(OCTarrLate)/countLate)
+```
+# similarly we can see that from all the flight flight in October had a 1.1 percent chance of being late.
+```{r}
+(perOCTarrLateTotal<-count(OCTarrLate)/Countotal)
+```
+
+# November 
+```{r}
+NOVarrLate<-filter(lateflights, MONTH %in% c(11))
+```
+# persentage of flights that where late in november in all the flight that where late 
+# we can see that late flights in november make a less significant percentage of all fights that where late (4.18%)
+```{r}
+(perNOVarrLate<-count(NOVarrLate)/countLate)
+```
+# Similarly we can see that from all the flights in november had a 0.65 percent chance of being late. the lowest of all the month for arrving late. 
+```{r}
+(perNOVarrLateTotal<-count(NOVarrLate)/Countotal)
+```
+# April
+```{r}
+APRarrLate<-filter(lateflights, MONTH %in% c(4))
+```
+# Persentage of flights that where late in April in all the flight that where late 
+# We can see that late flights in April make a less significant percentage of all fights that where late (6.98%)
+```{r}
+(perAPRarrLate<-count(APRarrLate)/countLate)
+```
+# Similarly we can see that from all the flights in April had a 1.09 percent chance of being late.
+```{r}
+(perAPRarrLateTotal<-count(APRarrLate)/Countotal)
+```
+
+# Mean persengate of month that has less chance of flights arriving late 
+```{r}
+((perNOVarrLateTotal+perOCTarrLateTotal+perSEParrLateTotal+perAPRarrLateTotal+perMARarrLateTotal+perFEBarrLateTotal)/6)
+```
+
+
+#--------------Early Arivals 
+```{r}
+ggplot(data = earlyflights) +
+  geom_histogram(mapping = aes(x = MONTH), binwidth = .1 )
+```
+# findings # 1.2: It seems that flight that are between the march and november have the lowest counts of early arrivals. 
+# it is hard to tell as to why this might be happening however, weather around this time a year in denver has more snowfall than the rest of the yaer which affects airport trafic. 
+#maybe there is a positive corralation between flights being less early and taxi out during this time a year.  
+
+# end of arrivals by month
+
+
+# ---Analyzing distance, looking for diffrances in flight that arrived early and late in DEN factored by distance 
+
+# Early flights Distribution by miles 
+```{r}
+ggplot(data = earlyflights) +
+  geom_histogram(mapping = aes(x = DISTANCE), binwidth = 20 )+
+  ggtitle('Histogram: Early Flights Distribution by Miles ')
+```
+# Late Flights Distribution by miles 
+```{r}
+ggplot(data = lateflights) +
+  geom_histogram(mapping = aes(x = DISTANCE), binwidth = 20 )+
+  ggtitle('Histogram: Late Flights Distribution by Miles ')
+```
+
+
+
+# Variance Distribution of Early Flights by Miles
+```{r}
+ggplot(data = earlyflights, mapping = aes(x = ARR_DELAY, y = DISTANCE)) +
+  geom_boxplot()+
+  ggtitle('Boxplot: Early Flights Variance by Miles ')
+```
+
+# Variance Distribution of Late Flights by Miles
+```{r}
+ggplot(data = lateflights, mapping = aes(x = ARR_DELAY, y = DISTANCE)) +
+  geom_boxplot()
+```
+# Visualy the box plot does not display any diffrancs between late and early flights when considering Distance 
+```{r}
+```
+# could there be an intercation somewhere between 895.3668 and 922.6956 miles that may cause flight to be delayed on ave
+# using the midpoint to see in there is if traveling more or less distance 
+```{r chuck_5, results="hide"}
+count(lateflights)
+LateGrater<-filter(lateflights, DISTANCE >= 909.031 )
+(LG<-count(LateGrater))
+LateLesser<-filter(lateflights, DISTANCE <= 909.031 )
+(LL<-count(LateLesser))
+count(earlyflights)
+earlyGrater<-filter(earlyflights, DISTANCE >= 909.031 )
+(EG<-count(earlyGrater))
+earlyLesser<-filter(earlyflights, DISTANCE <= 909.031 )
+(EL<-count(earlyLesser))
+#getting persentages 
+#percengated of flight that where early that travals >= 909.031
+(EG/countEarly*100)
+#percengated of flight that where late that travals <= 909.031
+(EL/countEarly*100)
+#percengated of flight that where late that travals >= 909.031
+(LG/countLate*100)
+#percengated of flight that where late that travals <= 909.031
+(LL/countLate*100)
+```
+# findings #2: it seems that in both conditions (late and early arrivals) percentage difrance in flights that flew to DEN with a distance grater and lesser than 909.031 don't differ
+# thus, flights that flew less than 909.031 tended to both more late and ealry. this is probably because most flights to DEN fly under 900 miles. This information is not usefull to DIA. but at the very least we can disregade DIstance as a contributing factor 
+
+# Recommendations and Conclusions: There is are significant between months in the flights that arrive late at Denver airport. Additionally, there is are significant between months in the flights that arrive early at Denver airport. The months that were on average later correlated to the months that have higher demand in-flight due to vacations and related holidays. For this scenario, it's recommended increasing staff to mitigate efficiency in human traffic. The months that arrived early where January and February. These months tend to have heavy winters those might be a possible explanation as to why there are fewer early fights. 
+Finally, there was no significant difference in distance and where a flight arrived late or early. 
+
+###end Jorge 
+
+# Start Mandy 
+# I, Mandy Karako, compared flight delays from Denver to destinations (airports). My main question was how does destination airport effect arrival delays from Denver? 
+
+# Filter colorado flights to make origin always equal Denver and filter out destination equaling Denver. 
+```{r}
+DENflights <- filter(COflights, DEST !="DEN"|ORIGIN=="DEN")
+```
+# Add a True/False variable indicating if a flight was late or not.
+```{r}
+DENflights <- DENflights %>% mutate(ARR_DELAY_LOG=(ARR_DELAY>=15))
+```
+# Denver flights that air delays were greater than or equal to 15 minutes.
+```{r}
+LATEflights <- filter(DENflights, ARR_DELAY >=15)
+```
+# Late arrivals based off destination. Desination does not equal Denver. I don't want to observe Denver as a destination for this comparison because I found it to be a huge outlier. 
+```{r}
+LATEflights <- LATEflights %>% filter(DEST !="DEN")
+```
+# Bar graph of the count of late flight arrivals to each destination. 
+```{r}
+ggplot(data=LATEflights)+
+  geom_bar(
+    mapping=aes(x= DEST, fill=DEST),
+    position = "dodge"
+    )+
+  ggtitle("Count of Arrival of Late Flights From Denver to Different Airports")
+```
+# Total number of late flights coming from Denver. 
+```{r}
+count(LATEflights) #41,376 late flights
+```
+# Number of late flights per destination.  
+```{r}
+LATEflights.DEST <- LATEflights%>%count(DEST)
+view(LATEflights.DEST)
+```
+# Seeing which destination had the most late flight arrivals from Denver.
+```{r}
+LATEflights.DEST%>%arrange(desc(n)) ## SFO was the destination with the most late flights from Denver. 
+```
+## Top five airports for arrival delays
+```{r}
+SFO <- 2213/count(LATEflights)*100 # about 5.3% of flights that are late from Denver are arriving to SFO. 
+LAX <- 2056/count(LATEflights)*100 # about 5.0% of flights that are late from Denver are arriving to LAX.
+PHX <- 1383/count(LATEflights)*100 # about 3.3% of flights that are late from Denver are arriving to PHX.
+SEA <- 1346/count(LATEflights)*100 # about 3.25% of flights that are late from Denver are arriving to SEA.
+SLC <- 1296/count(LATEflights)*100 # about 3.1% of flights that are late from Denver are arriving to SLC.  
+```
+## Percentage of late flights.
+```{r}
+count(LATEflights)/count(DENflights)*100 # 16.3% of total flights from Denver are late (excluding flights arriving to Denver).
+```
+## Percentage of total flights that are late that are going to SFO, LAX, PHX, SEA, SLC.
+```{r}
+2213/count(DENflights)*100 #SFO = .87%
+2056/count(DENflights)*100 #LAX = .81%
+1383/count(DENflights)*100 #PHX = .54%
+1346/count(DENflights)*100 #SEA = .53%
+1296/count(DENflights)*100 #SLC = .51%
+```
+# Probability that a late flight from Denver will be traveling to SFO, LAX, PHX, SEA, or SLC.
+```{r}
+df <-data.frame(Airport = c("SFO","LAX", "PHX", "SEA", "SLC"), Percentage = c(5.3,5,3.3,3.25,3.1))
+ggplot(df,mapping=aes(x=Airport, y=Percentage))+
+  geom_col()+
+  ggtitle("Probability That a Late Flight From Denver Will be Traveling to LAX, PHX, SEA, SFO, or SLC")
+```
+# Number of flights each airport is receiving from Denver. 
+```{r}
+count(DENflights%>%filter(DEST=="SFO")) #7,719 flights
+count(DENflights%>%filter(DEST=="LAX")) #10,597 flights
+count(DENflights%>%filter(DEST=="PHX")) #9,446 flights
+count(DENflights%>%filter(DEST=="SEA")) #6,802 flights
+count(DENflights%>%filter(DEST=="SLC")) #9,366 flights
+```
+# Mandy's Analysis: The top 5 airports for late flights from Denver were SFO, LAX, PHX, SEA, and SLC. The probability of a late flight leaving from Denver and arriving in SFO was 5.3%. The probability of a flight leaving from Denver, arriving in SFO, and also being late was .87%, which is pretty high considering the amount of flights leaving Denver. What I found interesting was that of the top 5 airports for late arrivals from Denver, SFO ranked 4th on number of flights recieved. LAX received the most flights but had a less chance of a flight being late. SLC received almost 2,000 more flights than SFO and 3.1% of late flights from Denver were arriving there. With that information, I can conclude that the number of flights a specific destination received did not effect how many late arrivals occured. Destination airport can play a role in late arrival of flights from Denver, but it is not conclusive. All that this data can conclude is that San Fransisco received the most late flights from Denver. I can hypothesize that the bigger the aiport, the more delayed flights there are, but further data would need to be explored to conclude that. 
+
+
+          
