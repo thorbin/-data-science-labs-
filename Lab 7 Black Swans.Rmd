@@ -8,7 +8,8 @@ output: html_document
 ```{r}
 library(tidyverse)
 library(dplyr)
-power<-read_csv2("/Users/thorbinatwell-donaghey/Desktop/household_power_consumption.txt",na='?')
+power<-read_csv2("/Users/thorbinatwell-donaghey/Desktop/household_power_consumption.txt",na=c('?',' '),locale=locale(grouping_mark=".",decimal_mark = ",")
+)
 #Thorbins import# 
 #stringpathPC <-  "C:/Users/chele robelo/Documents/stats/lab 7/household_power_consumption.txt"#
 #Jorge's import#
@@ -229,3 +230,44 @@ summarise(WaJulAgu, watteg_consumption = mean(KitchenApl, na.rm = TRUE))
 
 Things to consider: RMS voltage/power/current over the entire time surveyed to gauge 'average' electricity useage. Values above this RMS would show higher averages of electricity consumption indicating an increased presence at home, it should be easy to compare multiple house holds RMS value if we can see explicit fluctuations in RMS power consumption in just one house especially in a day to day capacity. 
 
+```{r}
+#manipulating data frame into final format, assumed group marker will be used as decimal for ease of plotting# 
+type_convert(power_new)
+power_separated<-power_new %>% separate(Date,into=c("Day","Month","Year"),convert=TRUE) %>% separate(Time, into=c("Hour","Minute"),convert=TRUE)
+```
+```{r}
+#now for the fun# 
+#2006#
+power_separated_month_2006<-filter(power_separated,Year==2006) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
+#2006 plot# 
+ggplot(data=power_separated_month_2006,mapping=aes(x=Minutes,y=mean_RP))+geom_point()+geom_smooth()+facet_wrap(~ Month,nrow=NULL)
+```
+```{r}
+#2007#
+power_separated_month_2007<-filter(power_separated,Year==2007) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
+#plot#
+ggplot(data=power_separated_month_2007,mapping=aes(x=Minutes,y=mean_RP))+geom_smooth()+facet_wrap(~ Month, nrow=NULL)
+```
+
+#### 2007 plot comments: 
+It appears as though nearly all months of the year share a similarity in terms of two local maxima (not including end points). Global reactive power was chosen as the variable because the quantity power tells us how much current changes, and sudden and periodic changes in current would indicate a human presence in a home. We can see that generally in the winter months power consumption is actually fairly low in magnitude where as it is significantly larger in the warmer months. This is likely due to the fact that this home used gas heating in the colder months and an electronic AC unit in the warmer months. This explanation appears to hold when looking at months after september ie, when the weather starts getting cooler, which is  seen by a lower mean power usage in the months of 10-12. It is also interesting to observe two glaring "2-gallon hat" maxima in nearly all plots. These could be the time a person dwelling gets home perhaps one peak is when the person takes a shower requiring the electric water heater to supply more and more power to deal with the sudden demand for warm water. As for the second peak
+```{r}
+#2008#
+power_separated_month_2008<-filter(power_separated,Year==2008) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
+#plot#
+ggplot(data=power_separated_month_2008,mapping=aes(x=Minutes,y=mean_RP))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
+```
+
+```{r}
+#2009# 
+power_separated_month_2009<-filter(power_separated,Year==2009) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
+#plot#
+ggplot(data=power_separated_month_2009,mapping=aes(x=Minutes,y=mean_RP))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
+```
+
+```{r}
+#2010#
+power_separated_month_2010<-filter(power_separated,Year==2010) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
+#plot#
+ggplot(data=power_separated_month_2010,mapping=aes(x=Minutes,y=mean_RP))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
+```
