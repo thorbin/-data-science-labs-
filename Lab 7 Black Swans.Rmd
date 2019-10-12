@@ -235,39 +235,43 @@ Things to consider: RMS voltage/power/current over the entire time surveyed to g
 type_convert(power_new)
 power_separated<-power_new %>% separate(Date,into=c("Day","Month","Year"),convert=TRUE) %>% separate(Time, into=c("Hour","Minute"),convert=TRUE)
 ```
+
 ```{r}
 #now for the fun# 
 #2006#
 power_separated_month_2006<-filter(power_separated,Year==2006) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
 #2006 plot# 
-ggplot(data=power_separated_month_2006,mapping=aes(x=Minutes,y=mean_RP))+geom_point()+geom_smooth()+facet_wrap(~ Month,nrow=NULL)
+ggplot(data=power_separated_month_2006,mapping=aes(x=Minutes,y=mean_GI))+geom_point()+geom_smooth()+facet_wrap(~ Month,nrow=NULL)
 ```
+
 ```{r}
 #2007#
 power_separated_month_2007<-filter(power_separated,Year==2007) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
 #plot#
-ggplot(data=power_separated_month_2007,mapping=aes(x=Minutes,y=mean_RP))+geom_smooth()+facet_wrap(~ Month, nrow=NULL)
+ggplot(data=power_separated_month_2007,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~ Month, nrow=NULL)
 ```
 
 #### 2007 plot comments: 
-It appears as though nearly all months of the year share a similarity in terms of two local maxima (not including end points). Global reactive power was chosen as the variable because the quantity power tells us how much current changes, and sudden and periodic changes in current would indicate a human presence in a home. We can see that generally in the winter months power consumption is actually fairly low in magnitude where as it is significantly larger in the warmer months. This is likely due to the fact that this home used gas heating in the colder months and an electronic AC unit in the warmer months. This explanation appears to hold when looking at months after september ie, when the weather starts getting cooler, which is  seen by a lower mean power usage in the months of 10-12. It is also interesting to observe two glaring "2-gallon hat" maxima in nearly all plots. These could be the time a person dwelling gets home perhaps one peak is when the person takes a shower requiring the electric water heater to supply more and more power to deal with the sudden demand for warm water. As for the second peak
+Nearly all months show a common trend: Current drawn from the house tends to decrease at night until the morning at precisely 8:20 am except for october. This is best explained by the person taking vacation in october and sleeping in. This explanation is probable because current intensity steadily increases and in the wee hours of the morning, current intensity is much higher than usual, someone with work in the morning wouldnt be staying up until 1 am using electronic devices for nearly a month.Interesting enough is that there is also a second peak right around lunch time which is highest in December and lowest in July. A possible explanation for this is that since this house is located in Sceaux, a tourist hot spot, perhaps the person is able to get cheaper street food in the warmer months requiring less frequent trips home for lunch. This makes sense because in general the colder months have higher mid-day peak current intensity, suggesting more time spent at home by the inhabitant. Lastly the last peak toward the end of the day is generally the highest. It is significant to note that the location of the second peak's maximum is located at 1250 minutes or nearly 9 pm give or take an hour. It should be noted that during the warmer months, this maximum is located past 9 pm, where as for the generally cooler months the location of this maximum is located at or before 9 pm. Is this proof that winter in France is not as enjoyable as one would think? As for explanations to this tertiary maximum, the documentation does not say anything about a heater, so since this tertiary maximum is larger for all months of the year, it is possible that the inhabitant used the electric AC unit in the summer and an electric heater in the winter months. 
 ```{r}
 #2008#
 power_separated_month_2008<-filter(power_separated,Year==2008) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
 #plot#
-ggplot(data=power_separated_month_2008,mapping=aes(x=Minutes,y=mean_RP))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
+ggplot(data=power_separated_month_2008,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
 ```
-
+#### 2008 plot comments
+It should be pointed out that the tertiary curve follows the same patterns as the previous figure regarding time location and relative size. It is also interesting to observe that the current intensity is generally at a minumum for the earlier hours of the morning, which is remniscient of the plots from 2007. Another similarity between 2007 and 2008 is the fact that the primary peaks are all located at exactly 500 minutes or 8:20 am exempting August. This suggests that this person probably kept their Job considering August is an obvious sign of a month long abscence. The differences however are that August shows almost no current intensity suggesting that the inhabitant went somewhere for a month, another is that the secondary peak doesn't show such a strong dependence on month. In the previous data set, there was an apparent relationship between the magnitude of the secondary maximum and month, here we see that relationship drop off quickly through out the rest of the year. If this secondary curve is in fact a lunch time presence, maybe the inhabitant found a good lunch squad and got out of the house more often.  
 ```{r}
 #2009# 
 power_separated_month_2009<-filter(power_separated,Year==2009) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
 #plot#
-ggplot(data=power_separated_month_2009,mapping=aes(x=Minutes,y=mean_RP))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
+ggplot(data=power_separated_month_2009,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
 ```
-
+#### 2009 comments
+This bit of data is a little lower quality but trends namely the tertiary curve remaining larger through out the year are still observer and the position of the tertiary curve on a month to month basis.
 ```{r}
 #2010#
 power_separated_month_2010<-filter(power_separated,Year==2010) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
 #plot#
-ggplot(data=power_separated_month_2010,mapping=aes(x=Minutes,y=mean_RP))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
+ggplot(data=power_separated_month_2010,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
 ```
