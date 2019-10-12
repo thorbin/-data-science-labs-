@@ -232,7 +232,7 @@ Things to consider: RMS voltage/power/current over the entire time surveyed to g
 
 ```{r}
 #manipulating data frame into final format, assumed group marker will be used as decimal for ease of plotting# 
-type_convert(power_new)
+power_new<-type_convert(power)
 power_separated<-power_new %>% separate(Date,into=c("Day","Month","Year"),convert=TRUE) %>% separate(Time, into=c("Hour","Minute"),convert=TRUE)
 ```
 
@@ -269,9 +269,15 @@ ggplot(data=power_separated_month_2009,mapping=aes(x=Minutes,y=mean_GI))+geom_sm
 ```
 #### 2009 comments
 This bit of data is a little lower quality but trends namely the tertiary curve remaining larger through out the year are still observer and the position of the tertiary curve on a month to month basis.
+
 ```{r}
-#2010#
-power_separated_month_2010<-filter(power_separated,Year==2010) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
-#plot#
-ggplot(data=power_separated_month_2010,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
+#finding RMS values of reactive power by month# 
+RMS_2006_month<-power_separated_month_2006 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+#2007# 
+RMS_2007_month<-power_separated_month_2007 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+#2008#
+RMS_2008_month<-power_separated_month_2008 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+#2009#
+RMS_2009_month<-power_separated_month_2009 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
 ```
+
