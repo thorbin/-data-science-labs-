@@ -364,5 +364,85 @@ ggplot(data3)+geom_line(aes(hour, x3))
 
 ##End Erik
 
+##Ryan's Analysis
+```{r}
+library(tidyverse)
+library(dplyr)
+
+power <- "C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\household_power_consumption.txt"
+
+data1 <- read_delim(file = power, delim=';', na = c('', '?'),
+                    col_types = cols(
+                      Date = col_date(format="%d/%m/%Y"),
+                      Time = col_time(format="%H:%M:%S"),
+                      Global_active_power = col_double(),
+                      Global_reactive_power = col_double(),
+                      Voltage = col_double(),
+                      Global_intensity = col_double(),
+                      Sub_metering_1 = col_double(),
+                      Sub_metering_2 = col_double(),
+                      Sub_metering_3 = col_double()
+                    ))
+data1 <- data1 %>% mutate(year=substr(Date,1,4), month=substr(Date, 6,7), day=substr(Date, 9,10))
+
+data1 <- data1 %>% mutate(hour=substr(Time,1,2), minute=substr(Time, 4,5), second=substr(Time, 7,8))
+
+data1 <- data1 %>% mutate( day=as.integer(day),
+                           month=as.integer(month),
+                           year=as.integer(year),
+                           hour=as.integer(hour),
+                           minute=as.integer(minute),
+                           second=as.integer(second))
+
+library(lubridate)
+data1 <- data1 %>% mutate(datetime=make_datetime(year, month, day, hour, minute, second))
 
 
+```
+Before deciding on a question worth answering, it is necessary to first explore the data to find patterns of interest. Since others are examining the micro-details of the various household appliances in terms of their energy patterns, I wanted to instead take a broader look at energy patterns throughout the year. To begin, a simple but necessary first step is to get an intial idea of how energy consumption changes based on month. Below is a geom_smooth showing mean voltage usage against the month of the year:
+
+```{r}
+ggplot(data1) + geom_smooth(aes(x = month, y = Voltage)) 
+```
+
+It's clear that energy consumption is lower in the warmer months, higher in the colder months. An obvious implication of this is that cooling a home requires less energy than heating it. But what if there are other factors at work? Let's what energy consumption looks like within the individual months. Below is a facet of geom_smooth plots showing energy usage throughout the day for each month:
+
+```{r}
+ggplot(data1) + geom_smooth(aes(hour, Voltage)) + facet_wrap(~month)
+```
+
+This is a far more interesting visualization. We notice that the winter months are far more volatile in their energy use than the summer months. Indeed, there is a notable leveling-off beginning in April, a near-total flattening in August, and a resumption of the volatility in October. The months with greater volatility are also the months with higher energy consumption, as we see by comparing this facet with our girst graph. This raises the question: is it possible that it is the volatility itself that causes higher energy consumption? Does the constant changing of the temperature throughout the day require more overall voltage than a smooth, predictable use of heating/cooling mechanisms? Or, a related consideration, is it possible that heating and cooling mechanisms in a home are optimized for a steady, average level of temperature control?
+
+These questions are important in light of today's discussion on climate change and power conservation. Some countries (like Germany) have gone so far as to ban or discourage the use of household air conditioners. Futhermore, consumers and businesses alike should be interested in what contributes more significantly to their energy costs and what they can do to minimize them.
+
+We need employ the concept of variance--a measure of the distance from the mean. In particular, we would like to know which months have the greatest variance in terms of their energy consumption. So, the question to answer becomes:
+
+
+## What times of the year have the greatest variance in energy usage, and how does variance relate to overall energy consumption?
+
+We start by selecting data that will give us our mean and variance:
+
+
+```{r}
+data_by_month <- data1 %>% select(month, Voltage) %>% 
+  group_by(month) %>% summarise(mean.voltage=mean(Voltage, na.rm=TRUE), var.voltage=var(Voltage, na.rm=TRUE))
+
+variance <- data_by_month %>% select(var.voltage)
+vari <- as.numeric(unlist(variance))
+
+ggplot(data_by_month)+geom_line(aes(month, vari))
+```
+
+
+We see from the above that, with the interesting exception of May, the months with greater energy consumption also have the highest variance. May is highly variable on the low end--in other words, like the winter months, it does not have a steady level of energy usage, and yet at the same time, its overall energy usage is the lowest of all twelve months, meaning that there are periods of time in May when there is very little energy expended. So, taking into account the evidence we've already seen about the much higher cost of heat relative to cooling, we can disregard May and consider only how the variance of heat-demanding months compares to the steadier months. Indeed, as we see in the summarized data below, there is a strong positive correlation between variance and energy usage:
+
+```{r}
+data_by_month
+
+```
+
+If we want to find the single most interesting statistic from this data, we can calculate the average in variance for four summer months (June, July, August, September), and divide them by the average variance for four winter months (November, December, January, February)--the result being that summer months have a variance of 57% of the variance of the winter months--meaning that summer months are far smoother, and almost half as variable, as winter months, in terms of energy consumption.
+
+The implications of this analysis might be damaging to residents in warmer and less variable climates like Los Angeles, who could see a further rise in traffic due to the long-term migration of individuals and businesses into their more energy-conserving territories, while those damaged by this analysis will be manufacturers of household heating appliances, as well as energy companies that profit off of residents in highly-variable cold climates.
+
+##End Ryan
