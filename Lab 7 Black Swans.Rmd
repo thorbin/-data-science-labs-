@@ -281,3 +281,49 @@ RMS_2008_month<-power_separated_month_2008 %>% group_by(Month) %>% transmute(Glo
 RMS_2009_month<-power_separated_month_2009 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
 ```
 
+##Begin Erik
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+hpc <- "C:/Users/ErikSvenneby/Desktop/household_power_consumption/household_power_consumption.txt"
+data1 <- read_delim(file = hpc, delim=';', na = c('', '?'),
+                    col_types = cols(
+                      Date = col_date(format="%d/%m/%Y"),
+                      Time = col_time(format="%H:%M:%S"),
+                      Global_active_power = col_double(),
+                      Global_reactive_power = col_double(),
+                      Voltage = col_double(),
+                      Global_intensity = col_double(),
+                      Sub_metering_1 = col_double(),
+                      Sub_metering_2 = col_double(),
+                      Sub_metering_3 = col_double()
+                    ))
+#This makes new objects for year, month, day and hour, minute, second
+data1 <- data1 %>% mutate(year=substr(Date,1,4), month=substr(Date, 6,7), day=substr(Date, 9,10))
+data1 <- data1 %>% mutate(hour=substr(Time,1,2), minute=substr(Time, 4,5), second=substr(Time, 7,8))
+#This casts the following objects to integers
+data1 <- data1 %>% mutate( day=as.integer(day),
+                           month=as.integer(month),
+                           year=as.integer(year),
+                           hour=as.integer(hour),
+                           minute=as.integer(minute),
+                           second=as.integer(second))
+#This sets the date and time variables up
+data1 <- data1 %>% mutate(datetime=make_datetime(year, month, day, hour, minute, second))
+#I tested that the dataset was plotting correctly
+#ggplot(data1) + geom_histogram(aes(Voltage))
+#This part selects submetering 3 and hour so I can more easily and efficiently work with the data
+data3 <- data1 %>% select(hour, Sub_metering_3) %>% group_by(hour) %>% summarise(x3 = mean(Sub_metering_3, na.rm = TRUE))
+```
+```{r setup, include=FALSE}
+#This is my plot of the data, which shows a graph with two peaks. The largest one is located at approximately 8am, and the second is smaller at 8pm.There are two relative minimums at approximately 3am and 4pm, with the 3am being the absolute minimum.
+ggplot(data3)+geom_line(aes(hour, x3))
+```
+
+#Erik's Analysis: Question: What time of day sees the most power coming from the Water Heater and A/C unit? I plotted a graph of submetering 3, which was the values associated with power consumption from the water heater and a/c, and found that 8am was the time with the most power consumption. I think this question is interesting because the power consumption in a household could be made much more efficient if things like the a/c and water heater use less power when not needed, and they both use a lot of power to function. I came up with this question trying to think about an easy way to consume less power. Anyone who would use my analysis could better plan for when they really need the a/c and water heater, and they would benefit from using less power.
+
+##End Erik
+
+
+
