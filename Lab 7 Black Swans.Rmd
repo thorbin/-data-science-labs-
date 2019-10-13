@@ -103,15 +103,14 @@ power <- power %>% mutate(year=substr(Date,1,4), month=substr(Date, 6,7), day=su
 
 #Updating data set
 #Casting the appropriate  data type
+
 power <- power %>% mutate( day=as.integer(day),
                            month=as.integer(month),
-                           year=as.integer(year),
-                           hour=as.integer(hour),
-                           minute=as.integer(minute),
-                           second=as.integer(second))
-
+                           year=as.integer(year))
+                        
+                         
 library(lubridate)
-power <- power %>% mutate(datetime=make_datetime(year, month, day, hour, minute, second))
+power <- power %>% mutate(datetime=make_datetime(year, month, day))
 
 #crating a new datatype to form a new variable that all-inclusive with respect to data and time
 
