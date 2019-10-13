@@ -15,7 +15,7 @@ power<-read_csv2("/Users/thorbinatwell-donaghey/Desktop/household_power_consumpt
 #Jorge's import#
 ```
 ###Household Power Usage
-The dataset used in this analysis, which was imported from the UCI ML Repository (https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption), contains data on household appliances and power usage. Our team each individually cleaned the data and produced our own individual findings and analyses.
+The dataset used in this analysis, which was imported from the UCI ML Repository (https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption), contains data on household appliances and power usage. Our team replaced all missing data (either an empty space '' or a '?') with NA, in order to have uniform values and make the plotting easier. We then performed our own individual analyses and produced our individual findings.
 
 
 
