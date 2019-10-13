@@ -276,7 +276,6 @@ power_separated<-power_new %>% separate(Date,into=c("Day","Month","Year"),conver
 ```
 
 ```{r}
-#now for the fun# 
 #2006#
 power_separated_month_2006<-filter(power_separated,Year==2006) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
 #2006 plot# 
@@ -314,11 +313,18 @@ This bit of data is a little lower quality but trends namely the tertiary curve 
 RMS_2006_month<-power_separated_month_2006 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
 #2007# 
 RMS_2007_month<-power_separated_month_2007 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+ggplot(data=RMS_2007_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2007 RMS power by month")+ylab("RMS power (Watts)")
 #2008#
 RMS_2008_month<-power_separated_month_2008 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+ggplot(data=RMS_2008_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2008 RMS power by month")+ylab("RMS power (Watts)")
 #2009#
 RMS_2009_month<-power_separated_month_2009 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+ggplot(data=RMS_2009_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2009 RMS power by month")+ylab("RMS power (Watts)")
 ```
+From these plots of RMS power vs month, it is clear that there is discernable variation in RMS power spannng as little time as a month. This shows that meter data can be used in conjunction with a program that seeks to award electrically frugal neighborhoods. Note that 2006 was omitted because 2006 contained only a single months worth of data. 
+
+Comments and final analysis: 
+The first method of finding the time dependence by minute per month was to see if the meter data collected was decent enough to actually reasonably depict a tenant's possible day to day activities on average. While the first series of plots did not directly contribute to plausibility of the action posed in the question, it aided in showing that this data was meticulous enough to show a persons day to day behavior down to the accuracy of a minute! While this would have made an interesting question in of itself, there were too many possible rational explanations for the observed's electrical behavior meaning that any answer to that question would be purley speculative. Speculative or not, the plots that would be used to answer that question gave rise to a valuable possibility  of being able to detect RMS power on a month-month basis. This was because clear changes in hourly electrical activity could be observed to change through time. Combined with our desparate need for renewable or at least tightly rationed energy and the possibility of detailed descriptions of power consumptions on a relatively small scale time frame, the question of whether or not economic or other valuable incentives could be awarded to communities that practice responsible energy consumption. The answer to this question given by the last few bar plots is absolutely. The question remaining is whether or not power corporations would allow that to happen as it would reduce the depth of their pockets. TLDR: The people who would benifit from said programs would be literally everyone currently on and to exist on the planet including energy and coal executives. The people who would be harmed would be big energy and coal executives. 
 
 ##Begin Erik
 
