@@ -41,17 +41,15 @@ stringpathPC <-  "C:/Users/chele robelo/Documents/stats/lab 7/household_power_co
 # Parsing and formatting the file to an appropriate dataset/dataframe.
 # values with " " and "?" are NA
 
-power <- read_delim(file = stringpathPC, delim=';', na = c('', '?'),
-                    col_types = cols(
-                      Date = col_date(format="%d/%m/%Y"),
-                      Time = col_time(format="%H:%M:%S"),
-                      Global_active_power = col_double(),
-                      Global_reactive_power = col_double(),
-                      Voltage = col_double(),
-                      Global_intensity = col_double(),
-                      Sub_metering_1 = col_double(),
-                      Sub_metering_2 = col_double(),
-                      Sub_metering_3 = col_double()
+#power <- read_delim(file = stringpathPC, delim=';', na = c('', '?'),
+                    #col_types = cols(
+                     # Time = col_time(format="%H:%M:%S"),
+                      #Global_active_power = col_double(),
+                     # Voltage = col_double(),
+                      #Global_intensity = col_double(),
+                      #Sub_metering_1 = col_double(),
+                      #Sub_metering_2 = col_double(),
+                      #Sub_metering_3 = col_double()
                     ))
 #Renaming Variables for better reference 
 
@@ -283,14 +281,17 @@ power_separated<-power_new %>% separate(Date,into=c("Day","Month","Year"),conver
 #2006#
 power_separated_month_2006<-filter(power_separated,Year==2006) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
 #2006 plot# 
-ggplot(data=power_separated_month_2006,mapping=aes(x=Minutes,y=mean_GI))+geom_point()+geom_smooth()+facet_wrap(~ Month,nrow=NULL)
+ggplot(data=power_separated_month_2006,mapping=aes(x=Minutes,y=mean_GI))+geom_point()+geom_smooth()+facet_wrap(~ Month,nrow=NULL)+labs(title="2006 Global current intensity in Amps")+ylab("Global current intensity")
 ```
 
 ```{r}
 #2007#
 power_separated_month_2007<-filter(power_separated,Year==2007) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
 #plot#
-ggplot(data=power_separated_month_2007,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~ Month, nrow=NULL)
+ggplot(data=power_separated_month_2007,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~ Month, nrow=NULL)+labs(title="2007 Global current intensity in Amps")+ylab("Global current intensity")
+#rms calculation and bar plot of RMS per month#
+RMS_2007_month<-power_separated_month_2007 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+ggplot(data=RMS_2007_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2007 RMS power by month")+ylab("RMS power (Watts)")
 ```
 
 #### 2007 plot comments: 
@@ -299,7 +300,10 @@ Nearly all months show a common trend: Current drawn from the house tends to dec
 #2008#
 power_separated_month_2008<-filter(power_separated,Year==2008) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
 #plot#
-ggplot(data=power_separated_month_2008,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
+ggplot(data=power_separated_month_2008,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~Month, nrow=NULL)+labs(title="2008 Global current intensity in Amps")+ylab("Global current intensity")
+#rms calculation and bar plot of RMS per month#
+RMS_2008_month<-power_separated_month_2008 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+ggplot(data=RMS_2008_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2008 RMS power by month")+ylab("RMS power (Watts)")
 ```
 #### 2008 plot comments
 It should be pointed out that the tertiary curve follows the same patterns as the previous figure regarding time location and relative size. It is also interesting to observe that the current intensity is generally at a minumum for the earlier hours of the morning, which is remniscient of the plots from 2007. Another similarity between 2007 and 2008 is the fact that the primary peaks are all located at exactly 500 minutes or 8:20 am exempting August. This suggests that this person probably kept their Job considering August is an obvious sign of a month long abscence. The differences however are that August shows almost no current intensity suggesting that the inhabitant went somewhere for a month, another is that the secondary peak doesn't show such a strong dependence on month. In the previous data set, there was an apparent relationship between the magnitude of the secondary maximum and month, here we see that relationship drop off quickly through out the rest of the year. If this secondary curve is in fact a lunch time presence, maybe the inhabitant found a good lunch squad and got out of the house more often.  
@@ -307,28 +311,19 @@ It should be pointed out that the tertiary curve follows the same patterns as th
 #2009# 
 power_separated_month_2009<-filter(power_separated,Year==2009) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
 #plot#
-ggplot(data=power_separated_month_2009,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~Month, nrow=NULL)
+ggplot(data=power_separated_month_2009,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~Month, nrow=NULL)+labs(title="2009 Global current intensity in Amps")+ylab("Global current intensity")
+#rms calculation and bar plot of RMS per month#
+RMS_2009_month<-power_separated_month_2009 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+ggplot(data=RMS_2009_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2009 RMS power by month")+ylab("RMS power (Watts)")
 ```
 #### 2009 comments
 This bit of data is a little lower quality but trends namely the tertiary curve remaining larger through out the year are still observer and the position of the tertiary curve on a month to month basis.
 
-```{r}
-#finding RMS values of reactive power by month# 
-RMS_2006_month<-power_separated_month_2006 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
-#2007# 
-RMS_2007_month<-power_separated_month_2007 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
-ggplot(data=RMS_2007_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2007 RMS power by month")+ylab("RMS power (Watts)")
-#2008#
-RMS_2008_month<-power_separated_month_2008 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
-ggplot(data=RMS_2008_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2008 RMS power by month")+ylab("RMS power (Watts)")
-#2009#
-RMS_2009_month<-power_separated_month_2009 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
-ggplot(data=RMS_2009_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2009 RMS power by month")+ylab("RMS power (Watts)")
-```
-From these plots of RMS power vs month, it is clear that there is discernable variation in RMS power spannng as little time as a month. This shows that meter data can be used in conjunction with a program that seeks to award electrically frugal neighborhoods. Note that 2006 was omitted because 2006 contained only a single months worth of data. 
+
+From the plots of RMS power vs month, it is clear that there is discernable variation in RMS power spannng as little time as a month. This shows that meter data can be used in conjunction with a program that seeks to award electrically frugal neighborhoods. Note that 2006 was omitted because 2006 contained only a single months worth of data. 
 
 Comments and final analysis: 
-The first method of finding the time dependence by minute per month was to see if the meter data collected was decent enough to actually reasonably depict a tenant's possible day to day activities on average. While the first series of plots did not directly contribute to plausibility of the action posed in the question, it aided in showing that this data was meticulous enough to show a persons day to day behavior down to the accuracy of a minute! While this would have made an interesting question in of itself, there were too many possible rational explanations for the observed's electrical behavior meaning that any answer to that question would be purley speculative. Speculative or not, the plots that would be used to answer that question gave rise to a valuable possibility  of being able to detect RMS power on a month-month basis. This was because clear changes in hourly electrical activity could be observed to change through time. Combined with our desparate need for renewable or at least tightly rationed energy and the possibility of detailed descriptions of power consumptions on a relatively small scale time frame, the question of whether or not economic or other valuable incentives could be awarded to communities that practice responsible energy consumption. The answer to this question given by the last few bar plots is absolutely. The question remaining is whether or not power corporations would allow that to happen as it would reduce the depth of their pockets. TLDR: The people who would benifit from said programs would be literally everyone currently on and to exist on the planet including energy and coal executives. The people who would be harmed would be big energy and coal executives. 
+The first method of finding the time dependence by minute per month was to see if the meter data collected was decent enough to actually reasonably depict a tenant's possible day to day activities on average. While the first series of plots did not directly contribute to plausibility of the action posed in the question, it aided in showing that this data was meticulous enough to show a persons day to day behavior down to the accuracy of a minute! While this would have made an interesting question in of itself, there were too many possible rational explanations for the observed's electrical behavior meaning that any answer to that question would be purley speculative. Speculative or not, the plots that would be used to answer that question gave rise to a valuable possibility  of being able to detect RMS power on a month-month basis. This was because clear changes in hourly electrical activity could be observed to change through time. Combined with our desparate need for renewable or at least tightly rationed energy and the possibility of detailed descriptions of power consumptions on a relatively small scale time frame, the question of whether or not economic or other valuable incentives could be awarded to communities that practice responsible energy consumption was asked. The answer to this question given by the bar plots is absolutely. The question remaining is whether or not power corporations would allow that to happen as it would reduce the depth of their pockets. TLDR: The people who would benifit from said programs would be literally everyone currently on and to exist on the planet including energy and coal executives. The people who would be harmed would be big energy and coal executives.  
 
 ##Begin Erik
 
@@ -501,7 +496,7 @@ ggplot(first.data)+
 ggplot(last.data)+
   geom_point(mapping=aes(x= Voltage, y=minute))
 ```
-## Comparing the first year (2006) to the last year (2010), the amount of energy used has increased heavily. By looking at the
+ Comparing the first year (2006) to the last year (2010), the amount of energy used has increased heavily. By looking at the
 ## graph from 2006 and comparing it to the graph from 2010, we see a more filled in plot for 2010, proving that their energy ## consumption has gone way up. There are many theories as to why that might be. There could be an increase in residents in 
 ## the house. There could be an increase in the amount of appliances, particularly in the kitchen. I think the most logical 
 ## assumption is that residents in the house were staying home more in 2010 than in 2006, since the 2010 graph shows more 
