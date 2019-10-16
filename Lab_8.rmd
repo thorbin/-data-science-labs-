@@ -1,0 +1,14 @@
+---
+title: "Lab 7 Black Swans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "10/16/2019"
+output: html_document
+---
+
+```{r}
+
+library(tidyverse)
+library(readxl)
+Tang <- read_excel("East Africa lake data.xlsx")
+
+```
