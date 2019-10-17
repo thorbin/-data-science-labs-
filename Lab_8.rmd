@@ -9,7 +9,21 @@ output: html_document
 
 library(tidyverse)
 library(readxl)
-Tang <- read_excel("East Africa lake data.xlsx")
+library(dplyr)
+#Tang <- read_excel("East Africa lake data.xlsx")#
+#Thorbin's import#
+Tang<-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet=6)
+
+```
+```{r}
+#Thorbin's lake visualisation
+
+tang <- Tang %>% select("Year AD...1":TEX86) %>% mutate(year1=`Year AD...1`%/%1,year2=`Year AD...4`%/%1,year=Year%/%1) #%/%1 gives year as a whole number#
+tang_BSI<-select(tang,year1,`BSi (normalized)`)
+tang_CHARC<-select(tang,year2,`Charcoal (normalized)`)
+tang_TEX86<-select(tang,year,TEX86)
+tang_interim <- full_join(tang_BSI,tang_CHARC,tang_TEX86,by=c("year1"="year2"))
+tang_final <-full_join(tang_interim,tang_TEX86,by=c("year1"="year"))
 
 ```
 
