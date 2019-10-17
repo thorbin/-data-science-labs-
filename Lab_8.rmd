@@ -1,0 +1,25 @@
+---
+title: "Lab 7 Black Swans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "10/16/2019"
+output: html_document
+---
+
+```{r}
+
+library(tidyverse)
+library(readxl)
+Tang <- read_excel("East Africa lake data.xlsx")
+
+```
+
+What we need:
+
+* a general overall question you want to answer using data (you may end up changing your question next week)
+
+* an explanation of why that question is important or interesting and a deeper explanation of why those reasons are important or     interesting
+
+* a reference to at least one dataset you plan on using to answer this overall question
+who the “pretend” domain expert is (and why they think the overall question is important and interesting)
+
+* each person's individual African Lake visualization.
