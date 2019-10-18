@@ -22,6 +22,17 @@ This question is important because, in order to give her the greatest chance of 
 What are the major causal factors driving violent crime?
 The mayor of Denver Michael Hancock is determined to end violent crime once and for all in the city of Denver. To that end, he has hired our team to perform statistical analysis on crime data throughout the country in order to better understand what drives violent crime. This question is important because every data scientist would like to live in a world of peace and safety. At least one dataset we will be using is: https://catalog.data.gov/dataset/violent-crime-property-crime-by-county-1975-to-present-f0443
 
+
+
+#JORGE INDIVIDUAL QUESTIONS
+
+With federal election approaching, recognition of voting behaviors and the perceptions can shed light on the motivations as to why individuals vote. To better understand this notion I want to ask: How voting heuristics affect the individual's decision or inclination to vote? For my back up question ( just incase obtaining reliable valid data for my previous question is out of reach) I would like to ask how are personality traits associated with voting behaviors or perceptions?
+
+
+“Heuristics are simple strategies to form judgments and make decisions by focusing on the most relevant aspects of a complex problem.” That being said it would be interesting to see what types of heuristics are available and potentially see if it affects people's decision to vote. Additionally it be interesting to see how precise are these heuristics in capturing the most relevant aspects of the person being voted for or its affiliated party. 
+I think that by analyzing temperaments one could find an association with political party affiliation and thus a proclivity to vote.   
+
+
 ```{r}
 
 library(tidyverse)
@@ -131,3 +142,22 @@ ggplot(data=Victoria, mapping=aes(x=SWDpercentage, y=Year))+
   ggtitle("Percentage of SWD's per Year")
 ```
 ##End Mandy##
+
+#Jorges' visual rep VOI
+
+```{r}
+library(readxl)
+East_Africa_lake_data <- read_excel("East Africa lake data.xlsx", 
+                                      +     sheet = "VOI rainfall station data")
+#taking out unnecessary column .making a new varible : Months 
+East_Africa_lake_data_test <-  East_Africa_lake_data[, -c(14, 15)] %>% 
+  gather(`Jan`, `Feb`,`Mar`,`Apr`,`May`,`Jun`,`Aug`,`Sep`,`Oct`,`Nov`,`Dec`,`Jul`, key = "Month", value = "Rainfall")
+#done 
+#observing Jan rainfall 
+janrain<-filter(tidydata_East_Africa, Month == "Jan")
+ggplot(janrain, aes(x=Rainfall )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white")+
+  geom_density(alpha=.2, fill="#FF6666") + ggtitle("Histogram and Density plot for rainfall in January ranging from 1904-1996")
+```
+
+##END JORGE##
