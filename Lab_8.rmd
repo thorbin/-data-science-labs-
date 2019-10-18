@@ -143,9 +143,12 @@ ggplot(data=Victoria, mapping=aes(x=SWDpercentage, y=Year))+
 ```
 ##End Mandy##
 
-#Jorges' visual rep VOI
 
-```{r}
+#Jorges' visual rep VOI
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T,
+                      results = "hide")
+library(tidyverse)
 library(readxl)
 East_Africa_lake_data <- read_excel("stats/class_work_lake data/East Africa lake data.xlsx", 
                                     sheet = "VOI rainfall station data")
@@ -154,7 +157,11 @@ East_Africa_lake_data_test <-  East_Africa_lake_data[, -c(14, 15)] %>%
   gather(`Jan`, `Feb`,`Mar`,`Apr`,`May`,`Jun`,`Aug`,`Sep`,`Oct`,`Nov`,`Dec`,`Jul`, key = "Month", value = "Rainfall")
 #done 
 #observing Jan rainfall 
-janrain<-filter(tidydata_East_Africa, Month == "Jan")
+janrain<-filter(East_Africa_lake_data_test, Month == "Jan")
+
+```
+
+```{r}
 ggplot(janrain, aes(x=Rainfall )) + 
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   geom_density(alpha=.2, fill="#FF6666") + ggtitle("Histogram and Density plot for rainfall in January ranging from 1904-1996")
