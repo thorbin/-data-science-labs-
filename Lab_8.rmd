@@ -16,7 +16,7 @@ who the “pretend” domain expert is (and why they think the overall question 
 * each person's individual African Lake visualization.
 ### Team Question:
 We have been hired by the Oprah Winfrey 2024 presidential campaign manager to analyze the question of why voter turnout is so low.
-This question is important because, in order to give her the greatest chance of winning the presidential election, Oprah must understand what drives all demographics to the polls and what we can do to maximize her chances of success. Further, a better understanding of voting patterns may help us understand how humans function on a deeper, psychological level, which in turn can help give us better predictions about our political, economic and social future. At least one dataset we will be using is from census.gov: https://www.census.gov/topics/public-sector/voting.html
+This question is important because, in order to give her the greatest chance of winning, Oprah must understand what drives all demographics to the polls and what we can do to maximize her chances of success. Further, a better understanding of voting patterns may help us understand how humans function on a deeper, psychological level, which in turn can help give us better predictions about our political, economic and social future. At least one dataset we will be using is from census.gov: https://www.census.gov/topics/public-sector/voting.html
 
 ### Backup Question: 
 What are the major causal factors driving violent crime?
