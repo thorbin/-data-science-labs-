@@ -33,7 +33,7 @@ Clearly concentration cannot be negative, the negative values indicate negative 
 
 ###End Thorbin###
 
-###Ryan's Naivisha visualization
+##Ryan's Naivisha visualization
 
 I chose to plot the depth of lake Naivasha over time:
 
