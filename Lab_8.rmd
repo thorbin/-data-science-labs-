@@ -162,12 +162,12 @@ ggplot(janrain, aes(x=Rainfall )) +
 
 ##END JORGE##
 
-Start Erik:
+#Start Erik:
 Eriks Questions:
 Question: Over time, what has the demographic of African-American voters tended to vote for?
 Does this demographic change over the demographics of men and women?
 
-Eriks code:
+#Eriks code:
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(readxl)
@@ -199,11 +199,11 @@ challadata <- mutate(challadata, avg = mean(VarveThickness))
 summarize(challadata, average = mean(VarveThickness))
 
 ```
-Eriks Graph
+#Eriks Graph
 ```{r}
 #I graphed centuries on the x axis and average rainfall per century on the y, and made it so that I had both a point and smooth line graph.
 ggplot(data = challadata, mapping=aes(x=Century, y=avg))+geom_point()+geom_smooth()+ggtitle('Varve Thickness over time at Lake Challa')
 
 
 ```
-End Erik
+#End Erik
