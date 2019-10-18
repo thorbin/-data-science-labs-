@@ -147,8 +147,8 @@ ggplot(data=Victoria, mapping=aes(x=SWDpercentage, y=Year))+
 
 ```{r}
 library(readxl)
-East_Africa_lake_data <- read_excel("East Africa lake data.xlsx", 
-                                      +     sheet = "VOI rainfall station data")
+East_Africa_lake_data <- read_excel("stats/class_work_lake data/East Africa lake data.xlsx", 
+                                    sheet = "VOI rainfall station data")
 #taking out unnecessary column .making a new varible : Months 
 East_Africa_lake_data_test <-  East_Africa_lake_data[, -c(14, 15)] %>% 
   gather(`Jan`, `Feb`,`Mar`,`Apr`,`May`,`Jun`,`Aug`,`Sep`,`Oct`,`Nov`,`Dec`,`Jul`, key = "Month", value = "Rainfall")
