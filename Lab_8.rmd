@@ -32,6 +32,37 @@ tang_final <-full_join(tang_interim,tang_TEX86,by=c("year1"="year"))
 Clearly concentration cannot be negative, the negative values indicate negative deviation from some kind of unity. If BSi concentration is a proxy of rain fall then higher positive deviations from unity indicate heavier periods of rain fall. 
 
 ###End Thorbin###
+
+###Ryan's Naivisha visualization
+
+I chose to plot the depth of lake Naivasha over time:
+
+'''{r}
+Naivasha <- read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\East Africa lake data.xlsx", sheet=5)
+
+Year = col_date(format="%Y")
+
+Naivasha$Year <- parse_date(as.character(Naivasha$Year), format = "%Y")
+#Doesn't work because of the decimals in the years.
+
+Naivasha <- rename(Naivasha,LakeDepth=`Lake Depth`)
+ggplot(data = Naivasha, mapping =aes(x=Year, y = LakeDepth))+geom_col()+geom_line()+xlab("Time")+ylab("Depth")
+```
+
+```{r}
+library(tidyverse)
+library(readxl)
+Naivasha <- read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\East Africa lake data.xlsx", sheet=5)
+
+Year = col_date(format="%Y")
+
+Naivasha$Year <- parse_date(as.character(Naivasha$Year), format = "%Y")
+#Doesn't work because of the decimals in the years.
+
+Naivasha <- rename(Naivasha,LakeDepth='Lake Depth')
+ggplot(data = Naivasha, mapping =aes(x='Year', y = 'Lake Depth'))+geom_point()+xlab("Time")+ylab("Depth")
+```
+
 What we need:
 
 * a general overall question you want to answer using data (you may end up changing your question next week)
