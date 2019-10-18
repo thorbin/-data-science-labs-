@@ -79,3 +79,55 @@ Naivasha <- rename(Naivasha,LakeDepth='Lake Depth')
 ggplot(data = Naivasha, mapping =aes(x='Year', y = 'Lake Depth'))+geom_point()+xlab("Time")+ylab("Depth")
 ```
 
+
+Mandy's Lake Data: Victoria Lake 
+```{r}
+library(tidyverse)
+library(dplyr)
+library(readxl)
+```
+Importing data Victoria sheet of East Africa Lake Data: 
+```{r}
+East_Africa_lake_data <- read_excel("~/Downloads/East Africa lake data.xlsx", 
+    sheet = "Victoria")
+View(East_Africa_lake_data)
+```
+Assigning data:
+```{r}
+Victoria <- East_Africa_lake_data
+```
+Rename age to year:
+```{r}
+Victoria <- rename(Victoria, Year = 'Age')
+```
+Filter out NA's:
+```{r}
+Victoria <- filter(Victoria, !is.na(Year))
+```
+Round all years to a whole number: 
+```{r}
+year.victoria <- select(Victoria, Year)
+year.victoria <- round(year.victoria, 0)
+SWD.victoria <- select(Victoria, 'SWD(%)')
+Victoria <- cbind(year.victoria, SWD.victoria)
+```
+Arrange years in descending order:
+```{r}
+Victoria <- arrange(Victoria, desc(Year))
+```
+Change name of SWD(%):
+```{r}
+Victoria <- rename(Victoria, SWDpercentage = 'SWD(%)')
+```
+Final tidyed data: 
+```{r}
+View(Victoria)
+```
+Plot: 
+```{r}
+ggplot(data=Victoria, mapping=aes(x=SWDpercentage, y=Year))+
+  geom_point()+
+  geom_smooth()+
+  ggtitle("Percentage of SWD's per Year")
+```
+##End Mandy##
