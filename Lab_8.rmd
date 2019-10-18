@@ -1,9 +1,26 @@
 ---
-title: "Lab 7 Black Swans"
+title: "Lab 8 Black Swans"
 author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
 date: "10/16/2019"
 output: html_document
 ---
+What we need:
+
+* a general overall question you want to answer using data (you may end up changing your question next week)
+
+* an explanation of why that question is important or interesting and a deeper explanation of why those reasons are important or     interesting
+
+* a reference to at least one dataset you plan on using to answer this overall question
+who the “pretend” domain expert is (and why they think the overall question is important and interesting)
+
+* each person's individual African Lake visualization.
+### Team Question:
+We have been hired by the Oprah Winfrey 2024 presidential campaign manager to analyze the question of why voter turnout is so low.
+This question is important because, in order to give her the greatest chance of winning the presidential election, Oprah must understand what drives all demographics to the polls and what we can do to maximize her chances of success. Further, a better understanding of voting patterns may help us understand how humans function on a deeper, psychological level, which in turn can help give us better predictions about our political, economic and social future. At least one dataset we will be using is from census.gov: https://www.census.gov/topics/public-sector/voting.html
+
+### Backup Question: 
+What are the major causal factors driving violent crime?
+The mayor of Denver Michael Hancock is determined to end violent crime once and for all in the city of Denver. To that end, he has hired our team to perform statistical analysis on crime data throughout the country in order to better understand what drives violent crime. This question is important because every data scientist would like to live in a world of peace and safety. At least one dataset we will be using is: https://catalog.data.gov/dataset/violent-crime-property-crime-by-county-1975-to-present-f0443
 
 ```{r}
 
@@ -62,13 +79,3 @@ Naivasha <- rename(Naivasha,LakeDepth='Lake Depth')
 ggplot(data = Naivasha, mapping =aes(x='Year', y = 'Lake Depth'))+geom_point()+xlab("Time")+ylab("Depth")
 ```
 
-What we need:
-
-* a general overall question you want to answer using data (you may end up changing your question next week)
-
-* an explanation of why that question is important or interesting and a deeper explanation of why those reasons are important or     interesting
-
-* a reference to at least one dataset you plan on using to answer this overall question
-who the “pretend” domain expert is (and why they think the overall question is important and interesting)
-
-* each person's individual African Lake visualization.
