@@ -43,7 +43,6 @@ Naivasha <- read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\
 Year = col_date(format="%Y")
 
 Naivasha$Year <- parse_date(as.character(Naivasha$Year), format = "%Y")
-#Doesn't work because of the decimals in the years.
 
 Naivasha <- rename(Naivasha,LakeDepth=`Lake Depth`)
 ggplot(data = Naivasha, mapping =aes(x=Year, y = LakeDepth))+geom_col()+geom_line()+xlab("Time")+ylab("Depth")
