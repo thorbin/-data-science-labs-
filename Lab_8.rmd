@@ -161,3 +161,49 @@ ggplot(janrain, aes(x=Rainfall )) +
 ```
 
 ##END JORGE##
+
+Start Erik:
+Eriks Questions:
+Question: Over time, what has the demographic of African-American voters tended to vote for?
+Does this demographic change over the demographics of men and women?
+
+Eriks code:
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(dplyr)
+
+#This is where I set up the data, I imported the file, renamed age ad and varve thickness as these were the two variables I wanted to use, and I filtered out nas firt. I then realized with the 3000+ data points, I only wanted to use about 30. I created a graph using mutated variables to take the average of the varve thickness for each century over time.
+challa <- read_excel("C:/Users/ErikSvenneby/Desktop/challa.xlsx")
+
+challa <- rename(challa, Year = 'Age AD')
+
+challa <- filter(challa, !is.na(Year))
+
+challa <- arrange(challa, Year)
+
+challa <- rename(challa, VarveThickness = 'varve thickness')
+
+challa <-filter(challa, !is.na(VarveThickness))
+
+challa <- filter(challa, (Year>-1000 & Year<2000))
+
+challa <- mutate(challa, Century = ceiling(Year/100))
+
+challa <- challa %>% mutate(VarveThickness=as.double(VarveThickness))
+
+challadata <- group_by(challa, Century)
+
+challadata <- mutate(challadata, avg = mean(VarveThickness))
+
+summarize(challadata, average = mean(VarveThickness))
+
+```
+Eriks Graph
+```{r}
+#I graphed centuries on the x axis and average rainfall per century on the y, and made it so that I had both a point and smooth line graph.
+ggplot(data = challadata, mapping=aes(x=Century, y=avg))+geom_point()+geom_smooth()+ggtitle('Varve Thickness over time at Lake Challa')
+
+
+```
+End Erik
