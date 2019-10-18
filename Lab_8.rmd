@@ -25,8 +25,13 @@ tang_TEX86<-select(tang,year,TEX86)
 tang_interim <- full_join(tang_BSI,tang_CHARC,tang_TEX86,by=c("year1"="year2"))
 tang_final <-full_join(tang_interim,tang_TEX86,by=c("year1"="year"))
 
-```
+#Thorbin's plot# 
+ ggplot(data=tang,mapping=aes(x=year,y=`BSi (normalized)`))+geom_point()+xlab("year")+ylab("Biogenic silica")+ggtitle("deviation of biogenic silica soil concentration by time")
 
+```
+Clearly concentration cannot be negative, the negative values indicate negative deviation from some kind of unity. If BSi concentration is a proxy of rain fall then higher positive deviations from unity indicate heavier periods of rain fall. 
+
+###End Thorbin###
 What we need:
 
 * a general overall question you want to answer using data (you may end up changing your question next week)
