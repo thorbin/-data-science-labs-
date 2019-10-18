@@ -45,7 +45,7 @@ Year = col_date(format="%Y")
 Naivasha$Year <- parse_date(as.character(Naivasha$Year), format = "%Y")
 
 Naivasha <- rename(Naivasha,LakeDepth=`Lake Depth`)
-ggplot(data = Naivasha, mapping =aes(x=Year, y = LakeDepth))+geom_col()+geom_line()+xlab("Time")+ylab("Depth")
+ggplot(data = Naivasha)+geom_col(mapping =aes(x=Year, y = LakeDepth), color = "blue")+geom_line(mapping =aes(x=Year, y = LakeDepth), color = "green")+xlab("Time")+ylab("Depth")
 ```
 
 ```{r}
