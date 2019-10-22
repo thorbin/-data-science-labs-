@@ -1,0 +1,13 @@
+---
+title: "lab 9: How can we explain voter turnouts using data?"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "10/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+#website Erik found that has solid data: Electionlab.mit.edu/data
+```
