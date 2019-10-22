@@ -1,5 +1,5 @@
 ---
-title: "lab 9: How can we explain voter turnouts using data?"
+title: "lab 9: How can we explain voter turnouts by age/race/...etc using data?"
 author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
 date: "10/17/2019"
 output: html_document
@@ -11,3 +11,5 @@ library(tidyr)
 library(dplyr)
 #website Erik found that has solid data: Electionlab.mit.edu/data
 ```
+
+####Thorbin's question: How does wage and annual income correspond to voter turnout? 
