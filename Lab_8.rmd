@@ -40,7 +40,17 @@ library(readxl)
 library(dplyr)
 #Tang <- read_excel("East Africa lake data.xlsx")#
 #Thorbin's import#
-#Tang<-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet=6)#
+Tang<-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet=6)
+#Ryans#
+Naivasha <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx", sheet=5)
+#Mandys#
+Victoria <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet = 7)
+#Jorge's
+East_Africa_lake_data <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet = 8)
+#Erik's
+challa <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet=1)
+
+
 
 ```
 ```{r}
@@ -65,8 +75,8 @@ Clearly concentration cannot be negative, the negative values indicate negative 
 
 I chose to plot the depth of lake Naivasha over time:
 
-'''{r}
-Naivasha <- read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\East Africa lake data.xlsx", sheet=5)
+```{r}
+#Naivasha <- read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\East Africa lake data.xlsx", sheet=5)
 
 Year = col_date(format="%Y")
 
@@ -79,7 +89,7 @@ ggplot(data = Naivasha)+geom_col(mapping =aes(x=Year, y = LakeDepth), color = "b
 ```{r}
 library(tidyverse)
 library(readxl)
-Naivasha <- read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\East Africa lake data.xlsx", sheet=5)
+Naivasha <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx", sheet=5)
 
 Year = col_date(format="%Y")
 
@@ -98,15 +108,9 @@ library(dplyr)
 library(readxl)
 ```
 Importing data Victoria sheet of East Africa Lake Data: 
-```{r}
-East_Africa_lake_data <- read_excel("~/Downloads/East Africa lake data.xlsx", 
-    sheet = "Victoria")
+#East_Africa_lake_data <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet = 7)#
 View(East_Africa_lake_data)
-```
 Assigning data:
-```{r}
-Victoria <- East_Africa_lake_data
-```
 Rename age to year:
 ```{r}
 Victoria <- rename(Victoria, Year = 'Age')
@@ -132,7 +136,7 @@ Victoria <- rename(Victoria, SWDpercentage = 'SWD(%)')
 ```
 Final tidyed data: 
 ```{r}
-View(Victoria)
+#View(Victoria)
 ```
 Plot: 
 ```{r}
@@ -146,15 +150,13 @@ ggplot(data=Victoria, mapping=aes(x=SWDpercentage, y=Year))+
 #Jorges' visual rep VOI
 
 ```{r}
-library(readxl)
-East_Africa_lake_data <- read_excel("East Africa lake data.xlsx", 
-                                      +     sheet = "VOI rainfall station data")
-#taking out unnecessary column .making a new varible : Months 
-East_Africa_lake_data_test <-  East_Africa_lake_data[, -c(14, 15)] %>% 
-  gather(`Jan`, `Feb`,`Mar`,`Apr`,`May`,`Jun`,`Aug`,`Sep`,`Oct`,`Nov`,`Dec`,`Jul`, key = "Month", value = "Rainfall")
+#East_Africa_lake_data <- read_excel("East Africa lake data.xlsx",sheet = 8)
+#taking out unnecessary column .making a new varible : Months
+East_Africa_lake_data_test <-East_Africa_lake_data %>% select(Jan:Dec) %>% 
+  gather(`Jan`,`Feb`,`Mar`,`Apr`,`May`,`Jun`,`Aug`,`Sep`,`Oct`,`Nov`,`Dec`,`Jul`, key = "Month", value = "Rainfall")
 #done 
 #observing Jan rainfall 
-janrain<-filter(tidydata_East_Africa, Month == "Jan")
+janrain<-filter(East_Africa_lake_data_test, Month == "Jan")
 ggplot(janrain, aes(x=Rainfall )) + 
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   geom_density(alpha=.2, fill="#FF6666") + ggtitle("Histogram and Density plot for rainfall in January ranging from 1904-1996")
@@ -174,7 +176,7 @@ library(readxl)
 library(dplyr)
 
 #This is where I set up the data, I imported the file, renamed age ad and varve thickness as these were the two variables I wanted to use, and I filtered out nas firt. I then realized with the 3000+ data points, I only wanted to use about 30. I created a graph using mutated variables to take the average of the varve thickness for each century over time.
-challa <- read_excel("C:/Users/ErikSvenneby/Desktop/challa.xlsx")
+#challa <- read_excel("C:/Users/ErikSvenneby/Desktop/challa.xlsx")
 
 challa <- rename(challa, Year = 'Age AD')
 
