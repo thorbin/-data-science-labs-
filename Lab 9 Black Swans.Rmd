@@ -9,7 +9,49 @@ output: html_document
 library(tidyverse)
 library(tidyr)
 library(dplyr)
+library(readxl)
+library(ggplot2)
 #website Erik found that has solid data: Electionlab.mit.edu/data
 ```
 
 ####Thorbin's question: How does wage and annual income correspond to voter turnout? 
+
+
+
+#Jorges analysis. 
+
+#reading file in
+##url: file location : https://docs.google.com/spreadsheets/d/1or-N33CpOZYQ1UfZo0h8yGPSyz0Db-xjmZOXg3VJi-Q/edit
+```{r}
+#General_Election <- read_excel("stats/lab_9 data sets/1980-2014 November General Election.xlsx", 
+#                                 +     skip = 1)
+```
+#data modification 
+```{r}
+#General_Election <- General_Election %>% rename(States = ...4)
+#General_Election <- General_Election %>% rename(Presi_vote = `Highest Office`)
+#names(General_Election)
+
+General_Election_test <- General_Election %>%
+  mutate(Presi_vote = Presi_vote/1000000)
+
+test<-General_Election_test%>% filter(States=="United States")%>%
+  ggplot(mapping = aes(x = Year, y = Presi_vote)) +
+  geom_point(method = lm)+
+  scale_x_continuous(breaks=seq(1980,2014,4)) +
+  scale_y_continuous(breaks=seq(10,180,10))+scale_y_continuous("US Presidential vote by Million")+
+  geom_smooth(method=lm, se=FALSE)
+
+```
+#plot #1
+```{r}
+plot(test)
+```
+
+#plot #2
+```{r}
+(ggplot(General_Election_test, aes(x = Year, y = `VAP Highest Office`/100)) + geom_bar(stat = "identity"))+
+  scale_y_continuous(("Voting Age Population"),labels=scales::percent)+
+  scale_x_continuous(breaks=seq(1980,2014,4))
+```
+#end jorges.
