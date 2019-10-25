@@ -9,15 +9,11 @@ output: html_document
 library(tidyverse)
 library(tidyr)
 library(dplyr)
-<<<<<<< HEAD
 library(readr)
-library(devtools)
-=======
 library(readxl)
 library(ggplot2)
-install.packages('gsheet') #its to read googlesheets needs to be installed 
 library(gsheet)
->>>>>>> b5833e2d8db84d3112a7e0e8aeaf7c37d4656b90
+
 #website Erik found that has solid data: Electionlab.mit.edu/data
 ```
 ##Ryan's Question: How large of a percentage are young voters in swing states?
@@ -106,21 +102,80 @@ While it remains true that young voters make up the smallest percentage in terms
 
 
 #end Ryan
+
 ####Thorbin's question: How does wage and annual income correspond to voter turnout? 
+```{r}
+#thorbin's import: 
+census_2011_data<-read_csv("~/Desktop/lab 9 data/Thorbin/census_2011_data")
+```
+For this lab, I took data from the 2012 census and Isolated variables including hours worked per day, university status and age. Using this and general census data regarding the 2012 election, I should be able to arrive at some possible variables to explain lack of younger voters. 
+
+Hypothesis: 
+I believe that younger people who are not in college, work a large amount of hours per week at lower salary leading to prolonged financial stress which significantly hampers motivation to vote. What I will use to confirm/deny this will be to compare yearly earnings and age which will demonstrate each age group's economic stress. 
+
+A similar method will be employed on the college student sector. 
+ 
+Since voting age is 18 in the US, and most students have graduated highschool by this age so by filtering age at and above 18 years, most non voting high school students will not be represented and most voting/non voting college students will be mostly represented. 
 
 
+```{r}
+voting_age_college<-census_2011_data %>% filter(AGEP>=18,SCHL>=18,!is.na(WKW))
+voting_age_LF<-census_2011_data %>% filter(AGEP>=18,SCHL==16|17,!is.na(WKW))
+ggplot(data=voting_age_college,mapping=aes(x=AGEP,y=WAGP))+geom_point()
+```
 
-#Jorges analysis. 
+From this plot it appears as though there is no correlation between wage/salary and age. This leads to the conclusion that salary age are not correlated. Just kidding, but what this data suggests is that salary does not play a role in voter turnout. 
+
+Since I messed up and deleted the original data sets, what I would do differently if I had more time would be to first off select better variables namely hourly wage. I dont know how I missed this, but adding this into the dataframe would give a better metric to judge financial stress. Another thing I wanted to do was to bin an age range and examine the average income by age range, this would not only avoid the mess of the geom_point plot, but it would also be intuitave and easy to draw a conclusion off of.
+Data to keep:
+AGEP (age years) 
+ST
+CIT (citizen status , 5 is non citizen discard)
+COW -class of worker
+(b .Not in universe (less than 16 years old/NILF who last worked more .than 5 years ago or never worked)
+1 .Employee of a private for-profit company or .business, or of an individual, for wages, .salary, or commissions
+2 .Employee of a private not-for-profit, .tax-exempt, or charitable organization
+           3 .Local government employee (city, county, etc.)
+           4 .State government employee
+           5 .Federal government employee
+           6 .Self-employed in own not incorporated
+             .business, professional practice, or farm
+           7 .Self-employed in own incorporated
+.business, professional practice or farm
+8 .Working without pay in family business or farm
+9 .Unemployed and last worked 5 years ago or earlier or never
+.worked)
+HINS1/2 Insurance 1=yes
+PAP (welfare dollar amt)
+SCH school enrollment
+(2 .Yes, public school or public college
+3 .Yes, private school, private college, or home school)-use in conj with SCHG neglect all values other than 15/16
+SCHL
+SEX 1=male
+WKW weeks worked in past 12 months: 
+b .N/A (less than 16 years old/did not work
+           b .during the past 12 months)
+           1 .50 to 52 weeks
+           2 .48 to 49 weeks
+           3 .40 to 47 weeks
+           4 .27 to 39 weeks
+           5 .14 to 26 weeks
+           6 .13 weeks or less
+PERNP/PINCP total persons earnings
+WAGP (salary dollar ammount)
+
+###End Thorbin
+
+##Jorges analysis. 
 
 ```{r}
 library(tidyverse)
 library(readxl)
-install.packages('gsheet')
 library(gsheet)
 datagog<-gsheet2tbl('https://docs.google.com/spreadsheets/d/1or-N33CpOZYQ1UfZo0h8yGPSyz0Db-xjmZOXg3VJi-Q/edit#gid=1670431880')
 ```
 
-#tidding 
+###tidding 
 ```{r}
 data2<-datagog[-c(1), ]
 data2<-data2 %>% rename(Years = X1)
@@ -136,7 +191,7 @@ data3$Voting_age_pop <- as.numeric(as.character(gsub(",","",data3$Voting_age_pop
 
 ```
 
-#manipulating data and variables
+###manipulating data and variables
 ```{r}
 data4 <- data3 %>%
   mutate(Presiden_vote = Presiden_vote/1000000)
@@ -150,16 +205,18 @@ data5<-data4%>% filter(State=="United States")%>%
 
 ```
 
-#Ploting 
+###Ploting 
 ```{r}
 plot(data5)
 ```
-#when it comes to general elections, it seems that the trend indicates that as the years go by there is an increase in voter turn out. possible explanations and contributing factors to this phenomenon may be related to an increase in political heuristic via to use of the social networks. I also suspect that political polarization might play a role. 
 
-#funtions used from tidyverse: ggplot, filter, geom_smooth, mutate, rename. funtions used outside tidyverse:as.numeric, as.character, gsub, library(gsheet)
-#end jorges.
+when it comes to general elections, it seems that the trend indicates that as the years go by there is an increase in voter turn out. possible explanations and contributing factors to this phenomenon may be related to an increase in political heuristic via to use of the social networks. I also suspect that political polarization might play a role. 
 
-## Start Mandy ##
+funtions used from tidyverse: ggplot, filter, geom_smooth, mutate, rename. funtions used outside tidyverse:as.numeric, as.character, gsub, library(gsheet)
+
+###end jorges.
+
+## Start Mandy
 Mandy's Question: There is a massive gap between voter turnout of younger Americans versus the voter turnout of older Americans, as most people already know. What is the main factor driving the huge discrepancy and how can candidates bridge that gap?
 ```{r}
 library(tidyverse)
@@ -224,88 +281,4 @@ Mandy's Analysis: Looking at the 2016 election data and surveys from The United 
 
 ###concluding remarks: 
 
-  The goal of this report was to analyze numerous facets of voter turn out data for US presidential elections. As we all know the systems in place to allow US citizens to vote have their flaws, and because of these flaws, voter turn out is non-ideal. Ryan figured that since major elections are dependent on the dominant political faction of the swing states, using the fact that younger crowds dont tend to vote as much for whatever reason, Ryan's hypothesis was that older citizens are the audience that most candidates pander to. Ryan's analysis showed that in general, the proportion of votes that a particular candidate recieved was increasingly dependent with increasing age groups, which also held true at the swing state level. Ryan argued that using this data in future elections, better approches to appeal to younger groups could prove to be a major boost for a candidates campaign. Continuing in this reasoning, Mandy sought to find answers for as to why this trend that Ryan discovered was so. Mandy found detailed voter census data that collected reasoning for not voting. Using this, Mandy found that most young people did not vote simply because they did not have enough time in their day, which makes sense considering the exhaustive plight of the 'millenial' where as the second most popular response was simply due to lack of interest, which again makes sense considering the Nihilistic undertones of millenial culture. While things seem bleak for the spirit of younger voting turnouts, Jorge noticed that in general as time goes on, more and more people vote which is at least comforting knowing that our democratic republic isnt just a 'lip synced' illusion. Thorbin focused in on possible mechanisms of Mandy's result also using census data but from 2012 (for reasons unknown). Thorbin hypothesized that financial comfort and hours worked could be a major player into the impetus of young voting. Unfortunately, the large data file (8gb) downloaded was not selected right and the wrong columns were selected. With the little data available, Thorbin attempted to show a relationship between age and wage/salary, however since the data was poorly selected a not so clear plot was derived. Lets just pretend this didnt happen. The original goal of Thorbin's analysis was to use what Ryan,Mandy had shown in terms of voter turn out and provide a possible explanation to this using monetary data. Admittably it would have been much better to use 2016 census data. Unfortunately Thorbin was not able to provide a well founded explanation to the trends observed by other lab members. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<<<<<<< HEAD
-####Thorbin's question: How does wage and annual income correspond to voter turnout? 
-```{r}
-#thorbin's import: 
-census_2011_data<-read_csv("~/Desktop/lab 9 data/Thorbin/census_2011_data")
-```
-For this lab, I took data from the 2012 census and Isolated variables including hours worked per day, university status and age. Using this and general census data regarding the 2012 election, I should be able to arrive at some possible variables to explain lack of younger voters. 
-
-Hypothesis: 
-I believe that younger people who are not in college, work a large amount of hours per week at lower salary leading to prolonged financial stress which significantly hampers motivation to vote. What I will use to confirm/deny this will be to compare yearly earnings and age which will demonstrate each age group's economic stress. 
-
-A similar method will be employed on the college student sector. 
- 
-Since voting age is 18 in the US, and most students have graduated highschool by this age so by filtering age at and above 18 years, most non voting high school students will not be represented and most voting/non voting college students will be mostly represented. 
-
-
-```{r}
-voting_age_college<-census_2011_data %>% filter(AGEP>=18,SCHL>=18,!is.na(WKW))
-voting_age_LF<-census_2011_data %>% filter(AGEP>=18,SCHL==16|17,!is.na(WKW))
-ggplot(data=voting_age_college,mapping=aes(x=AGEP,y=WAGP))+geom_point()
-```
-
-From this plot it appears as though there is no correlation between wage/salary and age. This leads to the conclusion that salary age are not correlated. Just kidding, but what this data suggests is that salary does not play a role in voter turnout. 
-
-Since I messed up and deleted the original data sets, what I would do differently if I had more time would be to first off select better variables namely hourly wage. I dont know how I missed this, but adding this into the dataframe would give a better metric to judge financial stress. Another thing I wanted to do was to bin an age range and examine the average income by age range, this would not only avoid the mess of the geom_point plot, but it would also be intuitave and easy to draw a conclusion off of.
-Data to keep:
-AGEP (age years) 
-ST
-CIT (citizen status , 5 is non citizen discard)
-COW -class of worker
-(b .Not in universe (less than 16 years old/NILF who last worked more .than 5 years ago or never worked)
-1 .Employee of a private for-profit company or .business, or of an individual, for wages, .salary, or commissions
-2 .Employee of a private not-for-profit, .tax-exempt, or charitable organization
-           3 .Local government employee (city, county, etc.)
-           4 .State government employee
-           5 .Federal government employee
-           6 .Self-employed in own not incorporated
-             .business, professional practice, or farm
-           7 .Self-employed in own incorporated
-.business, professional practice or farm
-8 .Working without pay in family business or farm
-9 .Unemployed and last worked 5 years ago or earlier or never
-.worked)
-HINS1/2 Insurance 1=yes
-PAP (welfare dollar amt)
-SCH school enrollment
-(2 .Yes, public school or public college
-3 .Yes, private school, private college, or home school)-use in conj with SCHG neglect all values other than 15/16
-SCHL
-SEX 1=male
-WKW weeks worked in past 12 months: 
-b .N/A (less than 16 years old/did not work
-           b .during the past 12 months)
-           1 .50 to 52 weeks
-           2 .48 to 49 weeks
-           3 .40 to 47 weeks
-           4 .27 to 39 weeks
-           5 .14 to 26 weeks
-           6 .13 weeks or less
-PERNP/PINCP total persons earnings
-WAGP (salary dollar ammount)
-
-=======
->>>>>>> b5833e2d8db84d3112a7e0e8aeaf7c37d4656b90
+  The goal of this report was to analyze numerous facets of voter turn out data for US presidential elections. As we all know the systems in place to allow US citizens to vote have their flaws, and because of these flaws, voter turn out is non-ideal. Ryan figured that since major elections are dependent on the dominant political faction of the swing states, using the fact that younger crowds dont tend to vote as much for whatever reason, Ryan's hypothesis was that older citizens are the audience that most candidates pander to. Ryan's analysis showed that in general, the proportion of votes that a particular candidate recieved was increasingly dependent with increasing age groups, which also held true at the swing state level. Ryan argued that using this data in future elections, better approches to appeal to younger groups could prove to be a major boost for a candidates campaign. On the topic of swing states, Erik's analysis highlighted an interesting phenomina. Erik found that in the state of Colorado, as time progressed, liberal dominance increased, suggesting that a similar thing could be happening in other swing states. This could mean that either people are beginning to identify with more liberal political stances, or that liberal candidates have been pandering increasing their political campaign efforts successfully in these states. Whether or not such a nefarious scheme is taking place would require careful analysis of all states's time variable liberal/conservative skew. Continuing in Ryan's reasoning, Mandy sought to find answers for as to why this trend that Ryan discovered was so. Mandy found detailed voter census data that collected reasoning for not voting. Using this, Mandy found that most young people did not vote simply because they did not have enough time in their day, which makes sense considering the exhaustive plight of the 'millenial' where as the second most popular response was simply due to lack of interest, which again makes sense considering the Nihilistic undertones of millenial culture. While things seem bleak for the spirit of younger voting turnouts, Jorge noticed that in general as time goes on, more and more people vote which is at least comforting knowing that our democratic republic isnt just a 'lip synced' illusion. Thorbin focused in on possible mechanisms of Mandy's result also using census data but from 2012 (for reasons unknown). Thorbin hypothesized that financial comfort and hours worked could be a major player into the impetus of young voting. Unfortunately, the large data file (8gb) downloaded was not selected right and the wrong columns were selected. With the little data available, Thorbin attempted to show a relationship between age and wage/salary, however since the data was poorly selected a not so clear plot was derived. Lets just pretend this didnt happen. The original goal of Thorbin's analysis was to use what Ryan,Mandy had shown in terms of voter turn out and provide a possible explanation to this using monetary data. Admittably it would have been much better to use 2016 census data. Unfortunately Thorbin was not able to provide a well founded explanation to the trends observed by other lab members.From the data collected in this lab it is clear that there at least was a problem with younger ages neglecting their right to vote, and as we all know recently there have been major campaigns to get the younger populations to vote, I gues the question that remains is whether or not the 2020 election census data will show significantly increased (or decreased) voter turnouts for younger populations. <insert avengers.theme here> 
