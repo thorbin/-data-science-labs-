@@ -9,15 +9,12 @@ output: html_document
 library(tidyverse)
 library(tidyr)
 library(dplyr)
-<<<<<<< HEAD
 library(readr)
 library(devtools)
-=======
 library(readxl)
 library(ggplot2)
 install.packages('gsheet') #its to read googlesheets needs to be installed 
 library(gsheet)
->>>>>>> b5833e2d8db84d3112a7e0e8aeaf7c37d4656b90
 #website Erik found that has solid data: Electionlab.mit.edu/data
 ```
 ##Ryan's Question: How large of a percentage are young voters in swing states?
@@ -105,8 +102,72 @@ We might first notice the fact that voters 18-24 fall in the range of about 3% (
 While it remains true that young voters make up the smallest percentage in terms of nationwide turnout, the above, finer analysis shows how that macro picture can sometimes obscure the truth, and consequently lead a candidate to erroneously neglect this demographic in key states. In particular, this analysis shows that our campaign should pay particular attention to young voters in states that have had relatively strong turnout in recent history for that demographic--in particular: Wisconsin, North Carolina, and Nevada.
 
 
-#end Ryan
-####Thorbin's question: How does wage and annual income correspond to voter turnout? 
+###end Ryan
+
+####Thorbin's question: How does wage and annual income correspond to voter turnout?  
+```{r}
+#thorbin's import: 
+census_2011_data<-read_csv("~/Desktop/lab 9 data/Thorbin/census_2011_data")
+```
+For this lab, I took data from the 2012 census and Isolated variables including hours worked per day, university status and age. Using this and general census data regarding the 2012 election, I should be able to arrive at some possible variables to explain lack of younger voters. 
+
+Hypothesis: 
+I believe that younger people who are not in college, work a large amount of hours per week at lower salary leading to prolonged financial stress which significantly hampers motivation to vote. What I will use to confirm/deny this will be to compare yearly earnings and age which will demonstrate each age group's economic stress. 
+
+A similar method will be employed on the college student sector. 
+ 
+Since voting age is 18 in the US, and most students have graduated highschool by this age so by filtering age at and above 18 years, most non voting high school students will not be represented and most voting/non voting college students will be mostly represented. 
+
+
+```{r}
+voting_age_college<-census_2011_data %>% filter(AGEP>=18,SCHL>=18,!is.na(WKW))
+voting_age_LF<-census_2011_data %>% filter(AGEP>=18,SCHL==16|17,!is.na(WKW))
+ggplot(data=voting_age_college,mapping=aes(x=AGEP,y=WAGP))+geom_point()
+```
+
+From this plot it appears as though there is no correlation between wage/salary and age. This leads to the conclusion that salary age are not correlated. Just kidding, but what this data suggests is that salary does not play a role in voter turnout. 
+
+Since I messed up and deleted the original data sets, what I would do differently if I had more time would be to first off select better variables namely hourly wage. I dont know how I missed this, but adding this into the dataframe would give a better metric to judge financial stress. Another thing I wanted to do was to bin an age range and examine the average income by age range, this would not only avoid the mess of the geom_point plot, but it would also be intuitave and easy to draw a conclusion off of.
+Data to keep:
+AGEP (age years) 
+ST
+CIT (citizen status , 5 is non citizen discard)
+COW -class of worker
+(b .Not in universe (less than 16 years old/NILF who last worked more .than 5 years ago or never worked)
+1 .Employee of a private for-profit company or .business, or of an individual, for wages, .salary, or commissions
+2 .Employee of a private not-for-profit, .tax-exempt, or charitable organization
+           3 .Local government employee (city, county, etc.)
+           4 .State government employee
+           5 .Federal government employee
+           6 .Self-employed in own not incorporated
+             .business, professional practice, or farm
+           7 .Self-employed in own incorporated
+.business, professional practice or farm
+8 .Working without pay in family business or farm
+9 .Unemployed and last worked 5 years ago or earlier or never
+.worked)
+HINS1/2 Insurance 1=yes
+PAP (welfare dollar amt)
+SCH school enrollment
+(2 .Yes, public school or public college
+3 .Yes, private school, private college, or home school)-use in conj with SCHG neglect all values other than 15/16
+SCHL
+SEX 1=male
+WKW weeks worked in past 12 months: 
+b .N/A (less than 16 years old/did not work
+           b .during the past 12 months)
+           1 .50 to 52 weeks
+           2 .48 to 49 weeks
+           3 .40 to 47 weeks
+           4 .27 to 39 weeks
+           5 .14 to 26 weeks
+           6 .13 weeks or less
+PERNP/PINCP total persons earnings
+WAGP (salary dollar ammount)
+
+=======
+>>>>>>> b5833e2d8db84d3112a7e0e8aeaf7c37d4656b90
+
 
 
 
@@ -246,107 +307,3 @@ Mandy's Analysis: Looking at the 2016 election data and surveys from The United 
 
 
 <<<<<<< HEAD
-####Thorbin's question: How does wage and annual income correspond to voter turnout? 
-```{r}
-#thorbin's import: 
-census_2011_data<-read_csv("~/Desktop/lab 9 data/Thorbin/census_2011_data")
-```
-For this lab, I took data from the 2012 census and Isolated variables including hours worked per day, university status and age. Using this and general census data regarding the 2012 election, I should be able to arrive at some possible variables to explain lack of younger voters. 
-
-Hypothesis: 
-I believe that younger people who are not in college, work a large amount of hours per week at lower salary leading to prolonged financial stress which significantly hampers motivation to vote. What I will use to confirm/deny this will be to compare yearly earnings and age which will demonstrate each age group's economic stress. 
-
-A similar method will be employed on the college student sector. 
- 
-Since voting age is 18 in the US, and most students have graduated highschool by this age so by filtering age at and above 18 years, most non voting high school students will not be represented and most voting/non voting college students will be mostly represented. 
-
-
-```{r}
-voting_age_college<-census_2011_data %>% filter(AGEP>=18,SCHL>=18,!is.na(WKW))
-voting_age_LF<-census_2011_data %>% filter(AGEP>=18,SCHL==16|17,!is.na(WKW))
-ggplot(data=voting_age_college,mapping=aes(x=AGEP,y=WAGP))+geom_point()
-```
-
-From this plot it appears as though there is no correlation between wage/salary and age. This leads to the conclusion that salary age are not correlated. Just kidding, but what this data suggests is that salary does not play a role in voter turnout. 
-
-Since I messed up and deleted the original data sets, what I would do differently if I had more time would be to first off select better variables namely hourly wage. I dont know how I missed this, but adding this into the dataframe would give a better metric to judge financial stress. Another thing I wanted to do was to bin an age range and examine the average income by age range, this would not only avoid the mess of the geom_point plot, but it would also be intuitave and easy to draw a conclusion off of.
-Data to keep:
-AGEP (age years) 
-ST
-CIT (citizen status , 5 is non citizen discard)
-COW -class of worker
-(b .Not in universe (less than 16 years old/NILF who last worked more .than 5 years ago or never worked)
-1 .Employee of a private for-profit company or .business, or of an individual, for wages, .salary, or commissions
-2 .Employee of a private not-for-profit, .tax-exempt, or charitable organization
-           3 .Local government employee (city, county, etc.)
-           4 .State government employee
-           5 .Federal government employee
-           6 .Self-employed in own not incorporated
-             .business, professional practice, or farm
-           7 .Self-employed in own incorporated
-.business, professional practice or farm
-8 .Working without pay in family business or farm
-9 .Unemployed and last worked 5 years ago or earlier or never
-.worked)
-HINS1/2 Insurance 1=yes
-PAP (welfare dollar amt)
-SCH school enrollment
-(2 .Yes, public school or public college
-3 .Yes, private school, private college, or home school)-use in conj with SCHG neglect all values other than 15/16
-SCHL
-SEX 1=male
-WKW weeks worked in past 12 months: 
-b .N/A (less than 16 years old/did not work
-           b .during the past 12 months)
-           1 .50 to 52 weeks
-           2 .48 to 49 weeks
-           3 .40 to 47 weeks
-           4 .27 to 39 weeks
-           5 .14 to 26 weeks
-           6 .13 weeks or less
-PERNP/PINCP total persons earnings
-WAGP (salary dollar ammount)
-
-=======
->>>>>>> b5833e2d8db84d3112a7e0e8aeaf7c37d4656b90
-
-#Begin Erik
-
-#Eriks Question: What do the voting trends for democrats and republicans in Colorado look like in presidential elections since 1976?
-Colorado as a swing state can be helpful in tracking other swing states, and the trends over time are interesting because though the general increases in population make the general trend in voting for both democrats and republicans upward, there are years in which the voting goes down for a party from previous elections. Here is the tidying of the data:
-
-```{r setup, include=FALSE}
-#This imports the necessary classes
-library(tidyverse)
-library(dplyr)
-#this loads the data, which was formatted already as Rdata
-load("C:/Users/ErikSvenneby/Downloads/1976-2016-president.RData")
-#I renamed some variables to make them look more neat
-x<- rename(x, State = 'state')
-x<- rename(x, Candidate = 'candidate')
-x<- rename(x, Year = 'year')
-x<- rename(x, Party = 'party')
-x<- rename(x, CandidateVotes = 'candidatevotes')
-x<- rename(x, TotalVotes = 'totalvotes')
-
-#I decided to filter the data to include the candidate the party along with the number of votes the candidate received and total votes in the election. I chose to analyze the state of COlorado as it is both my home state and a swing state. Analyzing data from Colorado is important because it can show the tendencies of a swing state over time. I filtered out nas.
-x<- filter(x, !is.na(Candidate))
-x<- filter(x, !is.na(Party))
-x<-filter(x, (CandidateVotes>367000))
-x<-filter(x, (State == 'Colorado'))
-x<- select(x, Year, State, Candidate, Party, CandidateVotes, TotalVotes)
-
-#I checked the class here. I did some research, and because the class is not a "factor", the only way for me to split my data was to facet_wrap it when I was going to plot the data. Other forms of splitting up the data on the same axes are not possible because the class of Party is AsIs when I imported it to RStudio, and converting the data to a factor class was not working.
-class(x$Party)
-
-```
-#Here is the graph of the data:
-
-```{r setup, include=FALSE}
-#I graphed and split the data into two sets in a facet wrap. There is one set for democrat and republican voter totals at each election. There is points and a smooth line which shows the overall trends in Colorado over time as a swing state.
-ggplot(data = x, mapping = aes(x=Year, y=CandidateVotes))+geom_point()+geom_smooth()+facet_wrap(~Party)+ggtitle("Voting Patterns in Presidential Elections in Colorado Since 1976")
-
-```
-#This data showed me that the democrat party in Colorado has seen a more drastic increase in voting, and Colorado is beginning to lean towards being a liberal state. This may be a result of a number of factors. Urban population growth in Colorado seems to have outpaced rural growth-- with denver being one of the fastest growing cities nationwide, and this could be a major reason. The data can be found at https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/42MVDX.
-
-#End Erik
