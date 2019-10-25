@@ -11,6 +11,8 @@ library(tidyr)
 library(dplyr)
 library(readxl)
 library(ggplot2)
+install.packages('gsheet') #its to read googlesheets needs to be installed 
+library(gsheet)
 #website Erik found that has solid data: Electionlab.mit.edu/data
 ```
 ##Ryan's Question: How large of a percentage are young voters in swing states?
@@ -105,38 +107,47 @@ While it remains true that young voters make up the smallest percentage in terms
 
 #Jorges analysis. 
 
-#reading file in
-##url: file location : https://docs.google.com/spreadsheets/d/1or-N33CpOZYQ1UfZo0h8yGPSyz0Db-xjmZOXg3VJi-Q/edit
 ```{r}
-#General_Election <- read_excel("stats/lab_9 data sets/1980-2014 November General Election.xlsx", 
-#                                 +     skip = 1)
+library(tidyverse)
+library(readxl)
+install.packages('gsheet')
+library(gsheet)
+datagog<-gsheet2tbl('https://docs.google.com/spreadsheets/d/1or-N33CpOZYQ1UfZo0h8yGPSyz0Db-xjmZOXg3VJi-Q/edit#gid=1670431880')
 ```
-#data modification 
+
+#tidding 
 ```{r}
-#General_Election <- General_Election %>% rename(States = ...4)
-#General_Election <- General_Election %>% rename(Presi_vote = `Highest Office`)
-#names(General_Election)
+data2<-datagog[-c(1), ]
+data2<-data2 %>% rename(Years = X1)
+data2<-data2 %>% rename(Presiden_vote = X9)
+data2<-data2 %>% rename(Voting_age_pop = Denominators)
 
-General_Election_test <- General_Election %>%
-  mutate(Presi_vote = Presi_vote/1000000)
+data3<-data2
 
-test<-General_Election_test%>% filter(States=="United States")%>%
-  ggplot(mapping = aes(x = Year, y = Presi_vote)) +
+data3$Years <- as.numeric(as.character(data3$Years))
+
+data3$Presiden_vote <- as.numeric(as.character(gsub(",","",data3$Presiden_vote)))
+data3$Voting_age_pop <- as.numeric(as.character(gsub(",","",data3$Voting_age_pop)))
+
+```
+
+#manipulating data and variables
+```{r}
+data4 <- data3 %>%
+  mutate(Presiden_vote = Presiden_vote/1000000)
+
+data5<-data4%>% filter(State=="United States")%>%
+  ggplot(mapping = aes(x = Years, y = Presiden_vote)) +
   geom_point(method = lm)+
   scale_x_continuous(breaks=seq(1980,2014,4)) +
   scale_y_continuous(breaks=seq(10,180,10))+scale_y_continuous("US Presidential vote by Million")+
   geom_smooth(method=lm, se=FALSE)
 
 ```
-#plot #1
-```{r}
-plot(test)
-```
 
-#plot #2
+#Ploting 
 ```{r}
-(ggplot(General_Election_test, aes(x = Year, y = `VAP Highest Office`/100)) + geom_bar(stat = "identity"))+
-  scale_y_continuous(("Voting Age Population"),labels=scales::percent)+
-  scale_x_continuous(breaks=seq(1980,2014,4))
+plot(data5)
 ```
+#when it comes to general elections, it seems that the trend indicates that as the years go by there is an increase in voter turn out. possible explanations and contributing factors to this phenomenon may be related to an increase in political heuristic via to use of the social networks. I also suspect that political polarization might play a role. 
 #end jorges.
