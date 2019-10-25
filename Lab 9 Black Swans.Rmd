@@ -4,6 +4,12 @@ author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
 date: "10/17/2019"
 output: html_document
 ---
+##Introduction:
+We have been hired by the Oprah Winfrey 2024 presidential campaign manager to analyze the question of why voter turnout among the 18-24 year-old demographic is so low.
+This question is important because, in order to give her the greatest chance of winning, Oprah must understand what drives all demographics to the polls and what we can do to maximize her chances of success. Further, a better understanding of voting patterns may help us understand how humans function on a deeper, psychological level, which in turn can help give us better predictions about our political, economic and social future. 
+
+Our team used multiple data sets but the primary source was https://www.census.gov/topics/public-sector/voting.html
+Using the census data from previous elections, combined with proper analysis, will help shed light how 18-24 year-olds vote, and we can use this information to help us decide how best to allocate resources and tailor our message, in addition to gaining a better understanding of the future political direction of our country. Below is a serious of individual findings and analyses, with a conclusion at the end.
 
 ```{r setup, include=FALSE}
 library(tidyverse)
