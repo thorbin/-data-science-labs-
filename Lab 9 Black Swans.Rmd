@@ -9,11 +9,243 @@ output: html_document
 library(tidyverse)
 library(tidyr)
 library(dplyr)
+<<<<<<< HEAD
 library(readr)
 library(devtools)
+=======
+library(readxl)
+library(ggplot2)
+install.packages('gsheet') #its to read googlesheets needs to be installed 
+library(gsheet)
+>>>>>>> b5833e2d8db84d3112a7e0e8aeaf7c37d4656b90
 #website Erik found that has solid data: Electionlab.mit.edu/data
 ```
+##Ryan's Question: How large of a percentage are young voters in swing states?
 
+Hopefully one of the lessons that any Presidential candidate should take away from the 2018 election is that it is not the popular vote but the swing states--and one's ability to appeal to them--that decide elections. Here we will look at how the demographic in question (voters age 18-24) behaves in swing states; whether there are any interesting trends we can identify; and then hopefully determine how much in terms of resources we should devote to young people in these states.
+
+We know that the so-called "perennial swing states" are: Colorado, Florida, Iowa, Michigan, Minnesota, Ohio, Nevada, New Hampshire, North Carolina, Pennsylvania, Virginia, and Wisconsin. It's an initially plausible hypothesis that voters in these states will tend to skew towards an older demographic--as young people gravitate to magnet cities on the coast, both as university students and young professionals. If this is true, the conclusion would be that elections are decided by appealing to older demographics, as these dominate the swing states. In order to test this idea, we will look at a data set from https://www.census.gov/data/tables/time-series/demo/voting-and-registration/p20-583.html -- table 4c, which is the governmental electoral data for November 2018. Unfortunately, this data set is oddly formatted and will require a thorough cleaning:
+
+
+
+```{r}
+
+library(janitor) # to clean column names. If it doesn't load for you, just install.packages("janitor")
+
+url <- "https://www2.census.gov/programs-surveys/cps/tables/p20/583/table04c.xlsx"
+destfile <- "table04c.xlsx"
+
+curl::curl_download(url, destfile)
+data <- read_excel(destfile)
+
+data = data %>% 
+  slice(-c(1:3)) 
+
+head(data)
+
+ 
+col_names = c(data[1,1:4],data[2,5:14])
+names(data) =  as.vector(unlist(col_names))
+names(data)
+data = data %>% slice(-1,-2) %>% clean_names()
+```
+
+Now that we've removed the unnecessary columns and cleaned the names, we'll need to filter by the variables we're interested in, as well as fill in some missing values:
+
+```{r}
+# select relevant columns. 
+req_cols = c("state", "age", "total_voted", "percent_voted_total", "total_population")
+
+req_data = data %>% 
+  select(req_cols) %>%
+  fill(state)
+
+head(req_data)
+```
+
+Here we can clearly see that there is a linear increase in percentage of the voting electorate as age categories increase. Simply put, the candidate who can better appeal to older people commands, nationwide, a higher vote count. Let's zoom in on the swing states to see how young people vote in finer detail:
+
+```{r}
+swing_states = c("COLORADO", "FLORIDA", "IOWA", "MICHIGAN", "MINNESOTA", "OHIO", "NEVADA", "NEW HAMPSHIRE", "NORTH CAROLINA", "PENNSYLVANIA", "VIRGINIA", "WISCONSIN")
+
+req_data = req_data %>% 
+  mutate(is_swing_state = ifelse(state %in% swing_states, "yes", "no"))
+
+req_data %>% head
+
+young_voter_pop = req_data %>% 
+  filter(age != "Total") %>% 
+  mutate(total_voted = as.numeric(total_voted),
+         total_population = as.numeric(total_population)) %>% 
+  group_by(state) %>% 
+  mutate(total_voted_state = sum(total_voted),
+         perc_of_total_voted_state = total_voted/total_voted_state) %>% 
+  data.frame %>% 
+  filter(age == "18 to 24")
+
+young_voter_pop %>% head
+
+
+```
+
+Now we have the data in the final form we need to generate a visualization to help us understand what fraction of the voting public our demographic constitutes:
+
+```{r}
+young_voter_pop %>% 
+  ggplot(aes(x = state, y = perc_of_total_voted_state, fill = is_swing_state)) +
+  geom_bar(stat = 'identity') +
+  theme(axis.text.x = element_text(size = 7, angle = 90)) + 
+  labs(x = "State",
+       y = "18-24 voter percentage",
+       title = "Young Voters and Swing States")
+```
+
+We might first notice the fact that voters 18-24 fall in the range of about 3% (for Maine) to 10% (Alaska) on the high end, whereas if we only analyze the swing states, the range is much smaller, with about 5% in Ohio to just under 8% in Wisconsin. This is valuable in and of itself in trying to decide how much of our resources we should allocate to a voting population of that size, but it might also help us tailor our message differently to, say, Ohio, then to Wisconsin. 
+
+While it remains true that young voters make up the smallest percentage in terms of nationwide turnout, the above, finer analysis shows how that macro picture can sometimes obscure the truth, and consequently lead a candidate to erroneously neglect this demographic in key states. In particular, this analysis shows that our campaign should pay particular attention to young voters in states that have had relatively strong turnout in recent history for that demographic--in particular: Wisconsin, North Carolina, and Nevada.
+
+
+#end Ryan
+####Thorbin's question: How does wage and annual income correspond to voter turnout? 
+
+
+
+#Jorges analysis. 
+
+```{r}
+library(tidyverse)
+library(readxl)
+install.packages('gsheet')
+library(gsheet)
+datagog<-gsheet2tbl('https://docs.google.com/spreadsheets/d/1or-N33CpOZYQ1UfZo0h8yGPSyz0Db-xjmZOXg3VJi-Q/edit#gid=1670431880')
+```
+
+#tidding 
+```{r}
+data2<-datagog[-c(1), ]
+data2<-data2 %>% rename(Years = X1)
+data2<-data2 %>% rename(Presiden_vote = X9)
+data2<-data2 %>% rename(Voting_age_pop = Denominators)
+
+data3<-data2
+
+data3$Years <- as.numeric(as.character(data3$Years))
+
+data3$Presiden_vote <- as.numeric(as.character(gsub(",","",data3$Presiden_vote)))
+data3$Voting_age_pop <- as.numeric(as.character(gsub(",","",data3$Voting_age_pop)))
+
+```
+
+#manipulating data and variables
+```{r}
+data4 <- data3 %>%
+  mutate(Presiden_vote = Presiden_vote/1000000)
+
+data5<-data4%>% filter(State=="United States")%>%
+  ggplot(mapping = aes(x = Years, y = Presiden_vote)) +
+  geom_point(method = lm)+
+  scale_x_continuous(breaks=seq(1980,2014,4)) +
+  scale_y_continuous(breaks=seq(10,180,10))+scale_y_continuous("US Presidential vote by Million")+
+  geom_smooth(method=lm, se=FALSE)
+
+```
+
+#Ploting 
+```{r}
+plot(data5)
+```
+#when it comes to general elections, it seems that the trend indicates that as the years go by there is an increase in voter turn out. possible explanations and contributing factors to this phenomenon may be related to an increase in political heuristic via to use of the social networks. I also suspect that political polarization might play a role. 
+
+#funtions used from tidyverse: ggplot, filter, geom_smooth, mutate, rename. funtions used outside tidyverse:as.numeric, as.character, gsub, library(gsheet)
+#end jorges.
+
+## Start Mandy ##
+Mandy's Question: There is a massive gap between voter turnout of younger Americans versus the voter turnout of older Americans, as most people already know. What is the main factor driving the huge discrepancy and how can candidates bridge that gap?
+```{r}
+library(tidyverse)
+library(dplyr)
+library(readxl)
+Voter_Turnout <- read_excel("~/Downloads/Voter Turnout 2.xlsx")
+View(Voter_Turnout)
+```
+Tidy Data 
+```{r}
+#tidy data
+voter.turnout <- Voter_Turnout[3:73,]
+voter.turnout <- voter.turnout %>% rename('Age' = 'Table with row headers in columns A and B, and column headers in rows 5 through 7.', 'Total Population'='...2', 'Total Citizen Population' = '...3', 'Reported Registered'= '...4', 'Reported Registered (%)'= '...5', 'Reported Not Registered'='...6', 'Reported Not Registered (%)'='...7', 'No Response to Registration' = '...8', 'No Response to Registration (%)' = '...9', 'Reported Voted'='...10', 'Reported Voted(%)'='...11', 'Reported Not Voted'='...12', 'Reported Not Voted (%)'='...13', 'No Response to Voting'='...14', 'No Response to Voting (%)'='...15', 'B'='...16', 'Total.Population'='...17')
+voter.turnout <- voter.turnout[8:71,]
+```
+Let's look at the percentage of people that voted in each age group: 
+```{r}
+ggplot(voter.turnout)+
+  geom_col(aes(x= Age, y = Total.Population, fill= Age))+
+  theme(legend.key.size = unit(.3, 'cm'), legend.key.width = unit(.2, 'cm'), legend.position = "bottom")+
+  ggtitle('Percentage of People That Voted in Each Age Group (2016)')+
+  labs(y= "People That Voted (%)") +
+  theme(axis.text.x = element_text(size = 5, angle =90), axis.text.y = element_text(size=4))+
+  scale_x_discrete(breaks=waiver())
+```
+Let's look at the percentage of people registered in each age group 
+```{r}
+ggplot(voter.turnout)+
+  geom_col(aes(x= Age, y = B , fill= Age))+
+  theme(legend.key.size = unit(.3, 'cm'), legend.key.width = unit(.2, 'cm'), legend.position = "bottom")+
+  ggtitle('Percentage of People That Are Registered in Each Age Group (2016)')+
+  labs(y= "People Registered to Vote (%)") +
+  theme(axis.text.x = element_text(size = 5, angle =90), axis.text.y = element_text(size=4))+
+  scale_x_discrete(breaks=waiver())
+```
+Tidying of survey of nonvoters and why they didn't vote: 
+```{r}
+library(readxl)
+nonvoters <- read_excel("~/Downloads/Why They Didn't Vote.xlsx")
+View(nonvoters)
+nonvoters <- nonvoters[4:7,]
+nonvoters <- nonvoters %>% rename('Age' = 'Table with row headers in columns A and B, and column headers in rows 5 through 6 and rows 60 through 61.', 'total.not.voting'='...2', 'illness.or.disability'='...3', 'out.of.town'='...4', 'forgot.to.vote'='...5', 'not.interested'='...6', 'too.busy'='...7', 'transportation.problems'='...8', 'did.not.like.candidates'='...9', 'registration.problems'='...10', 'bad.weather'='...11', 'inconvenient.polling.place'='...12', 'other.reason'='...13', 'dont.know.or.refused'='...14')
+```
+Visual of percentage of voters saying they were "too busy": 
+```{r}
+ggplot(nonvoters)+
+  geom_col(aes(x= Age, y= too.busy, fill = Age))+
+  labs(y= "Percentage")+
+  ggtitle("Percentage of Nonvoters that Were Too Busy in Each Age Group")
+```
+Visual of percentage of nonvoters that were "not interested": 
+```{r}
+ggplot(nonvoters)+
+  geom_col(aes(x=Age, y=not.interested, fill=Age))+
+  labs(y= "Percentage")+
+  ggtitle("Percentage of Nonvoters that Were not Interested in Each Age Group")
+```
+Mandy's Analysis: Looking at the 2016 election data and surveys from The United States Census Bureau, we see a huge gap between the older age group and the younger age groups in terms of voting. In 2016, almost 75% of 72 year olds voted, the highest percentage of any age group. Both the registration and voting graphs show a positive correlation with age and voter turnout/registration, besides the slight drop off at the end for people older than 75. Even then, there are still significantly more 85 years and older citizens than 18-24 year olds getting to the polls. With some exploratory analysis, I found two significant factors attributing to this discrepency. In a post election survey 2016, a lot of young nonvoters simply said they were too busy or not interested, while a lot of older voters did not report the same problem. The "too busy" discrepancy makes sense, with most 18-24 year olds going to school, working, participating in social activities, etc., while the 65 years and over age group have slowed down and most likely have more time on their hands for routine, mundane activities. From a candidates standpoint, it would be difficult to influence the "too busy" factor. However, the "not interested" percent of nonvoters could be influenced by several different candidate tactics and factors. Not only is it important for influencing young voters, but data shows there is a high percentage of 25-44 year olds that aren't interested either. Why? People are watching less TV. News is being followed less and less with the rise of smartphones and smart TV's. There are hundreds of other factors attributing to the lack of interest, but the rise of social media and other entertainment outlets besides television has played a major role. The two datasets I have analyzed are from the following page: https://www.census.gov/data/tables/time-series/demo/voting-and-registration/p20-580.html . 
+
+## End Mandy ##
+
+
+###concluding remarks: 
+
+  The goal of this report was to analyze numerous facets of voter turn out data for US presidential elections. As we all know the systems in place to allow US citizens to vote have their flaws, and because of these flaws, voter turn out is non-ideal. Ryan figured that since major elections are dependent on the dominant political faction of the swing states, using the fact that younger crowds dont tend to vote as much for whatever reason, Ryan's hypothesis was that older citizens are the audience that most candidates pander to. Ryan's analysis showed that in general, the proportion of votes that a particular candidate recieved was increasingly dependent with increasing age groups, which also held true at the swing state level. Ryan argued that using this data in future elections, better approches to appeal to younger groups could prove to be a major boost for a candidates campaign. Continuing in this reasoning, Mandy sought to find answers for as to why this trend that Ryan discovered was so. Mandy found detailed voter census data that collected reasoning for not voting. Using this, Mandy found that most young people did not vote simply because they did not have enough time in their day, which makes sense considering the exhaustive plight of the 'millenial' where as the second most popular response was simply due to lack of interest, which again makes sense considering the Nihilistic undertones of millenial culture. While things seem bleak for the spirit of younger voting turnouts, Jorge noticed that in general as time goes on, more and more people vote which is at least comforting knowing that our democratic republic isnt just a 'lip synced' illusion. Thorbin focused in on possible mechanisms of Mandy's result also using census data but from 2012 (for reasons unknown). Thorbin hypothesized that financial comfort and hours worked could be a major player into the impetus of young voting. Unfortunately, the large data file (8gb) downloaded was not selected right and the wrong columns were selected. With the little data available, Thorbin attempted to show a relationship between age and wage/salary, however since the data was poorly selected a not so clear plot was derived. Lets just pretend this didnt happen. The original goal of Thorbin's analysis was to use what Ryan,Mandy had shown in terms of voter turn out and provide a possible explanation to this using monetary data. Admittably it would have been much better to use 2016 census data. Unfortunately Thorbin was not able to provide a well founded explanation to the trends observed by other lab members. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<<<<<<< HEAD
 ####Thorbin's question: How does wage and annual income correspond to voter turnout? 
 ```{r}
 #thorbin's import: 
@@ -75,3 +307,5 @@ b .N/A (less than 16 years old/did not work
 PERNP/PINCP total persons earnings
 WAGP (salary dollar ammount)
 
+=======
+>>>>>>> b5833e2d8db84d3112a7e0e8aeaf7c37d4656b90
