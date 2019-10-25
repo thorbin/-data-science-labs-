@@ -150,4 +150,6 @@ data5<-data4%>% filter(State=="United States")%>%
 plot(data5)
 ```
 #when it comes to general elections, it seems that the trend indicates that as the years go by there is an increase in voter turn out. possible explanations and contributing factors to this phenomenon may be related to an increase in political heuristic via to use of the social networks. I also suspect that political polarization might play a role. 
+
+#funtions used from tidyverse: ggplot, filter, geom_smooth, mutate, rename. funtions used outside tidyverse:as.numeric, as.character, gsub, library(gsheet)
 #end jorges.
