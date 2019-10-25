@@ -153,3 +153,88 @@ plot(data5)
 
 #funtions used from tidyverse: ggplot, filter, geom_smooth, mutate, rename. funtions used outside tidyverse:as.numeric, as.character, gsub, library(gsheet)
 #end jorges.
+
+## Start Mandy ##
+Mandy's Question: There is a massive gap between voter turnout of younger Americans versus the voter turnout of older Americans, as most people already know. What is the main factor driving the huge discrepancy and how can candidates bridge that gap?
+```{r}
+library(tidyverse)
+library(dplyr)
+library(readxl)
+Voter_Turnout <- read_excel("~/Downloads/Voter Turnout 2.xlsx")
+View(Voter_Turnout)
+```
+Tidy Data 
+```{r}
+#tidy data
+voter.turnout <- Voter_Turnout[3:73,]
+voter.turnout <- voter.turnout %>% rename('Age' = 'Table with row headers in columns A and B, and column headers in rows 5 through 7.', 'Total Population'='...2', 'Total Citizen Population' = '...3', 'Reported Registered'= '...4', 'Reported Registered (%)'= '...5', 'Reported Not Registered'='...6', 'Reported Not Registered (%)'='...7', 'No Response to Registration' = '...8', 'No Response to Registration (%)' = '...9', 'Reported Voted'='...10', 'Reported Voted(%)'='...11', 'Reported Not Voted'='...12', 'Reported Not Voted (%)'='...13', 'No Response to Voting'='...14', 'No Response to Voting (%)'='...15', 'B'='...16', 'Total.Population'='...17')
+voter.turnout <- voter.turnout[8:71,]
+```
+Let's look at the percentage of people that voted in each age group: 
+```{r}
+ggplot(voter.turnout)+
+  geom_col(aes(x= Age, y = Total.Population, fill= Age))+
+  theme(legend.key.size = unit(.3, 'cm'), legend.key.width = unit(.2, 'cm'), legend.position = "bottom")+
+  ggtitle('Percentage of People That Voted in Each Age Group (2016)')+
+  labs(y= "People That Voted (%)") +
+  theme(axis.text.x = element_text(size = 5, angle =90), axis.text.y = element_text(size=4))+
+  scale_x_discrete(breaks=waiver())
+```
+Let's look at the percentage of people registered in each age group 
+```{r}
+ggplot(voter.turnout)+
+  geom_col(aes(x= Age, y = B , fill= Age))+
+  theme(legend.key.size = unit(.3, 'cm'), legend.key.width = unit(.2, 'cm'), legend.position = "bottom")+
+  ggtitle('Percentage of People That Are Registered in Each Age Group (2016)')+
+  labs(y= "People Registered to Vote (%)") +
+  theme(axis.text.x = element_text(size = 5, angle =90), axis.text.y = element_text(size=4))+
+  scale_x_discrete(breaks=waiver())
+```
+Tidying of survey of nonvoters and why they didn't vote: 
+```{r}
+library(readxl)
+nonvoters <- read_excel("~/Downloads/Why They Didn't Vote.xlsx")
+View(nonvoters)
+nonvoters <- nonvoters[4:7,]
+nonvoters <- nonvoters %>% rename('Age' = 'Table with row headers in columns A and B, and column headers in rows 5 through 6 and rows 60 through 61.', 'total.not.voting'='...2', 'illness.or.disability'='...3', 'out.of.town'='...4', 'forgot.to.vote'='...5', 'not.interested'='...6', 'too.busy'='...7', 'transportation.problems'='...8', 'did.not.like.candidates'='...9', 'registration.problems'='...10', 'bad.weather'='...11', 'inconvenient.polling.place'='...12', 'other.reason'='...13', 'dont.know.or.refused'='...14')
+```
+Visual of percentage of voters saying they were "too busy": 
+```{r}
+ggplot(nonvoters)+
+  geom_col(aes(x= Age, y= too.busy, fill = Age))+
+  labs(y= "Percentage")+
+  ggtitle("Percentage of Nonvoters that Were Too Busy in Each Age Group")
+```
+Visual of percentage of nonvoters that were "not interested": 
+```{r}
+ggplot(nonvoters)+
+  geom_col(aes(x=Age, y=not.interested, fill=Age))+
+  labs(y= "Percentage")+
+  ggtitle("Percentage of Nonvoters that Were not Interested in Each Age Group")
+```
+Mandy's Analysis: Looking at the 2016 election data and surveys from The United States Census Bureau, we see a huge gap between the older age group and the younger age groups in terms of voting. In 2016, almost 75% of 72 year olds voted, the highest percentage of any age group. Both the registration and voting graphs show a positive correlation with age and voter turnout/registration, besides the slight drop off at the end for people older than 75. Even then, there are still significantly more 85 years and older citizens than 18-24 year olds getting to the polls. With some exploratory analysis, I found two significant factors attributing to this discrepency. In a post election survey 2016, a lot of young nonvoters simply said they were too busy or not interested, while a lot of older voters did not report the same problem. The "too busy" discrepancy makes sense, with most 18-24 year olds going to school, working, participating in social activities, etc., while the 65 years and over age group have slowed down and most likely have more time on their hands for routine, mundane activities. From a candidates standpoint, it would be difficult to influence the "too busy" factor. However, the "not interested" percent of nonvoters could be influenced by several different candidate tactics and factors. Not only is it important for influencing young voters, but data shows there is a high percentage of 25-44 year olds that aren't interested either. Why? People are watching less TV. News is being followed less and less with the rise of smartphones and smart TV's. There are hundreds of other factors attributing to the lack of interest, but the rise of social media and other entertainment outlets besides television has played a major role. The two datasets I have analyzed are from the following page: https://www.census.gov/data/tables/time-series/demo/voting-and-registration/p20-580.html . 
+
+## End Mandy ##
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
