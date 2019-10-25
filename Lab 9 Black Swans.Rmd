@@ -160,6 +160,7 @@ Mandy's Question: There is a massive gap between voter turnout of younger Americ
 library(tidyverse)
 library(dplyr)
 library(readxl)
+url <- https://www.census.gov/data/tables/time-series/demo/voting-and-registration/p20-580.html
 Voter_Turnout <- read_excel("~/Downloads/Voter Turnout 2.xlsx")
 View(Voter_Turnout)
 ```
