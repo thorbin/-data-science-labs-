@@ -4,4 +4,11 @@ author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
 date: "11/1/2019"
 output: html_document
 ---
+```{r}
+#for this to work store the file containing the data on your desktop 
+library(dplyr)
+library(tidyverse)
 
+Answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")
+Questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv")
+```
