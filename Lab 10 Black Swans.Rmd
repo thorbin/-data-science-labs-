@@ -15,7 +15,16 @@ Questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Sco
 #just makes variables easier to recognize after Join
 Q_A<-full_join(Answers,Questions,by="Id")
 ```
+Thorbin's Hypothesis: The number of "if's' and "then's" in a Question should be a proxy of specific and detailed questions which usually net a higher ammount of upvotes. The relationship between these keywords and score should be inverse in the Question domain becuase the amount of ifs and thens indicate a very faceted,complicated answer which regardless of correctness, should net a lower number of upvotes due to people who don't have a solid grasp on the material discussed in the answer. Limitations: answers dont explain if else/then statements in depth lmao, questions asked are asked using logic resembling a flow chart.
 ```{r}
-#Thorbin's code 
-
+#Thorbin's code
+A<-Answers %>% select(BodyA,AnswerDate,Id,ScoreA) %>% group_by(Id)%>%mutate("keywords"=sum(str_detect(BodyA,c("if","If","Iff","iff","then","Then"))))
+# assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyA
+Q<-Questions %>% select(BodyQ,AskedDate,Id,ScoreQ) %>% group_by(Id)%>% mutate("keywords"=sum(str_detect(BodyQ,c("if","If","Iff","iff","then","Then"))))
+## assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyQ
+```
+```{r}
+#plots
+ggplot(data=Q,mapping=aes(x=keywords,y=ScoreQ))+geom_point()+ggtitle("Question upvotes at number of keywords")
+ggplot(data=A,mapping=aes(x=keywords,y=ScoreA))+geom_point()+ggtitle("Answer upvotes at number of keywords")
 ```
