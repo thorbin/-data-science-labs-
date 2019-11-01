@@ -1,0 +1,7 @@
+---
+title: "Lab 10 Black Swans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "11/1/2019"
+output: html_document
+---
+
