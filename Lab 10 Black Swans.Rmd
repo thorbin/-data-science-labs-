@@ -4,27 +4,55 @@ author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
 date: "11/1/2019"
 output: html_document
 ---
-```{r}
+```{r,include=FALSE}
 #for this to work store the file containing the data on your desktop 
 library(dplyr)
 library(tidyverse)
 library(stringr)
-
+library(knitr)
+```
+```{r}
 Answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
 Questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
 #just makes variables easier to recognize after Join
 Q_A<-full_join(Answers,Questions,by="Id")
 ```
-Thorbin's Hypothesis: The number of "if's' and "then's" in a Question should be a proxy of specific and detailed questions which usually net a higher ammount of upvotes. The relationship between these keywords and score should be inverse in the Question domain becuase the amount of ifs and thens indicate a very faceted,complicated answer which regardless of correctness, should net a lower number of upvotes due to people who don't have a solid grasp on the material discussed in the answer. Limitations: answers dont explain if else/then statements in depth lmao, questions asked are asked using logic resembling a flow chart.
+
+Thorbin's Hypothesis: 
+
+  The number of "if's' and "then's" in a Question should be a proxy of specific and detailed questions which usually net a higher ammount of upvotes. The relationship between these keywords and score should be inverse in the Question domain becuase the amount of ifs and thens indicate a very faceted,complicated answer which regardless of correctness, should net a lower number of upvotes due to people who don't have a solid grasp on the material discussed in the answer. Limitations: answers dont explain if else/then statements in depth lmao, questions asked are asked using logic resembling a flow chart.
 ```{r}
 #Thorbin's code
-A<-Answers %>% select(BodyA,AnswerDate,Id,ScoreA) %>% group_by(Id)%>%mutate("keywords"=sum(str_detect(BodyA,c("if","If","Iff","iff","then","Then"))))
+A<-Answers %>% select(BodyA,AnswerDate,Id,ScoreA) %>% group_by(Id)%>%mutate(keywords=sum(str_detect(BodyA,c("if","If","Iff","iff","then","Then")))) %>% ungroup() %>% group_by(keywords)
+Asummarized<-A %>% summarize(observations=n())
 # assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyA
-Q<-Questions %>% select(BodyQ,AskedDate,Id,ScoreQ) %>% group_by(Id)%>% mutate("keywords"=sum(str_detect(BodyQ,c("if","If","Iff","iff","then","Then"))))
+Q<-Questions %>% select(BodyQ,AskedDate,Id,ScoreQ) %>% group_by(Id)%>% mutate(keywords=sum(str_detect(BodyQ,c("if","If","Iff","iff","then","Then"))))%>% ungroup() %>% group_by(keywords)
+Qsummarized<-Q %>% summarize(observations=n())
+
 ## assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyQ
 ```
+
+#### Analysis:
+
 ```{r}
-#plots
 ggplot(data=Q,mapping=aes(x=keywords,y=ScoreQ))+geom_point()+ggtitle("Question upvotes at number of keywords")
-ggplot(data=A,mapping=aes(x=keywords,y=ScoreA))+geom_point()+ggtitle("Answer upvotes at number of keywords")
+kable(Qsummarized,format="html",caption="Summarized answer data at keyword count")
 ```
+
+  While the Question data appears to directly oppose my hypothesis, it is important to look at the number of questions in each group of keyword counts: 
+  
+  From this it is clear that the decreasing upvote count is in part due to decreasing number of observations of questions with large numbers of select key words. Since there are still decent numbers of observations up until the 5th category, variability in upvotes appears to decrease with number of key words used, indicating that questions with higher counts keywords tend to be spurned by the stack community. This makes sense because the more If's and then's used likely indicate a question operating at a more advanced level meaning fewer people are going to view it and also meaning that the asker will be intimate with the various complexities of the question.
+  
+  Turning to the Answers data, at first glance my hypothesis does not appear to be rejected out right. First impression is that there are 2 accepted levels of proxied detail namely from about 0-3 keywords. The summarized data is as follows: 
+
+```{r}
+ggplot(data=A,mapping=aes(x=keywords,y=ScoreA))+geom_point()+ggtitle("Answer upvotes at number of keywords")
+kable(Asummarized,format="html",caption="Summarized answer data at keyword count")
+```
+
+  This table shows that the number of observations across keyword groups changes approximately linearly, which was the case in the previous summarized table. The plot for this data shows that generally variability in percieved answer quality,considering decreasing audience in each percieved level of complexity, tends to increase with the number of key words used. This indicates that for more technical questions requiring the use of more conditional/concluding phrases posess higher likelihood of being highly appreciated answers. To make sense of this it is assumed again that the higher level of complexity questions require more complex answers meaning that the people likley to answer are highly qualified to give said answer, which implies that fewer people will up/down vote the answer because alot of people simply arent at that level of complexity. This is a trend that is observed indicating that this conclusive hypothesis has at least a shred of truth to it. 
+  
+Conclusion:
+  It appears as though my hypothesis is false under the assumed understanding that more complex questions regarding higher level concepts require more complex and faceted answers as measured by the use of conditional language. 
+
+###End Thorbin
