@@ -8,7 +8,14 @@ output: html_document
 #for this to work store the file containing the data on your desktop 
 library(dplyr)
 library(tidyverse)
+library(stringr)
 
-Answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")
-Questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv")
+Answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
+Questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
+#just makes variables easier to recognize after Join
+Q_A<-full_join(Answers,Questions,by="Id")
+```
+```{r}
+#Thorbin's code 
+
 ```
