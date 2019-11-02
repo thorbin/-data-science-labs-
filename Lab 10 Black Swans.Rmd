@@ -153,3 +153,134 @@ At any rate, the original hypothesis that there is an optimal length has been sh
 
 
 ### End Ryan
+
+### Start Jorge
+
+
+```{r }
+library(tidyverse)
+answers <- read_csv("Answers_trunc.csv")
+questions <- read_csv("Questions_trunc.csv")
+merged <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+merged <- merged %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+```
+
+## R Markdown
+
+
+```{r }
+knitr::opts_chunk$set(echo = FALSE)
+#exploring data as a whole
+ggplot(answers, aes(Score)) +
+  geom_histogram(aes(x=Score, y=..density..), bins=50) +
+  geom_density(color="blue")+ 
+  xlim(c(-10, 100))
+
+ggplot(questions, aes(Score)) +
+  geom_histogram(aes(x=Score, y=..density..), bins=50) +
+  geom_density(color="blue")+ 
+  xlim(c(-10, 250))
+
+mean(merged$Score.x)
+median(merged$Score.x)
+var(merged$Score.x)
+sd(merged$Score.x) #!
+
+mean(answers$Score)
+sd(answers$Score)
+mean(questions$Score)
+sd(questions$Score)
+
+
+hist(answers$Score)
+
+ans_score_sd <- sd(answers$Score)*sqrt((length(answers$Score)-1)/(length(answers$Score)))
+
+z <- (55 - mean(answers$Score)) / ans_score_sd
+
+p_yellow2 <- pnorm(z)  
+p_blue2 <- 1 - p_yellow2 
+
+```
+#Timeliness analysis
+```{r}
+
+ggplot(merged, aes(x=total_time/1000, y=Score.x))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 25))
+```
+
+```{r}
+median(merged$Score.x)
+```
+
+```{r}
+ggplot(merged, aes(x=total_time/1000, y=Score.x)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 1400))
+```
+
+```{r}
+ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 1500))
+```
+
+```{r}
+ggplot(merged, aes(x=total_time/1000, y=Score.y))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 25))
+```
+
+```{r}
+median(merged$Score.y)
+mean(merged$Score.y)
+```
+#the total time and its relation with the Answer and Question scores display a non-uniform behavior. 
+#There is still a significant amount of outliers that do affect the relationship between score and total time. 
+#One hypothesis to explain the vast amount of outlier scores is because those answer and question scores that fall above the mean are those who which users find to have the most utility.
+#thus, there are going to be a lot of low utility questions and answers, but those who have high utility will standout in their scores as they are generally useful to most who encounter them. 
+#Its functions to scores are similar to the price law or the Mathew principle. A small minority generates the most innovation in a given creative domine. 
+
+#---------------------------------------------------------------------------------end Timeliness Jorge-part
+#----------------------------------------------------------------------------------
+#exploring feature and analysis
+
+#To finds out if there is a relation in what makes an appropriate answer and questions would be best at first to focus at the lowest resolution in relation to the given topic
+#thus, the broadest concept related to the given topic, Python Questions from Stack Overflow, would be under the broadest umbrella that encompasses the topic which I hypothesis is the word:  code.  
+#my question at hand is there any differences in averages or  outliers scores concerning the exlution or inclution of the word : code, in both question and answers scores.
+
+```{r}
+ggplot(questions, aes(x = str_detect(Body, "code"), y=Score)) +
+  geom_point(size=.1, shape=23)+
+  ylim(c(0, 2000))
+```
+
+```{r}
+ggplot(questions, aes(x = str_detect(Body, "code"), y=Score))+
+geom_boxplot(outlier.colour="red", outlier.shape=8,
+              outlier.size=.4)+
+  stat_summary(fun.y=mean, geom="point", shape=23, size=4)
+```
+
+```{r}
+ggplot(answers, aes(x = str_detect(Body, "code"), y=Score)) +
+  geom_point(size=.1, shape=23)+
+  ylim(c(0, 2000))
+```
+
+```{r}
+ggplot(answers, aes(x = str_detect(Body, "code"), y=Score))+
+  geom_boxplot(outlier.colour="red", outlier.shape=8,
+               outlier.size=.4)+ 
+  stat_summary(fun.y=mean, geom="point", shape=23, size=4)
+```
+#it seems that that the integration or the lack of the word: code, did not have any effect in scores averages, however, when we look at the extream on the positive end we observe the inclusion of the word: code did affect the amount and density of the outliers.
+#This is important because it is the outlies that display questions and answers that have high utility. 
+#Thus, perhaps the reason for this effect is that it is a question or answer that does not define itself a the lowest resolution with proper keywords like code then, the probability of a user finding that question or answer relevant diminishes.
+### end Jorge. 
