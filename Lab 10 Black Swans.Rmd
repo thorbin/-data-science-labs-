@@ -243,9 +243,7 @@ mean(merged$Score.y)
 ```
 #the total time and its relation with the Answer and Question scores display a non-uniform behavior. 
 #There is still a significant amount of outliers that do affect the relationship between score and total time. 
-#One hypothesis to explain the vast amount of outlier scores is because those answer and question scores that fall above the mean are those who which users find to have the most utility.
-#thus, there are going to be a lot of low utility questions and answers, but those who have high utility will standout in their scores as they are generally useful to most who encounter them. 
-#Its functions to scores are similar to the price law or the Mathew principle. A small minority generates the most innovation in a given creative domine. 
+#it seems the correlation between total time and scores is positively correlated but to a small degree. 
 
 #---------------------------------------------------------------------------------end Timeliness Jorge-part
 #----------------------------------------------------------------------------------
