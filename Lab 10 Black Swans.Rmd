@@ -56,3 +56,100 @@ Conclusion:
   It appears as though my hypothesis is false under the assumed understanding that more complex questions regarding higher level concepts require more complex and faceted answers as measured by the use of conditional language. 
 
 ###End Thorbin
+
+---
+title: "Lab10"
+output: html_document
+---
+
+```{r}
+answers <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Answers_trunc.csv")
+questions <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Questions_trunc.csv")
+colnames(answers)
+colnames(questions)
+str(answers)
+str(questions)
+merged <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+
+colnames(merged)
+str(merged)
+
+## create relevant columns
+merged <- merged %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+
+```
+
+## Ryan's Hypothesis:
+There is an optimal length for questions and an optimal length for answers, and people in general will tend to confine their lengths to that optimal point.
+
+For humans, both time and attention spans are finite. A question or an answer that is too long will be penalized to due either the time-cost or the cognitive load, or both. A question or answer that is too short, on the other hand, risks omitting critical information. Therefore, it will be interesting to use data to help us understand what length of questions or answers tend to result in the highest score.
+
+We begin with the length of a questions' title. Below we see a bar graph showing string length on the x axis and score on the y axis:
+
+```{r}
+ggplot(data = questions) +
+  geom_bar(mapping = aes(x = str_count(questions$Title), fill = Score))+
+  labs(title= "Question Length vs Score", x = "Question Length", y = "Score")
+```
+
+While this is not a perfectly normal distribution, it does have a distinct bell-shape, suggesting that question title-lengths closer to the mean tend to result in a higher score.
+Indeed, if we calculate the mean, median and standard deviation . . .
+
+```{r}
+mean(str_count(questions$Title))
+median(str_count(questions$Title))
+sd(str_count(questions$Title))
+```
+
+. . . we find that title lengths that gravitate more toward the center also happen to be near to where our curve peaks. A standard deviation of 18.99463 is relatively small, suggesting titles have a fairly regular length and questioners tend to restrict their titles to a normal length.
+
+Maybe there is something about the title of a question that leads people to naturally be concise, so we will now turn to the body of the question, where the questioner has more freedom in terms of length. Does it follow the same pattern?
+
+```{r}
+ggplot(data = questions) +
+  geom_bar(mapping = aes(x = str_count(questions$Body), fill = Score))+
+  labs(title= "Question Length vs Score", x = "Question Length", y = "Score")+
+  xlim(c(0,5000))
+                                                                                   
+```
+
+This is messier. Peak scores seem to gravitate somewhere around a question length of 500, but there is a fat tail leading out to the right. However, unlike the case of titles, where the questioners tend to limit their lengths to that optimal point, here we see that this is not the case:
+
+```{r}
+mean(str_count(questions$Body))
+median(str_count(questions$Body))
+sd(str_count(questions$Body))
+```
+
+The standard deviation is massive here compared to that of the question titles, and a mean of 826 is further from the optimal point than we would expect if questioners tended to limit their lengths on average to a point that was rewarded with a high score. In other words, although lengthy questions are clearly penalized (since we see from the graph that concise questions get higher scores and longer questions get lower scores), people still tend to err on the side of length.
+
+This makes sense given that concise writing in the ungraduate, graduate, and technical levels is a skill that must be cultivated--it is not the natural tendency of humans. These analyses taken together reveal an interesting tension in human behavior, where the communicator on average imposes a greater time- and attention-cost on the recipient than the recipient deems optimal. And we have just used data to extract a lesson for the communicator.
+
+Finally, we turn to answer length:
+
+```{r}
+ggplot(data = answers)+
+  geom_bar(mapping = aes(x = str_count(answers$Body), fill = Score))+
+  labs(title = "Answer Length vs Score", x ="Answer Length", y = "Score") +
+  xlim(c(0, 1000))
+```
+
+This is even more interesting: there is a noticable peak in score around a length of 250, and then a very gradual decline as answers lengthen. If we again calculate the statistical properties:
+
+```{r}
+mean(str_count(answers$Body))
+median(str_count(answers$Body))
+sd(str_count(answers$Body))
+```
+
+The standard deviation is very large--meaning that answer-lengths vary tremendously--and the mean of (roughly) 658 is very far away from the "optimal point" of 250. (Notice that this is an even greater distance of length than that for questions, which was, roughly, 873-500). This shows that answers tend to err on the side of lengthiness far more than even questions.
+
+What these data show is that a lack of concision is an omnipresent human flaw. It's possible that user feedback over time will (or already has to an extent), teach users to be more concise, but it's also possible that technical-minded people on stackexchange need to understand the art of economical use of language, keeping in mind that humans do not have infinite bandwidth. 
+
+At any rate, the original hypothesis that there is an optimal length has been shown to be true, while the related idea that users will tend to gravitate toward that length has been shown to be true only for question titles and nothing else. Humans grasp that the purpose of a title is to concisely summarize a topic, and this shows that we are able to understand the idea of concision better than we can always implement it--suggesting that it is an acquired skill, not an automatic tendency.
+
+
+### End Ryan
