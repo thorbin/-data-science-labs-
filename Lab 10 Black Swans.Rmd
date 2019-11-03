@@ -462,3 +462,56 @@ ggplot(merged) + geom_point(mapping=aes(x=Score.x, y = Score.y))
 #My question was is there a trend between the strength of the question and the strength of the answer. I found that when people asked better questions (received a higher score), they received better answers. From this, one can predict the stength of an answer received based on the strength of the question they ask.
 
 #End Erik 
+
+## Start Mandy ## 
+I, Mandy Karako, analyzed length of body and answer versus the score. I expected to see longer answers and questions with a less score. I also hypothesized that very short questions and answers would have a less score as well. Very short answers or questions wouldn't be very effective because in order for it to be helpful, the questions and answers need detail but not too much that makes them too long. I also analyzed "How" questions versus "Why" questions. I hypothesized that there were probably more "How" questions than "Why" questions. Futhermore, I predicted that "How" questions result in a better score than "Why" questions. 
+```{r}
+library(tidyverse)
+library(readxl)
+library(dplyr)
+library(stringr)
+answers <- read_csv("~/Desktop/Data Science Fall2019/Answers_trunc.csv")
+questions <- read_csv("~/Desktop/Data Science Fall2019/Questions_trunc.csv")
+colnames(answers)
+colnames(questions)
+str(answers)
+str(questions)
+### join relational data using the join function
+data <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+colnames(data)
+str(data)
+## create relevant columns
+data <- data %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+```
+```{r}
+## score vs answer body length 
+ggplot(data = answers)+
+  geom_bar(mapping = aes(x = str_count(answers$Body), fill = Score))+
+  labs(title = "Answer Length vs Score", x ="Answer Body Length", y = "Score")+
+  xlim(c(0,1000))
+```
+```{r}
+## score vs question body length 
+ggplot(data = questions) + 
+  geom_bar(mapping=aes(x=str_count(questions$Body), fill = Score ))+ 
+  ggtitle("Question Body Length vs Score")+
+  labs(x= "Question Body Length", y = "Score")+
+  xlim(c(0,1200))
+```
+```{r}
+ggplot(data=questions)+
+  geom_jitter(mapping=aes(x=str_detect(Title, c("How", "how")), y=Score))+
+  ggtitle("Score of Questions with 'How' in it")+
+  labs(x= "Questions with 'How' in it")
+```
+```{r}
+ggplot(data=questions)+
+  geom_jitter(mapping=aes(x=str_detect(Title, c("Why", "why")), y=Score))+
+  ggtitle("Score of Questions with 'Why' in it")+
+  labs(x= "Questions with 'Why' in it")
+```
+Mandy's Analysis: Looking at the graph for the question data, questions between 250 and 750 received the best score, while very short or too long questions received a lower score, confirming my hypothesize. The same was true for the answer data. The answers around 250 received the best score. For the second part, I compared the "Why" questions with the "How" questions with geom jitter graphs, confirming that there were more "How" questions, and the "How" questions were received higher scores than the "Why" questions. I assume this is because "How" questions, in this context, are more popular and easier to answer. It's easier to tell someone how to do something rather than explain the "why" of that same concept.
+## End Mandy ##
