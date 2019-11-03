@@ -39,11 +39,19 @@ ggplot(answersj, aes(Score)) +
   xlim(c(-10, 100))+ ggtitle("Histogram and Density plot for answersj Scores")
 ```
 ```{r eval=TRUE, echo=FALSE, results='markup'}
+<<<<<<< HEAD
 writeLines("Mean for questionjs Score")
 mean(questionsj$Score)
 writeLines("\nRange for questionjs Score")
 range(questionsj$Score)
 writeLines("\nSD for questionjs Score")
+=======
+writeLines("Mean for questionsj Score")
+mean(questionsj$Score)
+writeLines("\nRange for questionsj Score")
+range(questionsj$Score)
+writeLines("\nSD for questionsj Score")
+>>>>>>> 52ca664673acf9c18a74cd9670b1441e68681620
 sd(questionsj$Score)
 ```
 we can calculate z-scores and percentiles of an individual’s answer score
