@@ -12,37 +12,46 @@ library(stringr)
 library(knitr)
 ```
 ```{r}
-answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
-questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
+Answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
+Questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
 #just makes variables easier to recognize after Join
 Q_A<-full_join(Answers,Questions,by="Id")
+
+answersj <- read_csv("~/Desktop/lab10/Answers_trunc.csv")
+questionsj <- read_csv("~/Desktop/lab10/Questions_trunc.csv")
+
+merged <- answersj %>%
+  left_join(questionsj, c('ParentId' = 'Id')) 
+merged <- merged %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+
 ```
+
 #Team analysis
 
 Answer score is normally distributed but the tails are not symmetrically proportionate. The right tail is largly skewed. 
 ```{r echo=FALSE,  warning=FALSE }
-
 #exploring data as a whole
-
-ggplot(answers, aes(Score)) +
+ggplot(answersj, aes(Score)) +
   geom_histogram(aes(x=Score, y=..density..), bins=50) +
   geom_density(color="red")+ 
-  xlim(c(-10, 100))+ ggtitle("Histogram and Density plot for Answers Scores")
+  xlim(c(-10, 100))+ ggtitle("Histogram and Density plot for answersj Scores")
 ```
 ```{r eval=TRUE, echo=FALSE, results='markup'}
-writeLines("Mean for Questions Score")
-mean(questions$Score)
-writeLines("\nRange for Questions Score")
-range(questions$Score)
-writeLines("\nSD for Questions Score")
-sd(questions$Score)
+writeLines("Mean for questionjs Score")
+mean(questionjs$Score)
+writeLines("\nRange for questionjs Score")
+range(questionjs$Score)
+writeLines("\nSD for questionjs Score")
+sd(questionjs$Score)
 ```
 we can calculate z-scores and percentiles of an individual’s answer score
 
 ```{r , results='markup'}
 #working with z scores to orient (verb)
-ans_score_sd <- sd(answers$Score)*sqrt((length(answers$Score)-1)/(length(answers$Score)))
-z <- (55 - mean(answers$Score)) / ans_score_sd
+ans_score_sd <- sd(answersj$Score)*sqrt((length(answersj$Score)-1)/(length(answersj$Score)))
+z <- (55 - mean(answersj$Score)) / ans_score_sd
 p_yellow2 <- pnorm(z)  
 p_blue2 <- 1 - p_yellow2 
 "displaying z score for score at 55"
@@ -59,22 +68,18 @@ Mean, median, Standard deviation, range, and IQR for total time in Secs
 ```{r eval=TRUE, echo=FALSE, results='markup'}
 writeLines("Mean-------------------------------------------\n")
 mean(merged$total_time)
-
 writeLines("\nMedian-----------------------------------------\n")
 median(merged$total_time)
-
 writeLines("\nSD---------------------------------------------\n")
 sd(merged$total_time)
-
 writeLines("\nRange------------------------------------------\n")
 range(merged$total_time)
-
 writeLines("\nIQR--------------------------------------------\n")
 quantile(merged$total_time)
 ```
 
 
-Mean, median, variance, Standard deviation, range, and IQR for Answers Scores
+Mean, median, variance, Standard deviation, range, and IQR for answersj Scores
 ```{r eval=TRUE, echo=FALSE, results='markup'}
 writeLines("Mean----------------------\n")
 mean(merged$Score.x)
@@ -119,14 +124,14 @@ ggplot(merged, aes(x=total_time/1000, y=Score.x)) +
   geom_smooth()+
   ylim(c(0, 500))+
   xlim(c(0, 10))+
-  ggtitle("Scatter plot of total time in hours per Answers Scores\n Condended view ")+
+  ggtitle("Scatter plot of total time in hours per answersj Scores\n Condended view ")+
   labs(y= "Q Score", x = "Hours")
 ``` 
-Outliers are predominant consistently, thus having an effect on the regression line   suggesting that as time go by answers scores have a slight increase 
+Outliers are predominant consistently, thus having an effect on the regression line   suggesting that as time go by answersj scores have a slight increase 
 
 
 
-Mean, median, variance, Standard deviation, range, and IQR for Question Scores
+Mean, median, variance, Standard deviation, range, and IQR for questionj Scores
 ```{r eval=TRUE, echo=FALSE, results='markup'}
 writeLines("Mean-----------------------------------------\n")
 mean(merged$Score.y)
@@ -144,7 +149,7 @@ quantile(merged$Score.y)
 ggplot(merged, aes(x=total_time/1000, y=Score.y))+
   geom_boxplot(size=.2)+
   ylim(c(0, 100))+ 
-  ggtitle("Box plot of total time in hours per Question Scores\n Extended view")+
+  ggtitle("Box plot of total time in hours per questionj Scores\n Extended view")+
   labs(y= "Q Score", x = "Hours")
 ```
 
@@ -157,7 +162,7 @@ ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
   geom_point(size=.02, shape=23)+
   geom_smooth()+
   ylim(c(0, 1500))+
-  ggtitle("Scatter plot of total time in hours per Questions Scores ")+
+  ggtitle("Scatter plot of total time in hours per questionjs Scores ")+
   labs(y= "Q Score", x = "Hours")
 ```
 
@@ -166,7 +171,7 @@ ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
 ggplot(merged, aes(x=total_time/1000, y=Score.y))+
   geom_boxplot(size=.2)+
   ylim(c(0, 1400))+ 
-  ggtitle("Box plot of total time in hours per Question Scores")+
+  ggtitle("Box plot of total time in hours per questionj Scores")+
   labs(y= "Q Score", x = "Hours")
 ```
 ```{r echo=FALSE,  warning=FALSE, message=FALSE}
@@ -175,18 +180,17 @@ ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
   geom_smooth()+
   ylim(c(0, 500))+
   xlim(c(0, 10))+
-  ggtitle("Scatter plot of total time in hours per Questions Scores\n \n Condended view  ")+
+  ggtitle("Scatter plot of total time in hours per questionjs Scores\n \n Condended view  ")+
   labs(y= "Q Score", x = "Hours")
 ```
 
-The total time and its relation with the Answer and Question scores initially display a negative corralation at the range of 0 to 10 hours. Once past the 10-hour mark we see a slight positive correlation with question and answers scores
+The total time and its relation with the Answer and questionj scores initially display a negative corralation at the range of 0 to 10 hours. Once past the 10-hour mark we see a slight positive correlation with questionj and answersj scores
 
  A significant amount of outliers that do affect the relationship between score and total time. 
 
 It seems the correlation between total time and scores is positively correlated but to a small degree. 
 
 #---------------------------------------------------------------------------------end Timeliness 
-
 #Discussing the features
 
 jorges features: My question at hand is there any differences in averages or outliers scores concerning the exlution or inclution of the word : code (the feature ), in both question and answers scores.
@@ -200,10 +204,10 @@ Thorbin's Hypothesis:
   The number of "if's' and "then's" in a Question should be a proxy of specific and detailed questions which usually net a higher ammount of upvotes. The relationship between these keywords and score should be inverse in the Question domain becuase the amount of ifs and thens indicate a very faceted,complicated answer which regardless of correctness, should net a lower number of upvotes due to people who don't have a solid grasp on the material discussed in the answer. Limitations: answers dont explain if else/then statements in depth lmao, questions asked are asked using logic resembling a flow chart.
 ```{r}
 #Thorbin's code
-A<-answers %>% select(BodyA,AnswerDate,Id,ScoreA) %>% group_by(Id)%>%mutate(keywords=sum(str_detect(BodyA,c("if","If","Iff","iff","then","Then")))) %>% ungroup() %>% group_by(keywords)
+A<-Answers %>% select(BodyA,AnswerDate,Id,ScoreA) %>% group_by(Id)%>%mutate(keywords=sum(str_detect(BodyA,c("if","If","Iff","iff","then","Then")))) %>% ungroup() %>% group_by(keywords)
 Asummarized<-A %>% summarize(observations=n())
 # assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyA
-Q<-questions %>% select(BodyQ,AskedDate,Id,ScoreQ) %>% group_by(Id)%>% mutate(keywords=sum(str_detect(BodyQ,c("if","If","Iff","iff","then","Then"))))%>% ungroup() %>% group_by(keywords)
+Q<-Questions %>% select(BodyQ,AskedDate,Id,ScoreQ) %>% group_by(Id)%>% mutate(keywords=sum(str_detect(BodyQ,c("if","If","Iff","iff","then","Then"))))%>% ungroup() %>% group_by(keywords)
 Qsummarized<-Q %>% summarize(observations=n())
 
 ## assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyQ
@@ -341,52 +345,48 @@ First I began exploring data as a whole by observing the distribution to have or
 knitr::opts_chunk$set(echo = T,
                       results = "hide")
 
-library(tidyverse)
-answers <- read_csv("Answers_trunc.csv")
-questions <- read_csv("Questions_trunc.csv")
-merged <- answers %>%
-  left_join(questions, c('ParentId' = 'Id')) 
+answersjj <- read_csv("~/Desktop/lab10/answersj_trunc.csv")
+questionjsj <- read_csv("~/Desktop/lab10/questionjs_trunc.csv")
 
+merged <- answersjj %>%
+  left_join(questionjsj, c('ParentId' = 'Id')) 
 merged <- merged %>% 
   mutate(total_time = CreationDate.x - CreationDate.y) %>%
   filter(total_time>0)
 ```
 
 ```{r eval=TRUE, echo=FALSE, results='markup'} 
-writeLines("Mean for Answers Score")
-mean(answers$Score)
-writeLines("\nRange for Answers Score")
-range(answers$Score)
-writeLines("\nSD for Answers Score")
-sd(answers$Score)
-
+writeLines("Mean for answersj Score")
+mean(answersjj$Score)
+writeLines("\nRange for answersj Score")
+range(answersjj$Score)
+writeLines("\nSD for answersj Score")
+sd(answersjj$Score)
 ```
 
 #Determine whether the variable answer score is normally distributed. Based on your answer to this, think about whether theoretically we can calculate z-scores and percentiles of an individual’s answer score.
 
 Answer score is normally distributed but the tails are not symmetrically proportionate. The right tail is largly skewed. 
 ```{r echo=FALSE,  warning=FALSE }
-
 #exploring data as a whole
-
-ggplot(answers, aes(Score)) +
+ggplot(j, aes(Score)) +
   geom_histogram(aes(x=Score, y=..density..), bins=50) +
   geom_density(color="red")+ 
-  xlim(c(-10, 100))+ ggtitle("Histogram and Density plot for Answers Scores")
+  xlim(c(-10, 100))+ ggtitle("Histogram and Density plot for answersj Scores")
 ```
 ```{r eval=TRUE, echo=FALSE, results='markup'}
-writeLines("Mean for Questions Score")
-mean(questions$Score)
-writeLines("\nRange for Questions Score")
-range(questions$Score)
-writeLines("\nSD for Questions Score")
-sd(questions$Score)
+writeLines("Mean for questionjs Score")
+mean(questionjs$Score)
+writeLines("\nRange for questionjs Score")
+range(questionjs$Score)
+writeLines("\nSD for questionjs Score")
+sd(questionjs$Score)
 ```
 we can calculate z-scores and percentiles of an individual’s answer score
 ```{r , results='markup'}
 #working with z scores to orient (verb)
-ans_score_sd <- sd(answers$Score)*sqrt((length(answers$Score)-1)/(length(answers$Score)))
-z <- (55 - mean(answers$Score)) / ans_score_sd
+ans_score_sd <- sd(answersjj$Score)*sqrt((length(answersjj$Score)-1)/(length(answersj$Score)))
+z <- (55 - mean(answersj$Score)) / ans_score_sd
 p_yellow2 <- pnorm(z)  
 p_blue2 <- 1 - p_yellow2 
 "displaying z score for score at 55"
@@ -401,15 +401,15 @@ print(p_yellow2)
 
 
 ```{r echo=FALSE,  warning=FALSE }
-ggplot(questions, aes(Score)) +
+ggplot(questionjs, aes(Score)) +
   geom_histogram(aes(x=Score, y=..density..), bins=50) +
   geom_density(color="blue")+ 
   xlim(c(-10, 150))+ 
   ylim(c(0, .1191))+
-  ggtitle("Histogram and Density plot for Question Scores")
-
-#hist(answers$Score)
+  ggtitle("Histogram and Density plot for questionj Scores")
+#hist(answersj$Score)
 ```
+
 
 
 
@@ -418,16 +418,12 @@ Mean, median, Standard deviation, range, and IQR for total time in Secs
 ```{r eval=TRUE, echo=FALSE, results='markup'}
 writeLines("Mean-------------------------------------------\n")
 mean(merged$total_time)
-
 writeLines("\nMedian-----------------------------------------\n")
 median(merged$total_time)
-
 writeLines("\nSD---------------------------------------------\n")
 sd(merged$total_time)
-
 writeLines("\nRange------------------------------------------\n")
 range(merged$total_time)
-
 writeLines("\nIQR--------------------------------------------\n")
 quantile(merged$total_time)
 ```
@@ -446,16 +442,6 @@ range(merged$Score.x)
 writeLines("\nIQR-----------------------\n")
 quantile(merged$Score.x)
 ```
-
-```{r echo=FALSE,  warning=FALSE}
-ggplot(merged, aes(x=total_time/3600, y=Score.x))+
-  geom_boxplot(size=.2)+
-  ylim(c(0, 100))+ 
-  ggtitle("Box plot of total time in hours per Answer Scores")+
-  labs(y= "Ans Score", x = "Hours")
-```
-
-
 
 ```{r echo=FALSE,  warning=FALSE, message=FALSE}
 ggplot(merged, aes(x=total_time/3600, y=Score.x)) +
@@ -478,7 +464,7 @@ ggplot(merged, aes(x=total_time/1000, y=Score.x)) +
   geom_smooth()+
   ylim(c(0, 500))+
   xlim(c(0, 10))+
-  ggtitle("Scatter plot of total time in hours per Answers Scores\n Condended view ")+
+  ggtitle("Scatter plot of total time in hours per answersj Scores\n Condended view ")+
   labs(y= "Q Score", x = "Hours")
 ``` 
 Outliers are predominant consistently, thus having an effect on the regression line   suggesting that as time go by answers scores have a slight increase 
@@ -499,11 +485,12 @@ writeLines("\nIQR-----------------------------------------\n")
 quantile(merged$Score.y)
 ```
 
+
 ```{r echo=FALSE,  warning=FALSE, message=FALSE}
 ggplot(merged, aes(x=total_time/1000, y=Score.y))+
   geom_boxplot(size=.2)+
   ylim(c(0, 100))+ 
-  ggtitle("Box plot of total time in hours per Question Scores\n Extended view")+
+  ggtitle("Box plot of total time in hours per questionj Scores\n Extended view")+
   labs(y= "Q Score", x = "Hours")
 ```
 
@@ -516,7 +503,7 @@ ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
   geom_point(size=.02, shape=23)+
   geom_smooth()+
   ylim(c(0, 1500))+
-  ggtitle("Scatter plot of total time in hours per Questions Scores ")+
+  ggtitle("Scatter plot of total time in hours per questionjs Scores ")+
   labs(y= "Q Score", x = "Hours")
 ```
 
@@ -525,7 +512,7 @@ ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
 ggplot(merged, aes(x=total_time/1000, y=Score.y))+
   geom_boxplot(size=.2)+
   ylim(c(0, 1400))+ 
-  ggtitle("Box plot of total time in hours per Question Scores")+
+  ggtitle("Box plot of total time in hours per questionj Scores")+
   labs(y= "Q Score", x = "Hours")
 ```
 ```{r echo=FALSE,  warning=FALSE, message=FALSE}
@@ -534,7 +521,7 @@ ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
   geom_smooth()+
   ylim(c(0, 500))+
   xlim(c(0, 10))+
-  ggtitle("Scatter plot of total time in hours per Questions Scores\n \n Condended view  ")+
+  ggtitle("Scatter plot of total time in hours per questionjs Scores\n \n Condended view  ")+
   labs(y= "Q Score", x = "Hours")
 ```
 
@@ -560,24 +547,24 @@ Thus, the broadest concept related to the given topic, Python Questions from Sta
 My question at hand is there any differences in averages or outliers scores concerning the exlution or inclution of the word : code, in both question and answers scores.
 
 ```{r echo=FALSE,  warning=FALSE, message=FALSE}
-ggplot(questions, aes(x = str_detect(Body, "code"), y=Score)) +
+ggplot(questionjs, aes(x = str_detect(Body, "code"), y=Score)) +
   geom_boxplot(size=.1, shape=23)+
   ylim(c(0, 25))+
-  ggtitle("Box Plot inclusion and exclusion text feature: code, per Questions Scores\n \n Condended view ")+
+  ggtitle("Box Plot inclusion and exclusion text feature: code, per questionjs Scores\n \n Condended view ")+
   labs(y= "Q Score", x = "Feature Text: code")
 ```
 
 ```{r echo=FALSE,  warning=FALSE, }
-ggplot(questions, aes(x = str_detect(Body, "code"), y=Score))+
+ggplot(questionjs, aes(x = str_detect(Body, "code"), y=Score))+
 geom_boxplot(outlier.colour="red", outlier.shape=8,
               outlier.size=.4)+
   stat_summary(fun.y=mean, geom="point", shape=23, size=4)+
-  ggtitle("Box Plot inclusion and exclusion feature: code, per Questions Scores\n \n Extended view ")+
+  ggtitle("Box Plot inclusion and exclusion feature: code, per questionjs Scores\n \n Extended view ")+
   labs(y= "Q Score", x = "Feature Text: code")
 ```
 
 ```{r echo=FALSE,  warning=FALSE}
-ggplot(answers, aes(x = str_detect(Body, "code"), y=Score)) +
+ggplot(answersj, aes(x = str_detect(Body, "code"), y=Score)) +
   geom_boxplot(size=.1, shape=23)+
   ylim(c(0, 20))+
   ggtitle("Box Plot inclusion and exclusion feature: code, per Answer Scores\n \n Condended view ")+
@@ -585,7 +572,7 @@ ggplot(answers, aes(x = str_detect(Body, "code"), y=Score)) +
 ```
 
 ```{r echo=FALSE,  warning=FALSE}
-ggplot(answers, aes(x = str_detect(Body, "code"), y=Score))+
+ggplot(answersj, aes(x = str_detect(Body, "code"), y=Score))+
   geom_boxplot(outlier.colour="red", outlier.shape=8,
                outlier.size=.4)+ 
   stat_summary(fun.y=mean, geom="point", shape=23, size=4)+
