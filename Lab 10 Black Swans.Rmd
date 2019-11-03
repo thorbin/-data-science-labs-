@@ -410,3 +410,41 @@ This is important because it is the positive outliers that are attributed to que
 Thus, perhaps the reason for this effect is that it is a question or answer that does not define itself a the lowest resolution with proper keywords such as : code, then, the probability of a user finding that question or answer relevant diminishes thus affecting its score.
 
 ### end Jorge. 
+
+#Begin Erik
+
+#Here I import all the necessary imports
+library(tidyverse)
+library(readxl)
+library(dplyr)
+answers <- read_csv("Answers_trunc.csv")
+questions <- read_csv("Questions_trunc.csv")
+
+#I selected columns I wanted
+answers <- select(answers, Score, Body)
+questions <- select(questions, Score, Title, Body)
+
+#I filtered out NAs
+
+answers <- filter(Answers, !is.na(Body))
+answers <- filter(Answers, !is.na(Score))
+questions <- filter(Questions, !is.na(Score))
+questions <- filter(Questions, !is.na(Title))
+questions <- filter(Questions, !is.na(Body))
+
+str(answers)
+str(questions)
+
+#I combined the datasets
+merged <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+
+qmark <- questions %>%
+  mutate(link = str_detect(Body, "?"))
+
+#I graphed
+ggplot(merged) + geom_point(mapping=aes(x=Score.x, y = Score.y))
+
+#My question was is there a trend between the strength of the question and the strength of the answer. I found that when people asked better questions (received a higher score), they received better answers. From this, one can predict the stength of an answer received based on the strength of the question they ask.
+
+#End Erik 
