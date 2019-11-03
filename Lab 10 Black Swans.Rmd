@@ -155,7 +155,9 @@ At any rate, the original hypothesis that there is an optimal length has been sh
 ### End Ryan
 
 ### Start Jorge
+#write a few sentences in the team report detailing what you did. 
 
+First I began exploring data as a whole by observing the distribution to have orientation. Then I began analisyn in Timeliness in relation to question and answer scores. It seems the correlation between total time and scores is positively correlated but to a small degree. Finaly, for my feature analysis, I explored how the integration or the lack of the word/text: code effected scores in both conditions. 
 
 
 ```{r include=FALSE}
@@ -356,10 +358,14 @@ It seems the correlation between total time and scores is positively correlated 
 #----------------------------------------------------------------------------------
 
 
-##Exploring feature and analysis
+#Exploring feature and analysis
+
+#What features did you create and why did you choose those features?
 
 To finds out if there is a relation in what makes an appropriate or optimal answer and questions would be best at first to focus at the lowest resolution in relation to the given topic
+
 Thus, the broadest concept related to the given topic, Python Questions from Stack Overflow, would be under the broadest umbrella that encompasses the topic which I hypothesis is the word:  code.  
+
 My question at hand is there any differences in averages or outliers scores concerning the exlution or inclution of the word : code, in both question and answers scores.
 
 ```{r echo=FALSE,  warning=FALSE, message=FALSE}
@@ -395,9 +401,11 @@ ggplot(answers, aes(x = str_detect(Body, "code"), y=Score))+
   ggtitle("Box Plot inclusion and exclusion feature: code, per Answer Scores\n \n Extended view ")+
   labs(y= "Ans Score", x = "Feature Text: code")
 ```
-It seems that that the integration or the lack of the word: code, did not have any effect in scores averages, however, when we look at the extream on the positive end we observe the inclusion of the word: code did affect the amount and density of the outliers.
+#What is the relationship between your features and the scores of questions/answers if any? Provide an explanation for why each relationship does/does not exist? 
 
-This is important because it is the positive outlies that are attributed to questions and answers that have high utility. 
+It seems that that the integration or the lack of the word: code, did not have any effect in scores averages, however, when we look at the extream on the positive end we observe the inclusion of the word: code did affect the amount and density of the outliers, which arguably defines a question or answer of high utility. 
+
+This is important because it is the positive outliers that are attributed to questions and answers that have high utility. 
 
 Thus, perhaps the reason for this effect is that it is a question or answer that does not define itself a the lowest resolution with proper keywords such as : code, then, the probability of a user finding that question or answer relevant diminishes thus affecting its score.
 
