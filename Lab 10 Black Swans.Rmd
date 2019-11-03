@@ -185,6 +185,9 @@ sd(answers$Score)
 
 ```
 
+#Determine whether the variable answer score is normally distributed. Based on your answer to this, think about whether theoretically we can calculate z-scores and percentiles of an individual’s answer score.
+
+Answer score is normally distributed but the tails are not symmetrically proportionate. The right tail is largly skewed. 
 ```{r echo=FALSE,  warning=FALSE }
 
 #exploring data as a whole
@@ -202,6 +205,23 @@ range(questions$Score)
 writeLines("\nSD for Questions Score")
 sd(questions$Score)
 ```
+we can calculate z-scores and percentiles of an individual’s answer score
+```{r , results='markup'}
+#working with z scores to orient (verb)
+ans_score_sd <- sd(answers$Score)*sqrt((length(answers$Score)-1)/(length(answers$Score)))
+z <- (55 - mean(answers$Score)) / ans_score_sd
+p_yellow2 <- pnorm(z)  
+p_blue2 <- 1 - p_yellow2 
+"displaying z score for score at 55"
+print(z)
+"displaying percentiles score for score at 55"
+"right"
+print(p_blue2)
+"left"
+print(p_yellow2)
+```
+
+
 
 ```{r echo=FALSE,  warning=FALSE }
 ggplot(questions, aes(Score)) +
@@ -214,13 +234,7 @@ ggplot(questions, aes(Score)) +
 #hist(answers$Score)
 ```
 
-```{r echo=FALSE}
-#working with z scores to orient (verb)
-ans_score_sd <- sd(answers$Score)*sqrt((length(answers$Score)-1)/(length(answers$Score)))
-z <- (55 - mean(answers$Score)) / ans_score_sd
-p_yellow2 <- pnorm(z)  
-p_blue2 <- 1 - p_yellow2 
-```
+
 
 #Timeliness analysis
 Mean, median, Standard deviation, range, and IQR for total time in Secs
