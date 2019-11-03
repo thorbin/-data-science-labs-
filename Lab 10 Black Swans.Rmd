@@ -12,8 +12,8 @@ library(stringr)
 library(knitr)
 ```
 ```{r}
-Answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
-Questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
+answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
+questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
 #just makes variables easier to recognize after Join
 Q_A<-full_join(Answers,Questions,by="Id")
 ```
