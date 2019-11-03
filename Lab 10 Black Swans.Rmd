@@ -679,16 +679,18 @@ ggplot(data = questions) +
   xlim(c(0,1200))
 ```
 ```{r}
+## score vs questions with how
 ggplot(data=questions)+
   geom_jitter(mapping=aes(x=str_detect(Title, c("How", "how")), y=Score))+
   ggtitle("Score of Questions with 'How' in it")+
   labs(x= "Questions with 'How' in it")
 ```
 ```{r}
+## score vs questions with why 
 ggplot(data=questions)+
   geom_jitter(mapping=aes(x=str_detect(Title, c("Why", "why")), y=Score))+
   ggtitle("Score of Questions with 'Why' in it")+
   labs(x= "Questions with 'Why' in it")
 ```
-Mandy's Analysis: Looking at the graph for the question data, questions between 250 and 750 received the best score, while very short or too long questions received a lower score, confirming my hypothesize. The same was true for the answer data. The answers around 250 received the best score. For the second part, I compared the "Why" questions with the "How" questions with geom jitter graphs, confirming that there were more "How" questions, and the "How" questions were received higher scores than the "Why" questions. I assume this is because "How" questions, in this context, are more popular and easier to answer. It's easier to tell someone how to do something rather than explain the "why" of that same concept.
+Mandy's Analysis: Looking at the graph for the question data, questions between 250 and 750 received the best score, while very short or too long questions received a lower score, confirming my hypothesize. The same was true for the answer data. The answers around 250 received the best score. For the second part, I compared the "Why" questions with the "How" questions with geom jitter graphs, confirming that there were more "How" questions, and the "How" questions were receiving higher scores than the "Why" questions. I assume this is because "How" questions, in this context, are more popular and easier to answer. It's easier to tell someone how to do something rather than explain the "why" of that same concept.
 ## End Mandy ##
