@@ -413,7 +413,7 @@ ggplot(questions, aes(Score)) +
 
 
 
-#Timeliness analysis
+#Timeliness analysis --jorge's part
 Mean, median, Standard deviation, range, and IQR for total time in Secs
 ```{r eval=TRUE, echo=FALSE, results='markup'}
 writeLines("Mean-------------------------------------------\n")
