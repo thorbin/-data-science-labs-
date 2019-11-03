@@ -12,8 +12,8 @@ library(stringr)
 library(knitr)
 ```
 ```{r}
-answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
-questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
+Answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
+Questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
 #just makes variables easier to recognize after Join
 Q_A<-full_join(Answers,Questions,by="Id")
 ```
@@ -604,8 +604,6 @@ Thus, perhaps the reason for this effect is that it is a question or answer that
 
 #Begin Erik
 
-```{r}
-
 #Here I import all the necessary imports
 library(tidyverse)
 library(readxl)
@@ -635,14 +633,8 @@ merged <- answers %>%
 qmark <- questions %>%
   mutate(link = str_detect(Body, "?"))
 
-```
-
-```{r}
-
 #I graphed
 ggplot(merged) + geom_point(mapping=aes(x=Score.x, y = Score.y))
-
-```
 
 #My question was is there a trend between the strength of the question and the strength of the answer. I found that when people asked better questions (received a higher score), they received better answers. From this, one can predict the stength of an answer received based on the strength of the question they ask.
 
@@ -670,18 +662,21 @@ str(data)
 data <- data %>% 
   mutate(total_time = CreationDate.x - CreationDate.y) %>%
   filter(total_time>0)
+## rename columns 
+answers <- answers %>% rename(ScoreA = Score, BodyA=Body)
+questions <- questions %>% rename(ScoreQ = Score, BodyQ= Body)
 ```
 ```{r}
 ## score vs answer body length 
 ggplot(data = answers)+
-  geom_bar(mapping = aes(x = str_count(answers$Body), fill = Score))+
+  geom_bar(mapping = aes(x = str_count(answers$BodyA), fill = ScoreA))+
   labs(title = "Answer Length vs Score", x ="Answer Body Length", y = "Score")+
   xlim(c(0,1000))
 ```
 ```{r}
 ## score vs question body length 
 ggplot(data = questions) + 
-  geom_bar(mapping=aes(x=str_count(questions$Body), fill = Score ))+ 
+  geom_bar(mapping=aes(x=str_count(questions$BodyQ), fill = ScoreQ ))+ 
   ggtitle("Question Body Length vs Score")+
   labs(x= "Question Body Length", y = "Score")+
   xlim(c(0,1200))
@@ -689,14 +684,14 @@ ggplot(data = questions) +
 ```{r}
 ## score vs questions with how
 ggplot(data=questions)+
-  geom_jitter(mapping=aes(x=str_detect(Title, c("How", "how")), y=Score))+
+  geom_jitter(mapping=aes(x=str_detect(Title, c("How", "how")), y=ScoreQ))+
   ggtitle("Score of Questions with 'How' in it")+
   labs(x= "Questions with 'How' in it")
 ```
 ```{r}
 ## score vs questions with why 
 ggplot(data=questions)+
-  geom_jitter(mapping=aes(x=str_detect(Title, c("Why", "why")), y=Score))+
+  geom_jitter(mapping=aes(x=str_detect(Title, c("Why", "why")), y=ScoreQ))+
   ggtitle("Score of Questions with 'Why' in it")+
   labs(x= "Questions with 'Why' in it")
 ```
