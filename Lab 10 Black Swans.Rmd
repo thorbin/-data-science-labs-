@@ -17,6 +17,183 @@ Questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Sco
 #just makes variables easier to recognize after Join
 Q_A<-full_join(Answers,Questions,by="Id")
 ```
+#Team analysis
+
+Answer score is normally distributed but the tails are not symmetrically proportionate. The right tail is largly skewed. 
+```{r echo=FALSE,  warning=FALSE }
+
+#exploring data as a whole
+
+ggplot(answers, aes(Score)) +
+  geom_histogram(aes(x=Score, y=..density..), bins=50) +
+  geom_density(color="red")+ 
+  xlim(c(-10, 100))+ ggtitle("Histogram and Density plot for Answers Scores")
+```
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean for Questions Score")
+mean(questions$Score)
+writeLines("\nRange for Questions Score")
+range(questions$Score)
+writeLines("\nSD for Questions Score")
+sd(questions$Score)
+```
+we can calculate z-scores and percentiles of an individual’s answer score
+
+```{r , results='markup'}
+#working with z scores to orient (verb)
+ans_score_sd <- sd(answers$Score)*sqrt((length(answers$Score)-1)/(length(answers$Score)))
+z <- (55 - mean(answers$Score)) / ans_score_sd
+p_yellow2 <- pnorm(z)  
+p_blue2 <- 1 - p_yellow2 
+"displaying z score for score at 55"
+print(z)
+"displaying percentiles score for score at 55"
+"right"
+print(p_blue2)
+"left"
+print(p_yellow2)
+```
+
+#Timeliness analysis
+Mean, median, Standard deviation, range, and IQR for total time in Secs
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean-------------------------------------------\n")
+mean(merged$total_time)
+
+writeLines("\nMedian-----------------------------------------\n")
+median(merged$total_time)
+
+writeLines("\nSD---------------------------------------------\n")
+sd(merged$total_time)
+
+writeLines("\nRange------------------------------------------\n")
+range(merged$total_time)
+
+writeLines("\nIQR--------------------------------------------\n")
+quantile(merged$total_time)
+```
+
+
+Mean, median, variance, Standard deviation, range, and IQR for Answers Scores
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean----------------------\n")
+mean(merged$Score.x)
+writeLines("\nMedian--------------------\n")
+median(merged$Score.x)
+writeLines("\nSD------------------------\n")
+sd(merged$Score.x)
+writeLines("\nRange---------------------\n")
+range(merged$Score.x)
+writeLines("\nIQR-----------------------\n")
+quantile(merged$Score.x)
+```
+
+```{r echo=FALSE,  warning=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 100))+ 
+  ggtitle("Box plot of total time in hours per Answer Scores")+
+  labs(y= "Ans Score", x = "Hours")
+```
+
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 1400))+ 
+  ggtitle("Scatter plot of total time in hours per Answer Scores ")+
+  labs(y= "Ans Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x))+
+  geom_boxplot(size=.2) +
+  ylim(c(0, 900)) + 
+  ggtitle("Box plot of total time in hours per Answer Scores \n Extended view")+
+  labs(y= "Ans Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.x)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 500))+
+  xlim(c(0, 10))+
+  ggtitle("Scatter plot of total time in hours per Answers Scores\n Condended view ")+
+  labs(y= "Q Score", x = "Hours")
+``` 
+Outliers are predominant consistently, thus having an effect on the regression line   suggesting that as time go by answers scores have a slight increase 
+
+
+
+Mean, median, variance, Standard deviation, range, and IQR for Question Scores
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean-----------------------------------------\n")
+mean(merged$Score.y)
+writeLines("\nMedian--------------------------------------\n")
+median(merged$Score.y)
+writeLines("SD------------------------------------------\n")
+sd(merged$Score.y)
+writeLines("\nRange---------------------------------------\n")
+range(merged$Score.y)
+writeLines("\nIQR-----------------------------------------\n")
+quantile(merged$Score.y)
+```
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 100))+ 
+  ggtitle("Box plot of total time in hours per Question Scores\n Extended view")+
+  labs(y= "Q Score", x = "Hours")
+```
+
+
+
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 1500))+
+  ggtitle("Scatter plot of total time in hours per Questions Scores ")+
+  labs(y= "Q Score", x = "Hours")
+```
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 1400))+ 
+  ggtitle("Box plot of total time in hours per Question Scores")+
+  labs(y= "Q Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 500))+
+  xlim(c(0, 10))+
+  ggtitle("Scatter plot of total time in hours per Questions Scores\n \n Condended view  ")+
+  labs(y= "Q Score", x = "Hours")
+```
+
+The total time and its relation with the Answer and Question scores initially display a negative corralation at the range of 0 to 10 hours. Once past the 10-hour mark we see a slight positive correlation with question and answers scores
+
+ A significant amount of outliers that do affect the relationship between score and total time. 
+
+It seems the correlation between total time and scores is positively correlated but to a small degree. 
+
+#---------------------------------------------------------------------------------end Timeliness 
+
+#Discussing the features
+
+jorges features: My question at hand is there any differences in averages or outliers scores concerning the exlution or inclution of the word : code (the feature ), in both question and answers scores.
+
+
+
+
 
 Thorbin's Hypothesis: 
 
