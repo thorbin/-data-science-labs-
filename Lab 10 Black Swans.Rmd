@@ -604,6 +604,8 @@ Thus, perhaps the reason for this effect is that it is a question or answer that
 
 #Begin Erik
 
+```{r}
+
 #Here I import all the necessary imports
 library(tidyverse)
 library(readxl)
@@ -633,8 +635,14 @@ merged <- answers %>%
 qmark <- questions %>%
   mutate(link = str_detect(Body, "?"))
 
+```
+
+```{r}
+
 #I graphed
 ggplot(merged) + geom_point(mapping=aes(x=Score.x, y = Score.y))
+
+```
 
 #My question was is there a trend between the strength of the question and the strength of the answer. I found that when people asked better questions (received a higher score), they received better answers. From this, one can predict the stength of an answer received based on the strength of the question they ask.
 
