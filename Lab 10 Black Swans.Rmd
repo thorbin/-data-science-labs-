@@ -12,10 +12,10 @@ library(stringr)
 library(knitr)
 ```
 ```{r}
-Answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
-Questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
+answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
+questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
 #just makes variables easier to recognize after Join
-Q_A<-full_join(Answers,Questions,by="Id")
+Q_A<-full_join(answers,questions,by="Id")
 
 answersj <- read_csv("~/Desktop/lab10/Answers_trunc.csv")
 questionsj <- read_csv("~/Desktop/lab10/Questions_trunc.csv")
@@ -40,11 +40,11 @@ ggplot(answersj, aes(Score)) +
 ```
 ```{r eval=TRUE, echo=FALSE, results='markup'}
 writeLines("Mean for questionjs Score")
-mean(questionjs$Score)
+mean(questionsj$Score)
 writeLines("\nRange for questionjs Score")
-range(questionjs$Score)
+range(questionsj$Score)
 writeLines("\nSD for questionjs Score")
-sd(questionjs$Score)
+sd(questionsj$Score)
 ```
 we can calculate z-scores and percentiles of an individual’s answer score
 
@@ -204,10 +204,10 @@ Thorbin's Hypothesis:
   The number of "if's' and "then's" in a Question should be a proxy of specific and detailed questions which usually net a higher ammount of upvotes. The relationship between these keywords and score should be inverse in the Question domain becuase the amount of ifs and thens indicate a very faceted,complicated answer which regardless of correctness, should net a lower number of upvotes due to people who don't have a solid grasp on the material discussed in the answer. Limitations: answers dont explain if else/then statements in depth lmao, questions asked are asked using logic resembling a flow chart.
 ```{r}
 #Thorbin's code
-A<-Answers %>% select(BodyA,AnswerDate,Id,ScoreA) %>% group_by(Id)%>%mutate(keywords=sum(str_detect(BodyA,c("if","If","Iff","iff","then","Then")))) %>% ungroup() %>% group_by(keywords)
+A<-answers %>% select(BodyA,AnswerDate,Id,ScoreA) %>% group_by(Id)%>%mutate(keywords=sum(str_detect(BodyA,c("if","If","Iff","iff","then","Then")))) %>% ungroup() %>% group_by(keywords)
 Asummarized<-A %>% summarize(observations=n())
 # assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyA
-Q<-Questions %>% select(BodyQ,AskedDate,Id,ScoreQ) %>% group_by(Id)%>% mutate(keywords=sum(str_detect(BodyQ,c("if","If","Iff","iff","then","Then"))))%>% ungroup() %>% group_by(keywords)
+Q<-questions %>% select(BodyQ,AskedDate,Id,ScoreQ) %>% group_by(Id)%>% mutate(keywords=sum(str_detect(BodyQ,c("if","If","Iff","iff","then","Then"))))%>% ungroup() %>% group_by(keywords)
 Qsummarized<-Q %>% summarize(observations=n())
 
 ## assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyQ
@@ -244,22 +244,14 @@ output: html_document
 ---
 
 ```{r}
-answers <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Answers_trunc.csv")
-questions <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Questions_trunc.csv")
-colnames(answers)
-colnames(questions)
-str(answers)
-str(questions)
-merged <- answers %>%
-  left_join(questions, c('ParentId' = 'Id')) 
+#answers <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Answers_trunc.csv")
+#questions <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Questions_trunc.csv")
+merged <-left_join(questions,answers,by=c("Id"="ParentId"),convert==TRUE) 
 
-colnames(merged)
-str(merged)
+
 
 ## create relevant columns
-merged <- merged %>% 
-  mutate(total_time = CreationDate.x - CreationDate.y) %>%
-  filter(total_time>0)
+merged <-merged %>% mutate(total_time = AnswerDate - AskedDate) %>% filter(total_time>0)
 
 ```
 
@@ -272,7 +264,7 @@ We begin with the length of a questions' title. Below we see a bar graph showing
 
 ```{r}
 ggplot(data = questions) +
-  geom_bar(mapping = aes(x = str_count(questions$Title), fill = Score))+
+  geom_bar(mapping = aes(x = str_count(questions$Title), fill = ScoreQ))+
   labs(title= "Question Length vs Score", x = "Question Length", y = "Score")
 ```
 
@@ -291,18 +283,17 @@ Maybe there is something about the title of a question that leads people to natu
 
 ```{r}
 ggplot(data = questions) +
-  geom_bar(mapping = aes(x = str_count(questions$Body), fill = Score))+
+  geom_bar(mapping = aes(x =str_count(questions$Body), fill=ScoreQ))+
   labs(title= "Question Length vs Score", x = "Question Length", y = "Score")+
   xlim(c(0,5000))
-                                                                                   
 ```
 
 This is messier. Peak scores seem to gravitate somewhere around a question length of 500, but there is a fat tail leading out to the right. However, unlike the case of titles, where the questioners tend to limit their lengths to that optimal point, here we see that this is not the case:
 
 ```{r}
-mean(str_count(questions$Body))
-median(str_count(questions$Body))
-sd(str_count(questions$Body))
+mean(str_count(questions$BodyQ))
+median(str_count(questions$BodyQ))
+sd(str_count(questions$BodyQ))
 ```
 
 The standard deviation is massive here compared to that of the question titles, and a mean of 826 is further from the optimal point than we would expect if questioners tended to limit their lengths on average to a point that was rewarded with a high score. In other words, although lengthy questions are clearly penalized (since we see from the graph that concise questions get higher scores and longer questions get lower scores), people still tend to err on the side of length.
@@ -313,7 +304,7 @@ Finally, we turn to answer length:
 
 ```{r}
 ggplot(data = answers)+
-  geom_bar(mapping = aes(x = str_count(answers$Body), fill = Score))+
+  geom_bar(mapping = aes(x = str_count(answers$BodyA), fill = ScoreA))+
   labs(title = "Answer Length vs Score", x ="Answer Length", y = "Score") +
   xlim(c(0, 1000))
 ```
@@ -321,9 +312,9 @@ ggplot(data = answers)+
 This is even more interesting: there is a noticable peak in score around a length of 250, and then a very gradual decline as answers lengthen. If we again calculate the statistical properties:
 
 ```{r}
-mean(str_count(answers$Body))
-median(str_count(answers$Body))
-sd(str_count(answers$Body))
+mean(str_count(answers$BodyA))
+median(str_count(answers$BodyA))
+sd(str_count(answers$BodyA))
 ```
 
 The standard deviation is very large--meaning that answer-lengths vary tremendously--and the mean of (roughly) 658 is very far away from the "optimal point" of 250. (Notice that this is an even greater distance of length than that for questions, which was, roughly, 873-500). This shows that answers tend to err on the side of lengthiness far more than even questions.
@@ -345,8 +336,8 @@ First I began exploring data as a whole by observing the distribution to have or
 knitr::opts_chunk$set(echo = T,
                       results = "hide")
 
-answersjj <- read_csv("~/Desktop/lab10/answersj_trunc.csv")
-questionjsj <- read_csv("~/Desktop/lab10/questionjs_trunc.csv")
+answersjj <- read_csv("~/Desktop/lab10/answers_trunc.csv")
+questionjsj <- read_csv("~/Desktop/lab10/questions_trunc.csv")
 
 merged <- answersjj %>%
   left_join(questionjsj, c('ParentId' = 'Id')) 
@@ -369,18 +360,18 @@ sd(answersjj$Score)
 Answer score is normally distributed but the tails are not symmetrically proportionate. The right tail is largly skewed. 
 ```{r echo=FALSE,  warning=FALSE }
 #exploring data as a whole
-ggplot(j, aes(Score)) +
+ggplot(data=answersj, aes(Score)) +
   geom_histogram(aes(x=Score, y=..density..), bins=50) +
   geom_density(color="red")+ 
   xlim(c(-10, 100))+ ggtitle("Histogram and Density plot for answersj Scores")
 ```
 ```{r eval=TRUE, echo=FALSE, results='markup'}
 writeLines("Mean for questionjs Score")
-mean(questionjs$Score)
+mean(questionsj$Score)
 writeLines("\nRange for questionjs Score")
-range(questionjs$Score)
+range(questionsj$Score)
 writeLines("\nSD for questionjs Score")
-sd(questionjs$Score)
+sd(questionsj$Score)
 ```
 we can calculate z-scores and percentiles of an individual’s answer score
 ```{r , results='markup'}
@@ -401,7 +392,7 @@ print(p_yellow2)
 
 
 ```{r echo=FALSE,  warning=FALSE }
-ggplot(questionjs, aes(Score)) +
+ggplot(questionsj, aes(Score)) +
   geom_histogram(aes(x=Score, y=..density..), bins=50) +
   geom_density(color="blue")+ 
   xlim(c(-10, 150))+ 
