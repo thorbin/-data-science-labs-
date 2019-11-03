@@ -157,128 +157,248 @@ At any rate, the original hypothesis that there is an optimal length has been sh
 ### Start Jorge
 
 
-```{r }
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = T,
+                      results = "hide")
+
 library(tidyverse)
 answers <- read_csv("Answers_trunc.csv")
 questions <- read_csv("Questions_trunc.csv")
 merged <- answers %>%
   left_join(questions, c('ParentId' = 'Id')) 
+
 merged <- merged %>% 
   mutate(total_time = CreationDate.x - CreationDate.y) %>%
   filter(total_time>0)
 ```
 
-## R Markdown
+```{r eval=TRUE, echo=FALSE, results='markup'} 
+writeLines("Mean for Answers Score")
+mean(answers$Score)
+writeLines("\nRange for Answers Score")
+range(answers$Score)
+writeLines("\nSD for Answers Score")
+sd(answers$Score)
 
+```
 
-```{r }
-knitr::opts_chunk$set(echo = FALSE)
+```{r echo=FALSE,  warning=FALSE }
+
 #exploring data as a whole
+
 ggplot(answers, aes(Score)) +
   geom_histogram(aes(x=Score, y=..density..), bins=50) +
-  geom_density(color="blue")+ 
-  xlim(c(-10, 100))
+  geom_density(color="red")+ 
+  xlim(c(-10, 100))+ ggtitle("Histogram and Density plot for Answers Scores")
+```
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean for Questions Score")
+mean(questions$Score)
+writeLines("\nRange for Questions Score")
+range(questions$Score)
+writeLines("\nSD for Questions Score")
+sd(questions$Score)
+```
 
+```{r echo=FALSE,  warning=FALSE }
 ggplot(questions, aes(Score)) +
   geom_histogram(aes(x=Score, y=..density..), bins=50) +
   geom_density(color="blue")+ 
-  xlim(c(-10, 250))
+  xlim(c(-10, 150))+ 
+  ylim(c(0, .1191))+
+  ggtitle("Histogram and Density plot for Question Scores")
 
-mean(merged$Score.x)
-median(merged$Score.x)
-var(merged$Score.x)
-sd(merged$Score.x) #!
+#hist(answers$Score)
+```
 
-mean(answers$Score)
-sd(answers$Score)
-mean(questions$Score)
-sd(questions$Score)
-
-
-hist(answers$Score)
-
+```{r echo=FALSE}
+#working with z scores to orient (verb)
 ans_score_sd <- sd(answers$Score)*sqrt((length(answers$Score)-1)/(length(answers$Score)))
-
 z <- (55 - mean(answers$Score)) / ans_score_sd
-
 p_yellow2 <- pnorm(z)  
 p_blue2 <- 1 - p_yellow2 
-
 ```
+
 #Timeliness analysis
-```{r}
+Mean, median, Standard deviation, range, and IQR for total time in Secs
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean-------------------------------------------\n")
+mean(merged$total_time)
 
-ggplot(merged, aes(x=total_time/1000, y=Score.x))+
-  geom_boxplot(size=.2)+
-  ylim(c(0, 25))
+writeLines("\nMedian-----------------------------------------\n")
+median(merged$total_time)
+
+writeLines("\nSD---------------------------------------------\n")
+sd(merged$total_time)
+
+writeLines("\nRange------------------------------------------\n")
+range(merged$total_time)
+
+writeLines("\nIQR--------------------------------------------\n")
+quantile(merged$total_time)
 ```
 
-```{r}
+
+Mean, median, variance, Standard deviation, range, and IQR for Answers Scores
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean----------------------\n")
+mean(merged$Score.x)
+writeLines("\nMedian--------------------\n")
 median(merged$Score.x)
+writeLines("\nSD------------------------\n")
+sd(merged$Score.x)
+writeLines("\nRange---------------------\n")
+range(merged$Score.x)
+writeLines("\nIQR-----------------------\n")
+quantile(merged$Score.x)
 ```
 
-```{r}
+```{r echo=FALSE,  warning=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 100))+ 
+  ggtitle("Box plot of total time in hours per Answer Scores")+
+  labs(y= "Ans Score", x = "Hours")
+```
+
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 1400))+ 
+  ggtitle("Scatter plot of total time in hours per Answer Scores ")+
+  labs(y= "Ans Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x))+
+  geom_boxplot(size=.2) +
+  ylim(c(0, 900)) + 
+  ggtitle("Box plot of total time in hours per Answer Scores \n Extended view")+
+  labs(y= "Ans Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
 ggplot(merged, aes(x=total_time/1000, y=Score.x)) +
   geom_point(size=.02, shape=23)+
   geom_smooth()+
-  ylim(c(0, 1400))
+  ylim(c(0, 500))+
+  xlim(c(0, 10))+
+  ggtitle("Scatter plot of total time in hours per Answers Scores\n Condended view ")+
+  labs(y= "Q Score", x = "Hours")
+``` 
+Outliers are predominant consistently, thus having an effect on the regression line   suggesting that as time go by answers scores have a slight increase 
+
+
+
+Mean, median, variance, Standard deviation, range, and IQR for Question Scores
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean-----------------------------------------\n")
+mean(merged$Score.y)
+writeLines("\nMedian--------------------------------------\n")
+median(merged$Score.y)
+writeLines("SD------------------------------------------\n")
+sd(merged$Score.y)
+writeLines("\nRange---------------------------------------\n")
+range(merged$Score.y)
+writeLines("\nIQR-----------------------------------------\n")
+quantile(merged$Score.y)
 ```
 
-```{r}
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 100))+ 
+  ggtitle("Box plot of total time in hours per Question Scores\n Extended view")+
+  labs(y= "Q Score", x = "Hours")
+```
+
+
+
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
 ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
   geom_point(size=.02, shape=23)+
   geom_smooth()+
-  ylim(c(0, 1500))
+  ylim(c(0, 1500))+
+  ggtitle("Scatter plot of total time in hours per Questions Scores ")+
+  labs(y= "Q Score", x = "Hours")
 ```
 
-```{r}
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
 ggplot(merged, aes(x=total_time/1000, y=Score.y))+
   geom_boxplot(size=.2)+
-  ylim(c(0, 25))
+  ylim(c(0, 1400))+ 
+  ggtitle("Box plot of total time in hours per Question Scores")+
+  labs(y= "Q Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 500))+
+  xlim(c(0, 10))+
+  ggtitle("Scatter plot of total time in hours per Questions Scores\n \n Condended view  ")+
+  labs(y= "Q Score", x = "Hours")
 ```
 
-```{r}
-median(merged$Score.y)
-mean(merged$Score.y)
-```
-#the total time and its relation with the Answer and Question scores display a non-uniform behavior. 
-#There is still a significant amount of outliers that do affect the relationship between score and total time. 
-#it seems the correlation between total time and scores is positively correlated but to a small degree. 
+The total time and its relation with the Answer and Question scores initially display a negative corralation at the range of 0 to 10 hours.once past the 10-hour mark we see a slight positive correlation with question and answers scores
+
+ A significant amount of outliers that do affect the relationship between score and total time. 
+
+It seems the correlation between total time and scores is positively correlated but to a small degree. 
 
 #---------------------------------------------------------------------------------end Timeliness Jorge-part
+
 #----------------------------------------------------------------------------------
-#exploring feature and analysis
 
-#To finds out if there is a relation in what makes an appropriate answer and questions would be best at first to focus at the lowest resolution in relation to the given topic
-#thus, the broadest concept related to the given topic, Python Questions from Stack Overflow, would be under the broadest umbrella that encompasses the topic which I hypothesis is the word:  code.  
-#my question at hand is there any differences in averages or  outliers scores concerning the exlution or inclution of the word : code, in both question and answers scores.
 
-```{r}
+##Exploring feature and analysis
+
+To finds out if there is a relation in what makes an appropriate or optimal answer and questions would be best at first to focus at the lowest resolution in relation to the given topic
+Thus, the broadest concept related to the given topic, Python Questions from Stack Overflow, would be under the broadest umbrella that encompasses the topic which I hypothesis is the word:  code.  
+My question at hand is there any differences in averages or outliers scores concerning the exlution or inclution of the word : code, in both question and answers scores.
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
 ggplot(questions, aes(x = str_detect(Body, "code"), y=Score)) +
-  geom_point(size=.1, shape=23)+
-  ylim(c(0, 2000))
+  geom_boxplot(size=.1, shape=23)+
+  ylim(c(0, 25))+
+  ggtitle("Box Plot inclusion and exclusion text feature: code, per Questions Scores\n \n Condended view ")+
+  labs(y= "Q Score", x = "Feature Text: code")
 ```
 
-```{r}
+```{r echo=FALSE,  warning=FALSE, }
 ggplot(questions, aes(x = str_detect(Body, "code"), y=Score))+
 geom_boxplot(outlier.colour="red", outlier.shape=8,
               outlier.size=.4)+
-  stat_summary(fun.y=mean, geom="point", shape=23, size=4)
+  stat_summary(fun.y=mean, geom="point", shape=23, size=4)+
+  ggtitle("Box Plot inclusion and exclusion feature: code, per Questions Scores\n \n Extended view ")+
+  labs(y= "Q Score", x = "Feature Text: code")
 ```
 
-```{r}
+```{r echo=FALSE,  warning=FALSE}
 ggplot(answers, aes(x = str_detect(Body, "code"), y=Score)) +
-  geom_point(size=.1, shape=23)+
-  ylim(c(0, 2000))
+  geom_boxplot(size=.1, shape=23)+
+  ylim(c(0, 20))+
+  ggtitle("Box Plot inclusion and exclusion feature: code, per Answer Scores\n \n Condended view ")+
+  labs(y= "Ans Score", x = "Feature Text: code")
 ```
 
-```{r}
+```{r echo=FALSE,  warning=FALSE}
 ggplot(answers, aes(x = str_detect(Body, "code"), y=Score))+
   geom_boxplot(outlier.colour="red", outlier.shape=8,
                outlier.size=.4)+ 
-  stat_summary(fun.y=mean, geom="point", shape=23, size=4)
+  stat_summary(fun.y=mean, geom="point", shape=23, size=4)+
+  ggtitle("Box Plot inclusion and exclusion feature: code, per Answer Scores\n \n Extended view ")+
+  labs(y= "Ans Score", x = "Feature Text: code")
 ```
-#it seems that that the integration or the lack of the word: code, did not have any effect in scores averages, however, when we look at the extream on the positive end we observe the inclusion of the word: code did affect the amount and density of the outliers.
-#This is important because it is the outlies that display questions and answers that have high utility. 
-#Thus, perhaps the reason for this effect is that it is a question or answer that does not define itself a the lowest resolution with proper keywords like code then, the probability of a user finding that question or answer relevant diminishes.
+It seems that that the integration or the lack of the word: code, did not have any effect in scores averages, however, when we look at the extream on the positive end we observe the inclusion of the word: code did affect the amount and density of the outliers.
+
+This is important because it is the positive outlies that are attributed to questions and answers that have high utility. 
+
+Thus, perhaps the reason for this effect is that it is a question or answer that does not define itself a the lowest resolution with proper keywords such as : code, then, the probability of a user finding that question or answer relevant diminishes thus affecting its score.
+
 ### end Jorge. 
