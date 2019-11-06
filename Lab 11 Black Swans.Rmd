@@ -1,0 +1,22 @@
+---
+title: "Lab 11"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "11/4/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(babynames)
+library(dplyr)
+```
+
+
+Thorbins stuff:
+```{r}
+#strategy: find the say 20 most popular names in any given year then plot their prop as a time series that way we dont have to deal with any silly regular expression BS. 
+male<-filter(babynames,sex=="M",year>=2007) %>% group_by(name) %>%arrange(desc(prop))
+#most popular name for 2007-2008 is Jacob
+female<-filter(babynames,sex=="F",year>=2007) %>% group_by(name) %>% arrange(desc(prop))
+```
+
