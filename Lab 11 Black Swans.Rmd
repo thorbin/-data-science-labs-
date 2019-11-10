@@ -868,4 +868,70 @@ print(gt4)
 #I believe that the names: Juliana, female, and Zane, male, are approaching values that could indicate potential in terms of it being trendy in the near future. Values for a name being trendy would be porp=.001. Zane and Juliana display an upward behavior that approximating proportions of  .001.
 
 # End Jorge
+#Begin Erik
 
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(babynames)
+#summary(babynames)
+babynames <- filter(babynames,!is.na(sex))
+male<-filter(babynames,sex=="M") %>% group_by(name) %>%arrange(desc(prop))
+female<-filter(babynames,sex=="F") %>% group_by(name) %>%arrange(desc(prop))
+#Here I set up the sets I needed and split the data by male and female.
+```
+```{r}
+erik<- male %>% filter(str_detect(name, "^E[r]+i[ck]+[eh]?"))
+#Here I made a dataset with names similiar to my own
+```
+```{r}
+ggplot(erik, mapping=aes(x=year, y =n, color = name)) + geom_point()
+#Here I graphed the number of instances of names similar to mine over time
+```
+```{r}
+rachorari <- female %>% filter(str_detect(name, "^A+r+i")||str_detect(name, "^R+a+c"))
+rachorari1988 <- rachorari %>% filter(year==1988)
+?sum(rachorari1988, prop)
+#There were 58 instances of rachel or ariana in 1988
+
+rachorari1990 <- rachorari %>% filter(year==1990)
+#There were 63 observations of rachel or ariana in 1990
+rachorari2017 <- rachorari %>% filter(year==2017)
+#There was no 2018, so I checked for 2017, there are 112 instances of versions of rachel or ariana prop of 
+  
+ariel1973 <- female %>% filter(str_detect(name, "^A+r+i")) %>% filter(year==1973)
+#There are 18 instances of versions of ariel in 1973
+ariel1988 <- female %>% filter(str_detect(name, "^A+r+i")) %>% filter(year==1988)
+#There are 39 instances of versions of ariel in 1988
+ariel1990 <- female %>% filter(str_detect(name, "^A+r+i")) %>% filter(year==1990)
+#There are 47 instances of versions of ariel in 1990
+
+rachel1973 <- female %>% filter(str_detect(name, "^R+a+c")) %>% filter(year==1973)
+#There are 11 instances of versions of Rachel in 1973
+rachel1988 <- female %>% filter(str_detect(name, "^R+a+c")) %>% filter(year==1988)
+#There are 19 instances of versions of Rachel in 1988
+rachel1990 <- female %>% filter(str_detect(name, "^R+a+c")) %>% filter(year==1990)
+#There are 16 instances of versions of Rachel in 1990
+
+```
+```{r}
+#Here I joined datasets of the occurrences of all of our names. 
+specerik <- male %>% filter(str_detect(name, "Erik"))
+specmandy <- female %>% filter(str_detect(name, "Mandy"))
+trythorbin <- male %>% filter(str_detect(name, "Toby"))
+specryan <- male %>% filter(str_detect(name, "Ryan"))
+specjorge <- male %>% filter(str_detect(name, "Jorge"))
+names <- full_join(specerik, specmandy, by=NULL)
+names <- full_join(names,trythorbin, by=NULL)
+names <- full_join(names,specryan, by=NULL)
+names <- full_join(names,specjorge, by=NULL)
+names <- filter(names, year>1963)
+#This is the set 28 years before ryan was born to 28 years after.
+```
+
+```{r}
+ggplot(names, mapping=aes(x=year, y = n, color = name))+geom_point()
+#Here I graphed the dataset by name
+```
+#End erik
