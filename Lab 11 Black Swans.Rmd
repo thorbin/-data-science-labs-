@@ -192,6 +192,18 @@ We filtered out each of our names individually by string detect and the year and
 Which of your teams' names show a "significant" change over the years? 
 
 
+Picking two baby names for our client: They want a name clearly for males or females (no gender-ambiguous names), “trending” but not “trendy”, i.e., on the upslope but not super-popular today, maybe very popular in 10-20 years, and cannot be easily (and commonly) shortened to a nickname (like “Benjamin” to “Ben”). 
+```{r}
+# Let's look at names from the last ten years and rule out the most popular names. Let's say we want n to be less than 5,000 but greater than 500. 
+clientsbaby <- allnames %>% filter(year>=2008) %>% arrange(name) %>% filter(n < 5000, n>500)
+rhett <- clientsbaby %>% filter(name == "Rhett")
+ivy <- clientsbaby %>% filter(name== "Ivy")
+
+#From the dataset, I have picked the name Rhett for a boy, and the name Ivy for a girl. Both names are trending but not trendy. The names are slowly becoming more popular overtime. Both the names are not unisex. Both names cannot be easily shortened into a nickname. 
+
+
+```
+
 # Jorge Portion:  
 
 
