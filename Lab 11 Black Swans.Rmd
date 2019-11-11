@@ -935,3 +935,294 @@ ggplot(names, mapping=aes(x=year, y = n, color = name))+geom_point()
 #Here I graphed the dataset by name
 ```
 #End erik
+
+
+#Ryan's
+
+```{r cars}
+library(babynames)
+library(stringr)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+data <- babynames
+```
+
+
+
+**Problem:**
+
+We need to analyse the names of newborn babies, male or female, born between 1880 to 2017, looking up the trends, and selecting two good, uprising (but not trendy) non gender-neutral names to cover both possible outcomes of the pregnancy.
+
+**Why is this important or interesting?**
+
+It should interesting to see how names change through years. For example, a gender-neutral name like "Elon" has now become a mostly male name because of (apparently) one person. We want a name to be interesting, widespread enough to be understandable, but not too trendy and not evocative of your old aunt or uncle.
+
+**How will our solution be used?**
+
+It will be used to name a newborn child somewhere near to the middle of December, and it could be used in the future by other customers or maybe even applications to help couples in the naming process.
+
+**4. In a perfrect world, what data can be used to analyse this solution?**
+
+The dataset we're using only includes U.S. data. Worldwide data would be ideal, and data from the future would be even better. The former is difficult, the latter is impossible.
+
+**5. What data have been collected? **
+
+Full baby names in the U.S., which includes all names with at least 5 uses.
+
+## Plot
+
+```{r}
+filtered_rya <- data[str_detect(data$name, regex("^rya.", ignore_case = TRUE)),]
+filtered_rya <- filtered_rya %>% group_by(year) %>% summarise(total = sum(prop))
+```
+
+```{r}
+filtered_ryan <- data[str_detect(data$name, regex("^ryan$", ignore_case = TRUE)),]
+filtered_ryan <- filtered_ryan %>% group_by(year) %>% summarise(total = sum(prop))
+```
+
+```{r}
+total <- merge(filtered_rya, filtered_ryan, by='year')
+```
+
+```{r}
+ggplot(data = total, aes(x = year)) + geom_line(aes(y=total.x, colour=blues9[1])) +  geom_line(aes(y=total.y, colour=blues9[3])) + labs(caption = "Data source: babynames", x = "Year", y = "Proportion") + scale_colour_discrete(name = "Regexp", labels = c("^ryan$", "^rya."))
+```
+
+You can also embed plots, for example:
+
+```{r}
+filtered_rachel <- data[str_detect(data$name, regex("^rach.", ignore_case = TRUE)) & data$sex == 'F',]
+filtered_ariel <- data[str_detect(data$name, regex("^ariel.", ignore_case = TRUE)) & data$sex == 'F',]
+```
+
+```{r}
+filtered_ariel[filtered_ariel$year==1973,]$name
+```
+```{r}
+filtered_ariel[filtered_ariel$year==1988,]$name
+```
+```{r}
+filtered_ariel[filtered_ariel$year==1990,]$name
+```
+
+```{r}
+filtered_rachel[filtered_rachel$year==1973,]$name
+```
+
+```{r}
+filtered_rachel[filtered_rachel$year==1988,]$name
+```
+
+```{r}
+filtered_rachel[filtered_rachel$year==1990,]$name
+```
+
+```{r}
+filtered_rachel_ariel <- data[(str_detect(data$name, regex("^rach.", ignore_case = TRUE)) | str_detect(data$name, regex("^ariel.", ignore_case = TRUE))) & data$sex == 'F',]
+```
+
+```{r}
+filtered_rachel_ariel <- filtered_rachel_ariel %>% group_by(year) %>% summarise(total = sum(prop))
+```
+
+```{r}
+filtered_rachel_ariel[filtered_rachel_ariel$year==1973,]$total
+```
+
+```{r}
+filtered_rachel_ariel[filtered_rachel_ariel$year==1988,]$total
+```
+
+```{r}
+filtered_rachel_ariel[filtered_rachel_ariel$year==1990,]$total
+```
+
+```{r}
+filtered_rachel_ariel[filtered_rachel_ariel$year==2017,]$total
+```
+
+
+Below, we will consider the change as the difference of proportion of a name in the current year compared to the previous year. Therefore, we would compare the change of girls called Ariel (or other variations) with the mean change in given year.
+
+```{r}
+change_ariel <- (filtered_ariel[filtered_ariel$year==1990,] %>% summarise(total = sum(prop)))$total - (filtered_ariel[filtered_ariel$year==1988,] %>% summarise(total = sum(prop)))$total
+change_ariel
+```
+
+```{r}
+(filtered_ariel[filtered_ariel$year==1989,] %>% summarise(total = sum(prop)))$total - (filtered_ariel[filtered_ariel$year==1988,] %>% summarise(total = sum(prop)))$total
+```
+
+Change in proportion was big, but not very significant, meaning that movie have not boosted it.
+
+```{r}
+filtered_vowels <- data[str_detect(data$name, regex("^[aeiou].", ignore_case = TRUE)) & data$sex == 'F' & data$year >= 1988 & data$year <= 1990,]
+```
+
+```{r}
+differences <- filtered_vowels %>% group_by(name) %>% summarise(abs_diff = max(prop) - min(prop))
+```
+
+```{r}
+mean(differences$abs_diff)
+```
+
+```{r}
+percentile <- ecdf(differences$abs_diff)
+percentile(change_ariel)
+```
+
+  However, change_ariel falls into the 99th percentile, so it's a pretty big change!
+
+```{r}
+filtered_females <- data[data$sex == 'F' & data$year >= 1987 & data$year <= 1990,]
+
+filtered_females <- filtered_females %>% group_by(name) %>% mutate(popularity_diff = prop - lag(prop, order_by=year))
+
+filtered_females <- na.omit(filtered_females)
+```
+
+```{r}
+filtered_females <- filtered_females %>% group_by(year) %>% mutate(max_prop = max(prop)) %>% mutate(mean_prop = mean(prop)) %>% filter(str_detect(name, regex("^ariel.", ignore_case = TRUE))) %>% summarise(total = sum(prop), max = mean(max_prop), mean = mean(mean_prop)) 
+```
+
+```{r}
+ggplot(filtered_females, aes(x=year)) + 
+    stat_smooth(aes(y = total, colour=blues9[1])) +
+    stat_smooth(aes(y = max, colour=blues9[3])) +
+    stat_smooth(aes(y = mean, colour=blues9[5]))
+```
+
+```{r}
+ggplot(filtered_females, aes(x=year)) + 
+    stat_smooth(aes(y = total, colour=blues9[1])) +
+    stat_smooth(aes(y = mean, colour=blues9[5])) + labs(caption = "Data source: babynames", x = "Year", y = "Change in proportion") + scale_colour_discrete(name = "Legend", labels = c("Other names", "Ariel"))
+```
+
+
+### Prediction
+
+I will use the last 3 years to predict the names that would be moderately trendy today, but will probably become popular later (e.g. they are showing a positive popularity change).
+
+```{r}
+filtered_names <- data %>% filter(year >= 2013 & year <= 2017) %>% mutate(popularity_diff = prop - lag(prop, order_by=year))
+
+filtered_names <- na.omit(filtered_names)
+```
+
+
+```{r}
+growing_names <- filtered_names %>% filter(popularity_diff >= 0 & prop > 0.000001
+) %>% filter(year==2017)
+```
+
+```{r}
+head(growing_names)
+```
+
+```{r}
+names_girl <- data %>% filter(year == 2017 & sex == 'F')
+```
+
+```{r}
+possible_girls <- intersect(names_girl[order(-names_girl$prop),][20:30,]$name,  growing_names$name)
+possible_girls
+```
+```{r}
+names_boy <- data %>% filter(year == 2017 & sex == 'M')
+```
+
+```{r}
+possible_boys <- intersect(names_boy[order(-names_boy$prop),][20:30,]$name,  growing_names$name)
+possible_boys
+```
+
+Therefore, I'd recommend the names Mila (F) and Luke (M) since these names are not decreasing in popularity, cannot be shortened, and are not so trendy now (but still trendy enough).
+
+```{r}
+mia_luke <- data %>% filter(str_detect(name, regex("^mila$", ignore_case = TRUE)) | str_detect(name, regex("^luke$", ignore_case = TRUE)))
+```
+
+
+```{r}
+ggplot(data = mia_luke, aes(x = year, y = prop, colour = name)) + geom_smooth() + labs(caption = "Data source: babynames", x = "Year", y = "Proportion")
+```
+
+
+### My team names analysis
+
+```{r}
+nameChanges <- function(regex, yob){
+  X <- (2018 - yob)
+  names_before <- data %>% filter(year == yob - X | year == yob)
+  names_after <- data %>% filter(year == yob | year == 2017)
+  change_before <- names_before %>% group_by(name) %>% summarise(change = max(prop) - min(prop))
+  change_after <- names_after %>% group_by(name) %>% summarise(change = max(prop) - min(prop))
+  name_filtered <- data %>% filter(str_detect(name, regex(regex, ignore_case = TRUE))) %>% group_by(year) %>% summarise(total = sum(prop))
+  absolute_change_after <- name_filtered[name_filtered$year == 2017,]$total[1] - name_filtered[name_filtered$year == yob,]$total[1]
+  absolute_change_before <- name_filtered[name_filtered$year == yob,]$total[1] - 
+    name_filtered[name_filtered$year == yob - X,]$total[1]
+  
+  percentile_before <- ecdf(change_before$change)
+  relative_change_before <- percentile_before(abs(absolute_change_before))
+  
+  percentile_after <- ecdf(change_after$change)
+  relative_change_after <- percentile_after(abs(absolute_change_after))
+  
+  result <- c(absolute_change_after, relative_change_after, absolute_change_before, relative_change_before)
+  return(result);
+}
+```
+
+```{r}
+result <- data.frame("Name"=c(), "AbsoluteAfter"=c(), "RelativeAfter"=c(), "AbsoluteBefore"=c(), "RelativeBefore"=c())
+
+res <- nameChanges("^ryan$", 1988)
+data_new <- data.frame(c("Ryan"), c(res[1]), c(res[2]), c(res[3]), c(res[4]))
+names(data_new) <- c("Name", "AbsoluteAfter", "RelativeAfter", "AbsoluteBefore", "RelativeBefore")
+result <- rbind(result, data_new)
+
+res <- nameChanges("^jeorg.", 1994)
+data_new <- data.frame(c("Jeorge"), c(res[1]), c(res[2]), c(res[3]), c(res[4]))
+names(data_new) <- c("Name", "AbsoluteAfter", "RelativeAfter", "AbsoluteBefore","RelativeBefore")
+result <- rbind(result, data_new)
+
+res <- nameChanges("^mandy$", 1997)
+data_new <- data.frame(c("Mandy"), c(res[1]), c(res[2]), c(res[3]), c(res[4]))
+names(data_new) <- c("Name", "AbsoluteAfter", "RelativeAfter", "AbsoluteBefore", "RelativeBefore")
+result <- rbind(result, data_new)
+
+res <- nameChanges("^thorb.", 1998)
+data_new <- data.frame(c("Thorbin"), c(res[1]), c(res[2]), c(res[3]), c(res[4]))
+names(data_new) <- c("Name", "AbsoluteAfter", "RelativeAfter", "AbsoluteBefore", "RelativeBefore")
+result <- rbind(result, data_new)
+
+res <- nameChanges("^erik$", 2000)
+data_new <- data.frame(c("Erik"), c(res[1]), c(res[2]), c(res[3]), c(res[4]))
+names(data_new) <- c("Name", "AbsoluteAfter", "RelativeAfter", "AbsoluteBefore", "RelativeBefore")
+result <- rbind(result, data_new)
+```
+
+
+```{r}
+head(result)
+```
+
+Unfortunately, there was no data for Thorbin.
+
+```{r}
+ggplot(data = result, aes(x=Name)) + 
+    geom_bar(position="dodge", stat="identity", aes(fill=RelativeAfter, y=AbsoluteAfter))
+```
+
+```{r}
+ggplot(data = result, aes(x=Name)) + 
+    geom_bar(position="dodge", stat="identity", aes(fill=RelativeBefore, y=AbsoluteBefore))
+```
+
+
+The most significant change was for Ryan and Mandy.
