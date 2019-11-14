@@ -1,38 +1,31 @@
-  #by jorge r
-  install.packages("gapminder")
-  install.packages("tidyverse")
-  library(gapminder)
-  library(tidyverse)
-  
-  View(gapminder)
+ ---
+title: "Lab12"
+author: "Jorge Robelo, Ryan Bilkie, Thorbin Atwell-Donaghy, Mandy Karako, Erik Svenneby"
+date: "11/10/2019"
+output: html_document
+---
 
-  # Permutation Test : âA permutation test (also called a randomization test, re-randomization test, or an exact test) 
-                      # is a type of statistical significance test in which the distribution of the test statistic under
-                      # the null hypothesis is obtained by calculating all possible values of the test statistic under 
-                      # rearrangements of the labels on the observed data points.â
-  
-              # Do labels matter. Does Categorization matter 
-              
-              # To perform a permutation test: 
-                                          # scramble up the labels, 
-                                          # resample the data, and 
-                                          # calculate a summary of the data. 
-                                          # Repeat this process 1000 or more times. 
-                                          # Then, plot the 1000 summaries as a histogram and plot the summary of the actual data on the histogram.
-                                          # Decide if the actual data is extreme based on the percentile of the actual summary.
-                       
-                       # write a function and then runs 1000 or more iterations. 
-                       # You also need to plot histograms and calculate percentiles.
-  
-  # Two-Sample Permutation Test : we want to know if groups A and B have different means for some variable 
-                   # H0: Î¼AâÎ¼B=0
-                   # H1: Î¼AâÎ¼Bâ 0
-  
-  
-  #is nicaragua life exp diffrent from costa rica ? 
-  
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+library(gapminder)
+library(tidyverse)
+```
 
-  
+###The Gapminder Data Set
+
+The "gapminder" library in R contains worldwide country data, with variables that include country, continent, year, life expectancy, total population and per-capita GDP.
+
+The questions we're interested in from this data set are:
+
+1) Is there a difference in life expectancy between Nicaragua and Costa Rica?
+2) Is there a correlation between life expectancy and total population?
+
+These are important questions for understanding the relationship between a county's population and its relative health and safety. If life expectancy is a good measure of the well-being of a given country, then we should be interested in the variables that might be correlated with a higher or lower life expectancy.
+
+The first of these questions will be answered with a mean permutation test. The second will be answered with a correlation permutation test.
+
+```{r}
+
   Nica_cost_lifexp <-gapminder%>%filter(country %in% c("Nicaragua", "Costa Rica"))
   
   Nica<-Nica_cost_lifexp%>%filter(country=="Nicaragua")
@@ -143,3 +136,13 @@
  
  #i still need to calculate the acutual cor and seee where it falls in the histogram 
  #by jorge r 
+ 
+```
+
+## Data-based conclusions:
+
+
+## Individual Contributions:
+
+Jorge formulated the questions of interest and provided the mean permutation test. Ryan wrote the initial summary and conclusion and helped construct the correlation permutation test. Thorbin calculated the summary statistics and p-values, and he helped resolve knitting issues. Mandy created the visualizations and generated most of the conclusions based on the data. Erik helped in generalizing the function code to allow for different data sets.
+
