@@ -84,16 +84,25 @@ The first of these questions will be answered with a mean permutation test. The 
 
   x<-perm_mean(perms=1000, all_values=v_all_test, n_A=(length(v_all_test)/2))
   hist(x)
+  t.test(x)
+  
+ ```
+ 
+We see from the above that the p-value for x is .9496. If we round up, this is enough to reject the null hypothesis and conclude that life expectancy for Nicaragua is indeed less than that of Costa Rica. We also see that the mean of x is .008721 and we have a 95% confidence interval of about -.26 to +.28.
+
+Further summary statistics:
+
+```{r}
   quantile(x, probs = seq(0, 1, 0.05))
   
   (aH<-mean(Nica$lifeExp)-mean(Costa$lifeExp))
+  
+ ```
 
-  # based on a two sample t test it seems that diffrances in life expectacy in nicaragua and costarica are significantly diffrent 
-  # life exp : costa > nica 
+Finally, we need to construct a permutation correlation test to examine the relationship between life expentency and population:
+
+```{r}
   
-  
-  
-  #is there a corralation between life exp and pop 
   
   perm_cor <- function(perms = 1000, x, y)
   {
@@ -144,5 +153,5 @@ The first of these questions will be answered with a mean permutation test. The 
 
 ## Individual Contributions:
 
-Jorge formulated the questions of interest and provided the mean permutation test. Ryan wrote the initial summary and conclusion and helped construct the correlation permutation test. Thorbin calculated the summary statistics and p-values, and he helped resolve knitting issues. Mandy created the visualizations and generated most of the conclusions based on the data. Erik helped in generalizing the function code to allow for different data sets.
+Jorge formulated the questions of interest and provided the mean permutation test. Ryan wrote the initial summary and conclusion and calculated p-values and summary statistics. Thorbin helped construct the permutation correlation test, and he helped resolve knitting issues. Mandy created the visualizations and generated most of the conclusions based on the data. Erik helped in generalizing the function code to allow for different data sets.
 
