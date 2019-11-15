@@ -34,7 +34,7 @@ The first of these questions will be answered with a mean permutation test. The 
 
 ```{r echo=TRUE, warning=FALSE }
 
-  Nica_cost_lifexp <-gapminder%>%filter(country %in% c("Nicaragua", "Costa Rica"))
+  Nica_cost_lifexp <-gapminder_unfiltered%>%filter(country %in% c("Nicaragua", "Costa Rica"))
   
   Nica<-Nica_cost_lifexp%>%filter(country=="Nicaragua")
   Costa<-Nica_cost_lifexp%>%filter(country=="Costa Rica")
@@ -189,10 +189,10 @@ Finally, we need to construct a permutation correlation test to examine the rela
     labs(title="Permutated Correlation Distribution", 
          subtitle="Correlation Distribution differences between life expectancy and population",
          x="Diffrence in Correlation"
-         )+ geom_segment(aes(x = -0.03995,y =0, xend = -0.066, yend = 0))+ 
-            geom_segment(aes(x = -0.03995,y =0, xend = -0.03995, yend = 27))+
-            geom_segment(aes(x = 0.0393599898,y =0, xend = 0.0714, yend = 0))+
-            geom_segment(aes(x = 0.0393599898,y =0, xend = 0.0393599898, yend = 27))
+         )+ geom_segment(aes(x = -3.831881e-02,y =0, xend = -0.066, yend = 0))+ 
+            geom_segment(aes(x = -3.831881e-02,y =0, xend = -3.831881e-02, yend = 27))+
+            geom_segment(aes(x =  3.932543e-02,y =0, xend = 0.0714, yend = 0))+
+            geom_segment(aes(x =  3.932543e-02,y =0, xend =  3.932543e-02, yend = 27))
 ```
 
 ```{r}  
