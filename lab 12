@@ -120,7 +120,7 @@ The first of these questions will be answered with a mean permutation test. The 
   
 ```
  
-We see from the above that the p-value for x is .9496. If we round up, this is enough to reject the null hypothesis and conclude that life expectancy for Nicaragua is indeed less than that of Costa Rica. We also see that the mean of x is .008721 and we have a 95% confidence interval of about -.26 to +.28.
+We see from the above that the p-value for x is .9496. If we round up, this is enough to reject the null hypothesis and conclude that life expectancy for Nicaragua is indeed less than that of Costa Rica. We also see that the mean of x is .008721 and we have a 95% confidence interval of about -.26 to +.28. This is supported by the data in the table, which passes the eye test to suggest that Costa Rica does have a higher mean life expectancy.
 
 Further summary statistics:
 
@@ -207,7 +207,7 @@ Finally, we need to construct a permutation correlation test to examine the rela
 ```
 
 ## Data-based conclusions:
-
+Once again, the data showed with 95% confidence that Costa Rica had a higher mean life expectancy than Nicaragua. This was reflected by the analysis which fell in place in the critical region.
 
 ## Individual Contributions:
 
