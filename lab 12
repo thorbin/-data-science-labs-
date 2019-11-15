@@ -7,8 +7,12 @@ output: html_document
 
 ```{r setup}
 knitr::opts_chunk$set(echo = TRUE)
-library(gapminder)
-library(tidyverse)
+  install.packages("gapminder")
+  install.packages("tidyverse")
+  library(gapminder)
+  library(tidyverse)
+
+
 ```
 
 ###The Gapminder Data Set
@@ -84,9 +88,23 @@ The first of these questions will be answered with a mean permutation test. The 
 
   x<-perm_mean(perms=1000, all_values=v_all_test, n_A=(length(v_all_test)/2))
   hist(x)
+  
+  
+  ggplot(, aes(x=x)) +
+    geom_histogram(alpha=.9, fill="cornflowerblue")+
+    labs(title="Permutated Mean Distribution", 
+         subtitle="Mean distribution differences between life expectancy between Nicaragua and Costa Rica",
+         x="Diffrence in Mean"
+         ) + geom_segment(aes(x = -7.3287500,y =0, xend = -14.1611667, yend = 0))+ 
+            geom_segment(aes(x = -7.3287500,y =0, xend = -7.3287500, yend = 27))+
+            geom_segment(aes(x = 6.9143917,y =0, xend = 14, yend = 0))+
+            geom_segment(aes(x = 6.9143917,y =0, xend = 6.9143917, yend = 27))
+  
+  
+  
   t.test(x)
   
- ```
+```
  
 We see from the above that the p-value for x is .9496. If we round up, this is enough to reject the null hypothesis and conclude that life expectancy for Nicaragua is indeed less than that of Costa Rica. We also see that the mean of x is .008721 and we have a 95% confidence interval of about -.26 to +.28.
 
@@ -95,9 +113,13 @@ Further summary statistics:
 ```{r}
   quantile(x, probs = seq(0, 1, 0.05))
   
+  "Sample mean diffrance for life expectancy between Nicaragua and Costa Rica."
+  
   (aH<-mean(Nica$lifeExp)-mean(Costa$lifeExp))
   
- ```
+  "The mean diffrance fall in the critical region"
+```
+
 
 Finally, we need to construct a permutation correlation test to examine the relationship between life expentency and population:
 
@@ -141,11 +163,29 @@ Finally, we need to construct a permutation correlation test to examine the rela
   yc<-gapminder$lifeExp
   
   xyc<-perm_cor(perms = 1000, xc, yc)
- hist(xyc)  
  
- #i still need to calculate the acutual cor and seee where it falls in the histogram 
- #by jorge r 
+  # hist(xyc)  
  
+  ggplot(, aes(x=xyc)) +
+    geom_histogram(alpha=.9, fill="cornflowerblue")+
+    #geom_density(alpha=.2, fill="tan")+
+    labs(title="Permutated Correlation Distribution", 
+         subtitle="Correlation Distribution differences between life expectancy and population",
+         x="Diffrence in Correlation"
+         )+ geom_segment(aes(x = -0.03995,y =0, xend = -0.066, yend = 0))+ 
+            geom_segment(aes(x = -0.03995,y =0, xend = -0.03995, yend = 27))+
+            geom_segment(aes(x = 0.0393599898,y =0, xend = 0.0714, yend = 0))+
+            geom_segment(aes(x = 0.0393599898,y =0, xend = 0.0393599898, yend = 27))
+  
+  
+  
+  quantile(xyc, probs = seq(0, 1, 0.05))
+  #by jorge r and Team
+  cor(xc,yc)
+   cor.test(xc,yc)
+ "The correlation falls within the critical region"
+  cor.test(xc,yc)
+
 ```
 
 ## Data-based conclusions:
@@ -154,4 +194,3 @@ Finally, we need to construct a permutation correlation test to examine the rela
 ## Individual Contributions:
 
 Jorge formulated the questions of interest and provided the mean permutation test. Ryan wrote the initial summary and conclusion and calculated p-values and summary statistics. Thorbin helped construct the permutation correlation test, and he helped resolve knitting issues. Mandy created the visualizations and generated most of the conclusions based on the data. Erik helped in generalizing the function code to allow for different data sets.
-
