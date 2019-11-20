@@ -1,0 +1,77 @@
+#jorge 
+#Correlation between GDP and Literacy rates in Kuwait
+
+install.packages("tidyverse")
+library(tidyverse)
+yes
+
+
+gdp2<-gdp_total_yearly_growth %>% 
+  gather( 2:214, key = "year", value = "GDP", na.rm = T)
+
+
+lit_rate_15_above <-literacy_rate_adult_total_percent_of_people_ages_15_and_above %>% 
+  gather( 2:38, key = "year", value = "LR", na.rm = T)
+
+
+kuwait_gpd<-gdp2%>%filter(country=="Kuwait", year %in% c("1975", "1980", "1985", "1995", "2005", "2006", "2007", "2008"))
+
+kuwait_LR<-lit_rate_15_above%>%filter(country=="Kuwait")
+
+
+perm_cor <- function(perms = 1000, x, y)
+{
+ 
+  perm_mean_diffC <- numeric(perms)
+  # Loop throught number of permutations
+  for (i in c(1:perms))
+  {
+    # Step 2:
+    # Randomly mix up the values in the vector "y"
+    rand_order_y <-sample(y)
+    # Step 3:
+    # Compute the correlation between x and the randomly mixed
+    # up y-vector. Store this value in the vector from step 1.
+    
+    vc<-cor(x, rand_order_y) 
+    
+    perm_mean_diffC[i]= vc
+    
+  }
+  
+  # Step 4:
+  # Return new updated vector, created in step 1
+  return(perm_mean_diffC)
+}
+
+
+
+kuwait_gpd$year <- as.numeric(as.character(kuwait_gpd$year))
+kuwait_LR$year <- as.numeric(as.character(kuwait_gpd$year))
+
+xc<-kuwait_gpd$GDP
+yc<-kuwait_LR$LR
+
+
+xyc<-perm_cor(perms = 1000, xc, yc)
+
+cor(xc,yc)
+
+hist(xyc)  
+
+ggplot(, aes(x=xyc)) +
+  geom_histogram(alpha=.9, fill="cornflowerblue")+
+  #geom_density(alpha=.2, fill="tan")+
+  labs(title="Permutated Correlation Distribution", 
+       subtitle="Correlation Distribution differences between GDP and Literacy rates in Kuwait",
+       x="Diffrence in Correlation Distribution"
+  )+ geom_segment(aes(x = -0.57290771,y =0, xend = -0.9, yend = 0))+ 
+  geom_segment(aes(x = -0.57290771,y =0, xend = -0.57290771, yend = 27))+
+  geom_segment(aes(x =  0.64522201,y =0, xend = 0.9, yend = 0))+
+  geom_segment(aes(x =  0.64522201,y =0, xend =  0.64522201, yend = 27))+
+  geom_vline(xintercept = 0.9004037, color="red")
+
+quantile(xyc, probs = seq(0, 1, 0.05))
+
+
+the corralation between Kuwaits GPD and LR are statictically significant 
