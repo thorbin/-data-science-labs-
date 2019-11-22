@@ -1,3 +1,142 @@
+---
+title: "lab_13"
+output: html_document
+---
+
+```{r setup}
+library(tidyverse)
+```
+
+
+
+##Ryan's section
+
+
+The question I'm interested in asking is whether or not there is a correlation between a country's per capita economic growth and how much of its labor force it devotes to armed personnel. This is an important question because we could like to know the economic cost of the size of a military, for instance, and the effect it has on the overall economy.
+
+First we import the data and perform some exploratory data analysis:
+
+```{r}
+library(reshape2)
+data1 = read.csv("~/Downloads/gdp_per_capita_yearly_growth.csv")
+data2 = read.csv("~/Downloads/armed_forces_personnel_percent_of_labor_force.csv")
+
+
+data1m = data1 %>% 
+  melt(id.vars = 'country')
+
+data2m = data2 %>% 
+  melt(id.vars = 'country')
+
+
+gdp2 = data1m %>% 
+  rename(year = variable, GDP = value)
+
+armed_forces = data2m %>% 
+  rename(year = variable, perc_of_labor_force = value)
+
+gdp2 = gdp2 %>% 
+  filter(year %in% armed_forces$year,
+         country %in% armed_forces$country)
+armed_forces = armed_forces %>% 
+  filter(year %in% gdp2$year,
+         country %in% gdp2$country)
+
+head(map_dbl(armed_forces$perc_of_labor_force, mean))
+head(map_dbl(gdp2$GDP, mean))
+
+tail(map_dbl(armed_forces$perc_of_labor_force, mean))
+tail(map_dbl(gdp2$GDP, mean))
+```
+
+We don't see any obvious relationship between large militaries and either high or low economic growth. It might be better to analyze a particular country--say, the United States. We can use a map function to generate the US's mean per capita GDP and proportion of armed forces personnel as a percentage of the labor force:
+
+```{r}
+US_gdp = gdp2 %>% filter(country == "United States")
+US_armed_forces = armed_forces %>% filter(country == "United States")
+
+mean(US_gdp$GDP)
+mean(US_armed_forces$perc_of_labor_force)
+
+```
+
+We now set up our permutation correlation function and then calculate a correlation:
+
+```{r}
+
+perm_cor <- function(perms = 1000, x, y)
+{
+  
+  perm_mean_diffC <- numeric(perms)
+  # Loop throught number of permutations
+  for (i in c(1:perms))
+  {
+    # Step 2:
+    # Randomly mix up the values in the vector "y"
+    rand_order_y <-sample(y)
+    # Step 3:
+    # Compute the correlation between x and the randomly mixed
+    # up y-vector. Store this value in the vector from step 1.
+    
+    vc<-cor(x, rand_order_y) 
+    
+    perm_mean_diffC[i]= vc
+    
+  }
+  
+  # Step 4:
+  # Return new updated vector, created in step 1
+  return(perm_mean_diffC)
+}
+
+
+
+US_gdp$year <- as.numeric(gsub("X","",as.character(US_gdp$year)))
+
+US_armed_forces$year <- as.numeric(gsub("X","",as.character(US_armed_forces$year)))
+
+US_gdp$GDP <- as.numeric(gsub("X","",as.character(US_gdp$GDP)))
+
+US_armed_forces$perc_of_labor_force <- as.numeric(gsub("X","",as.character(US_armed_forces$perc_of_labor_force)))
+
+head(US_armed_forces)
+
+xc<-US_gdp$GDP
+yc<-US_armed_forces$perc_of_labor_force
+
+
+
+
+xyc<-perm_cor(perms = 1000, xc, yc)
+
+cor.test(xc,yc)
+
+```
+
+We see that we have a correlation of -0.1419413, which means a weak negative correlation between military spending and economic growth.
+
+We have a p-value of .48, which means that our result is not statistically significant. We can visualize this:
+
+```{r}
+
+ggplot(, aes(x=xyc)) +
+  geom_histogram(alpha=.9, fill="darkslategrey")+
+  labs(title="Permutated Correlation Distribution", 
+       subtitle="Correlation Distribution differences between per capita GDP and armed forces as % of labor market",
+       x="Difference in Correlation Distribution"
+  )+ geom_segment(aes(x = -0.57290771,y =0, xend = -0.9, yend = 0))+ 
+  geom_segment(aes(x = -0.57290771,y =0, xend = -0.57290771, yend = 27))+
+  geom_segment(aes(x =  0.64522201,y =0, xend = 0.9, yend = 0))+
+  geom_segment(aes(x =  0.64522201,y =0, xend =  0.64522201, yend = 27))+
+  geom_vline(xintercept = cor(xc,yc), color="red")
+
+```
+
+
+The conclusion is that, although we see a weak negative correlation between military spending and economic growth, the results of analyzing only one country with this method do not give us anything statistically significant.
+
+##end Ryan
+
 #jorge 
 #Correlation between GDP and Literacy rates in Kuwait
 
