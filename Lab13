@@ -1,15 +1,134 @@
 ---
-title: "lab_13"
-output: html_document
+title: "lab13"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "11/24/2019"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
 ---
 
-```{r setup}
+Jorge Analasys:
+
+step 1 :
+Null hypothesis H0:ρ=0, There is no corralation between Kuwaits gdp and Literacy rates
+
+Alternative hypothesis HA:ρ≠0 or HA:ρ<0 or HA:ρ>0, There is corralation between Kuwaits gdp and Literacy rates
+
+importance: GDP is usually a reliable measure of a state's economic prosperity. By using literacy rates data, perhaps we may find a positive correlation with GDP.  I suspect that as people are more literate then that should reflect in the country's GDP because literacy is essential for business communication  
+
+```{r warning=FALSE, include=FALSE}
+
+#install.packages("tidyverse")
+library(readr)
 library(tidyverse)
+
+#gdp_total_yearly_growth <- read_csv("/Users/joro7386/Downloads/gdp_total_yearly_growth.csv")
+
+#literacy_rate_adult_total_percent_of_people_ages_15_and_above <- read_csv("/Users/joro7386/Downloads/literacy_rate_adult_total_percent_of_people_ages_15_and_above.csv")
+
+gdp_total_yearly_growth <- read_csv("C:/Users/chele/Documents/stats_data_sci/lab13/gdp_total_yearly_growth.csv")
+
+literacy_rate_adult_total_percent_of_people_ages_15_and_above<-read_csv("C:/Users/chele/Documents/stats_data_sci/lab13/literacy_rate_adult_total_percent_of_people_ages_15_and_above.csv")
+
+gdp2<-gdp_total_yearly_growth %>% 
+  gather( 2:214, key = "year", value = "GDP", na.rm = T)
+
+
+lit_rate_15_above <-literacy_rate_adult_total_percent_of_people_ages_15_and_above %>% 
+  gather( 2:38, key = "year", value = "LR", na.rm = T)
+
+
+kuwait_gpd<-gdp2%>%filter(country=="Kuwait", year %in% c("1975", "1980", "1985", "1995", "2005", "2006", "2007", "2008"))
+
+kuwait_LR<-lit_rate_15_above%>%filter(country=="Kuwait")
 ```
 
+permutation funtion 
+```{r warning=FALSE, include=FALSE}
+perm_cor <- function(perms = 1000, x, y)
+{
+  
+  perm_mean_diffC <- numeric(perms)
+  # Loop throught number of permutations
+  for (i in c(1:perms))
+  {
+    # Step 2:
+    # Randomly mix up the values in the vector "y"
+    rand_order_y <-sample(y)
+    # Step 3:
+    # Compute the correlation between x and the randomly mixed
+    # up y-vector. Store this value in the vector from step 1.
+    
+    vc<-cor(x, rand_order_y) 
+    
+    perm_mean_diffC[i]= vc
+    
+  }
+  
+  # Step 4:
+  # Return new updated vector, created in step 1
+  return(perm_mean_diffC)
+}
+
+```
+
+```{r}
+
+kuwait_gpd$year <- as.numeric(as.character(kuwait_gpd$year))
+kuwait_LR$year <- as.numeric(as.character(kuwait_gpd$year))
+
+xc<-kuwait_gpd$GDP
+yc<-kuwait_LR$LR
 
 
-##Ryan's section
+xyc<-perm_cor(perms = 1000, xc, yc)
+```
+
+```{r}
+"corralation between GPD and Literacy rates in Kuwait"
+cor(xc,yc)
+```
+
+plot
+```{r echo=FALSE, warning=FALSE}
+ggplot(, aes(x=xyc)) +
+  geom_histogram(alpha=.9, fill="cornflowerblue")+
+  #geom_density(alpha=.2, fill="tan")+
+  labs(title="Permutated Correlation Distribution", 
+       subtitle="Correlation Distribution differences between GDP and Literacy rates in Kuwait",
+       x="Diffrence in Correlation Distribution"
+  )+ geom_segment(aes(x = -0.57290771,y =0, xend = -0.9, yend = 0))+ 
+  geom_segment(aes(x = -0.57290771,y =0, xend = -0.57290771, yend = 27))+
+  geom_segment(aes(x =  0.64522201,y =0, xend = 0.9, yend = 0))+
+  geom_segment(aes(x =  0.64522201,y =0, xend =  0.64522201, yend = 27))+
+  geom_vline(xintercept = 0.9004037, color="red")
+
+quantile(xyc, probs = seq(0, 1, 0.05))
+```
+
+```{r}
+"kuwait gpd-median"
+map(xc, median)
+```
+
+```{r}
+"kuwait literacy rates-median"
+map(yc, median)
+```
+
+The corralation between Kuwaits GPD and Literacy rate are statictically significant.
+correlation is positively strong. 
+
+
+However, I believe that to have a more rigorous statistical conclusion we needed more observation in Literacy rates 
+
+
+
+#end Jorge R
+
+#Ryan's section
 
 
 The question I'm interested in asking is whether or not there is a correlation between a country's per capita economic growth and how much of its labor force it devotes to armed personnel. This is an important question because we could like to know the economic cost of the size of a military, for instance, and the effect it has on the overall economy.
@@ -17,10 +136,19 @@ The question I'm interested in asking is whether or not there is a correlation b
 First we import the data and perform some exploratory data analysis:
 
 ```{r}
-library(reshape2)
-data1 = read.csv("~/Downloads/gdp_per_capita_yearly_growth.csv")
-data2 = read.csv("~/Downloads/armed_forces_personnel_percent_of_labor_force.csv")
 
+data1<- read_csv("C:/Users/chele/Documents/stats_data_sci/lab13/gdp_per_capita_yearly_growth.csv")
+
+
+data2<- read_csv("C:/Users/chele/Documents/stats_data_sci/lab13/armed_forces_personnel_percent_of_labor_force.csv")
+
+#gdp_per_capita_yearly_growth <- read_csv("/Users/joro7386/Downloads/gdp_per_capita_yearly_growth.csv")
+
+#armed_forces_personnel_percent_of_labor_force <- read_csv("/Users/joro7386/Downloads/armed_forces_personnel_percent_of_labor_force.csv")
+
+library(reshape2)
+#data1 <- gdp_per_capita_yearly_growth 
+#data2 <- armed_forces_personnel_percent_of_labor_force 
 
 data1m = data1 %>% 
   melt(id.vars = 'country')
@@ -117,7 +245,7 @@ We see that we have a correlation of -0.1419413, which means a weak negative cor
 
 We have a p-value of .48, which means that our result is not statistically significant. We can visualize this:
 
-```{r}
+```{r warning=FALSE}
 
 ggplot(, aes(x=xyc)) +
   geom_histogram(alpha=.9, fill="darkslategrey")+
@@ -137,30 +265,40 @@ The conclusion is that, although we see a weak negative correlation between mili
 
 ##end Ryan
 
-#jorge 
-#Correlation between GDP and Literacy rates in Kuwait
-
-install.packages("tidyverse")
+#mandy 
+What is the subquestion you are addressing? - Is there a correlation between CO2 emissions and income?
+```{r}
+library(reshape2)
 library(tidyverse)
-yes
+library(dplyr)
+library(stringr)
+library(tibble)
 
+income = read.csv("C:/Users/chele/Documents/stats_data_sci/lab13/income_per_person_gdppercapita_ppp_inflation_adjusted.csv")
+CO2emissions = read.csv("C:/Users/chele/Documents/stats_data_sci/lab13/co2_emissions_tonnes_per_person.csv")
 
-gdp2<-gdp_total_yearly_growth %>% 
-  gather( 2:214, key = "year", value = "GDP", na.rm = T)
+#income = read.csv("/Users/joro7386/Downloads/income_per_person_gdppercapita_ppp_inflation_adjusted.csv")
+#CO2emissions = read.csv("/Users/joro7386/Downloads/co2_emissions_tonnes_per_person.csv")
+income <- income %>% melt(id.vars = 'country')
+CO2emissions <- CO2emissions %>% melt(id.vars= 'country')
+income <- income %>% rename(year = variable, income = value)
+CO2emissions <- CO2emissions %>% rename(year=variable, emissions = value)
+CO2emissions <- CO2emissions %>% filter( emissions !=  'NA')
+income <- income %>% filter(income != 'NA')
+income <- income %>% filter(year %in% CO2emissions$year, country %in% CO2emissions$country)
+CO2emissions <- CO2emissions %>% filter(year %in% income$year, country %in% income$country)
+head(map_dbl(income$income, mean))
+head(map_dbl(CO2emissions$emissions, mean))
+tail(map_dbl(income$income, mean))
+tail(map_dbl(CO2emissions$emissions, mean))
+## We see an obvious correlation between an increase income and CO2 emissions. But are they dependent on one another? 
+```
 
-
-lit_rate_15_above <-literacy_rate_adult_total_percent_of_people_ages_15_and_above %>% 
-  gather( 2:38, key = "year", value = "LR", na.rm = T)
-
-
-kuwait_gpd<-gdp2%>%filter(country=="Kuwait", year %in% c("1975", "1980", "1985", "1995", "2005", "2006", "2007", "2008"))
-
-kuwait_LR<-lit_rate_15_above%>%filter(country=="Kuwait")
-
-
+```{r}
+##We now set up our permutation correlation function and then calculate a correlation:
 perm_cor <- function(perms = 1000, x, y)
 {
- 
+  
   perm_mean_diffC <- numeric(perms)
   # Loop throught number of permutations
   for (i in c(1:perms))
@@ -182,38 +320,54 @@ perm_cor <- function(perms = 1000, x, y)
   # Return new updated vector, created in step 1
   return(perm_mean_diffC)
 }
+```
+Let's just look at the United States:
+```{r}
+income <- income %>% filter(country == 'United States')
+CO2emissions <- CO2emissions %>% filter(country == 'United States')
 
+mean(income$income)
+mean(CO2emissions$emissions)
 
+income$year <- as.numeric(gsub("X","",as.character(income$year)))
 
-kuwait_gpd$year <- as.numeric(as.character(kuwait_gpd$year))
-kuwait_LR$year <- as.numeric(as.character(kuwait_gpd$year))
+CO2emissions$year <- as.numeric(gsub("X","",as.character(CO2emissions$year)))
 
-xc<-kuwait_gpd$GDP
-yc<-kuwait_LR$LR
+income$income <- as.numeric(gsub("X","",as.character(income$income)))
 
+CO2emissions$emissions <- as.numeric(gsub("X","",as.character(CO2emissions$emissions)))
 
-xyc<-perm_cor(perms = 1000, xc, yc)
+xc<- income$year
+yc<- CO2emissions$year
+xyc <-perm_cor(perms = 1000, xc, yc)
 
-cor(xc,yc)
+cor.test(xc,yc)
+# We see a direct positive correlation of 1 between income and CO2 emissions.
+```
+Pearson's product-moment correlation
+data:  xc and yc
+t = Inf, df = 213, p-value < 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 1 1
+sample estimates:
+cor = 1 
 
-hist(xyc)  
-
-ggplot(, aes(x=xyc)) +
-  geom_histogram(alpha=.9, fill="cornflowerblue")+
-  #geom_density(alpha=.2, fill="tan")+
+GRAPH: 
+```{r warning=FALSE}
+ggplot(,aes(x=xyc)) +
+  geom_histogram(alpha=.9, fill="darkslategrey")+
   labs(title="Permutated Correlation Distribution", 
-       subtitle="Correlation Distribution differences between GDP and Literacy rates in Kuwait",
-       x="Diffrence in Correlation Distribution"
+       subtitle="Correlation Distribution differences between income and CO2 emissions",
+       x="Difference in Correlation Distribution"
   )+ geom_segment(aes(x = -0.57290771,y =0, xend = -0.9, yend = 0))+ 
   geom_segment(aes(x = -0.57290771,y =0, xend = -0.57290771, yend = 27))+
   geom_segment(aes(x =  0.64522201,y =0, xend = 0.9, yend = 0))+
   geom_segment(aes(x =  0.64522201,y =0, xend =  0.64522201, yend = 27))+
-  geom_vline(xintercept = 0.9004037, color="red")
+  geom_vline(xintercept = cor(xc,yc), color="red")
 
-quantile(xyc, probs = seq(0, 1, 0.05))
+```
 
-
-the corralation between Kuwaits GPD and LR are statictically significant 
 
 #Begin Erik
 
@@ -226,8 +380,8 @@ library(dplyr)
 ```{r}
 #I filtered here so that each dataset contained the same years, and had the countries with the largest amount of forrest area. I changed the ID of each set to the country
 library(reshape2)
-forrest = read.csv("C:/Users/ErikSvenneby/Desktop/forest_area_sq_km.csv")
-GDP = read.csv("C:/Users/ErikSvenneby/Desktop/total_gdp_ppp_inflation_adjusted.csv")
+forrest = read.csv("C:/Users/chele/Documents/stats_data_sci/lab13/forest_area_sq_km.csv")
+GDP = read.csv("C:/Users/chele/Documents/stats_data_sci/lab13/total_gdp_ppp_inflation_adjusted.csv")
 
 forrest = forrest %>% 
   melt(id.vars = 'country')
