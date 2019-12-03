@@ -214,3 +214,50 @@ quantile(xyc, probs = seq(0, 1, 0.05))
 
 
 the corralation between Kuwaits GPD and LR are statictically significant 
+
+#Begin Erik
+
+```{r}
+library(tidyverse)
+library(dplyr)
+```
+
+
+```{r}
+#I filtered here so that each dataset contained the same years, and had the countries with the largest amount of forrest area. I changed the ID of each set to the country
+library(reshape2)
+forrest = read.csv("C:/Users/ErikSvenneby/Desktop/forest_area_sq_km.csv")
+GDP = read.csv("C:/Users/ErikSvenneby/Desktop/total_gdp_ppp_inflation_adjusted.csv")
+
+forrest = forrest %>% 
+  melt(id.vars = 'country')
+
+GDP = GDP %>% 
+  melt(id.vars = 'country')
+
+forrest <- rename(forrest, 'Year'='variable')
+GDP <- rename(GDP, 'Year' = 'variable')
+forrest <- rename(forrest, 'forrestarea'='value')
+GDP <- rename(GDP, 'GDP' = 'value')
+forrest <- filter(forrest, forrestarea>=1000000)
+
+GDP = GDP %>% 
+  filter(country %in% forrest$country)
+forrest = forrest %>% 
+  filter(country %in% GDP$country)
+GDP = GDP %>% 
+  filter(Year %in% forrest$Year)
+forrest = forrest %>% 
+  filter(Year %in% GDP$Year)
+
+
+#forrest_transpose <- as.data.frame(t(as.matrix(forrest)))
+#GDP_transpose<- as.data.frame(t(as.matrix(GDP)))
+```
+```{r}
+#Here are plots of scatter graphs of the forrest area in each country, which show which countries have increasing and decreasing forrest areas, and then the Map of GDP, which shows how much a country gained or lost for gdp each year.Together, these plots show the relationship between GDP growth and the forrest area in a country.
+ggplot(forrest, mapping = aes(x=Year, y=forrestarea, color = country))+geom_point()
+ggplot(GDP, mapping = aes(x=Year,y=GDP, color = country))+geom_point()
+```
+#It seems there is little to no correlation between GDP and forrest area.
+#End Erik
