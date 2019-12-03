@@ -9,7 +9,12 @@ output:
   word_document: default
 ---
 
-Jorge Analasys:
+overall goal: how does economic progress affect different aspects of society. example: literacy rates, military, CO2 outputs, forestation
+
+teams Analasys: we'll use jorge's findings as our team evaluation 
+
+
+Jorge and teams Analasys:
 
 step 1 :
 Null hypothesis H0:ρ=0, There is no corralation between Kuwaits gdp and Literacy rates
@@ -91,6 +96,14 @@ xyc<-perm_cor(perms = 1000, xc, yc)
 cor(xc,yc)
 ```
 
+```{r}
+ ggplot(, aes(x = xc, y = yc))+
+  geom_line()+
+   ggtitle("GPD and Literacy rates in Kuwait")+
+  labs(y="Literacy rates", x = "GDP")
+
+```
+
 plot
 ```{r echo=FALSE, warning=FALSE}
 ggplot(, aes(x=xyc)) +
@@ -124,9 +137,9 @@ correlation is positively strong.
 
 However, I believe that to have a more rigorous statistical conclusion we needed more observation in Literacy rates 
 
+teams conclution: 
 
-
-#end Jorge R
+#end Jorge R and teams
 
 #Ryan's section
 
