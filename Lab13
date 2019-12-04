@@ -9,12 +9,12 @@ output:
   word_document: default
 ---
 
-overall goal: how does economic progress affect different aspects of society. example: literacy rates, military, CO2 outputs, forestation
+Overal question: how does economic progress affect different aspects of society? For example: literacy rates, the size of a military force, CO2 emissions, forestation--all of these factors might be affected by economic growth.
 
-teams Analasys: we'll use jorge's findings as our team evaluation 
+Team Analysis: We found Jorge's findings to be the most statistically sound and interesting, so we use his analysis below:
 
 
-Jorge and teams Analasys:
+Jorge and team's analysis:
 
 step 1 :
 Null hypothesis H0:ρ=0, There is no corralation between Kuwaits gdp and Literacy rates
@@ -428,3 +428,8 @@ ggplot(GDP, mapping = aes(x=Year,y=GDP, color = country))+geom_point()
 ```
 #It seems there is little to no correlation between GDP and forrest area.
 #End Erik
+
+
+Conclusion:
+We have shown that some variables are indeed correlated with economic growth (in some countries)--such as education and CO2 emissions, whereas others (like size of military and forrestation) do not have a statistically clear relationship.
+
