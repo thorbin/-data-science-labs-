@@ -1,4 +1,181 @@
-based of lab 10 
+---
+title: "Lab_14"
+authors: The Black Swans
+output: html_document
+---
+
+
+### Team Portion: Which features previously analyzed in Lab 10 allow for well-fitted models?
+
+In lab 10, the Black Swans analyzed various features of questions and answers on the site Stack Overflow to generate interesting findings. In light of newly-learned statistical modeling techniques, we now revisit this project to see if we can apply these new techniques to our previous work. In particular, we will determine whether any of these visualizations allow for a well-fitted model, as well as testing the statistical permutations of some with permutations.
+
+The feature we found most interesting was Ryan's analysis of question and answer lengths, which together demonstrate both the importance of brevity in question-forming as well as the importance of thoroughness in answers. Ryan's analysis is below:
+
+### Ryan's Portion:
+
+In lab 10 I answered the question of how length relates to score, in questions (titles and body) and answers (body). We found interesting patterns which tended towards a bell curve, suggesting an optimal length for both, although the distribution for answers had a very fat right-hand tail. To gain further insight, I'll now try to fit a linear model to these data.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(modelr)
+options(na.action = na.warn)
+```
+
+This time, we include the modelr package.
+
+```{r}
+
+answers <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Answers_trunc.csv")
+questions <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Questions_trunc.csv")
+colnames(answers)
+colnames(questions)
+str(answers)
+str(questions)
+merged <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+
+colnames(merged)
+str(merged)
+
+## create relevant columns
+merged <- merged %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+
+
+```
+
+
+As we saw in lab 10, the length of a question title is rewarded by a high score only within strict length parameters, giving the distribution a strict bell shape:
+
+```{r}
+ggplot(data = questions) +
+  geom_bar(mapping = aes(x = str_count(questions$Title), fill = Score))+
+  labs(title= "Question Length vs Score", x = "Question Length", y = "Score")
+
+
+
+ggplot(data = questions) +
+  geom_point(mapping = aes(x = str_count(questions$Title), y = Score))+
+  labs(title= "Question Length vs Score", x = "Question Length", y = "Score")
+```
+
+We now fit a linear model:
+
+
+```{r}
+questions_2 <-  tibble::data_frame(
+  x = str_count(questions$Title),
+  y = questions$Score
+)
+
+head(questions_2)
+
+m1 <- lm(y ~ x, data = questions_2)
+grid <- questions_2 %>%
+  data_grid(x)
+grid
+
+grid <- grid %>%
+  add_predictions(m1)
+grid
+
+coef(m1)
+```
+
+We see that the y-intercept is about 35 and the slope has a barely negative, slowly descending trajectory. This suggests that we can make the very weak claim that overall, question-title lengths will be barely penalized the longer they grow. Below is a visualization of that trajectory, as well as the points that show just how bad of a model this is.
+
+
+```{r}
+ggplot(data = questions) +
+  geom_point(mapping = aes(x = str_count(questions$Title), y = Score))+
+  labs(title= "Question Length vs Score", x = "Question Length", y = "Score")+
+  geom_line(aes(x, y = pred), data = grid, colour = 'red', size = 1)
+
+
+```
+
+To further understand how this model fails to capture what's really going on, we'll examine the residuals:
+
+```{r}
+questions_2 <- questions_2 %>%
+  add_residuals(m1)
+questions_2
+
+ggplot(questions_2, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+
+ggplot(questions_2, aes(x, resid)) + 
+  geom_ref_line(h = 0) +
+  geom_point() 
+```
+
+As we see, there is a great deal of variation in between 0 and 100, which illustrates the pitfall of a linear model in this circumstance.
+
+We'll turn at last to the body of the answers. Since this had a fat right tail....
+
+```{r}
+ggplot(data = answers)+
+  geom_bar(mapping = aes(x = str_count(answers$Body), fill = Score))+
+  labs(title = "Answer Length vs Score", x ="Answer Length", y = "Score") +
+  xlim(c(0, 1000))
+```
+
+...we would expect its linearization to look somewhat different from the questions one we saw above.
+
+```{r}
+
+answers_2 <-  tibble::data_frame(
+  x = str_count(answers$Body),
+  y = answers$Score
+)
+
+head(answers_2)
+
+m2 <- lm(y ~ x, data = answers_2)
+grid <- answers_2 %>%
+  data_grid(x)
+grid
+
+grid <- grid %>%
+  add_predictions(m2)
+grid
+coef(m2)
+
+```
+
+Indeed, we see that this one has a much lower y intercept and a slightly positive slope.
+
+```{r}
+
+ggplot(data = answers) +
+  geom_point(mapping = aes(x = str_count(answers$Body), y = Score))+
+  labs(title= "Answer Length vs Score", x = "Answer Length", y = "Score")+
+  geom_line(aes(x, y = pred), data = grid, colour = 'red', size = 1)
+```
+
+This is interesting. Once again we have a poor linear model, but this one shows a clear, long-term upward trend. In contrast to question titles, answer bodies are not, in general, penalized for length, even though the bulk of the residuals reside in the lower areas once again:
+
+```{r}
+
+answers_2 <- answers_2 %>%
+  add_residuals(m2)
+answers_2
+
+ggplot(answers_2, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+
+ggplot(answers_2, aes(x, resid)) + 
+  geom_ref_line(h = 0) +
+  geom_point() 
+```
+
+
+The conlusion from this new technique applied to old data is that linear models can shed light on visual patterns even when the fit is poor. We've seen two very clear patterns--question-titles score lower the longer they are, answers score higher the longer they are--and this is only useful when we hold in mind the residuals, which communicate where the bulk of variability lies.
+
+
+
 
 #Jorge R 
 
