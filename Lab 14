@@ -321,3 +321,120 @@ hist(x)
 "groups are stat sig"
 
 ```
+
+###Begin Erik
+
+
+```{r}
+#The goal of my code was to test the difference between the scores of questions which contained the word: "tried" and those that did not, along with answers which contained the word: "try" and those that did not. I found this interesting because oftentimes it seems that a question can be asked more knowledgeably and effectively when one has already attempted a solution, and is likely close to the answer. Similarly, I was interested in answers which contained the word "try", but I was not sure wheter they would be better or worse than answers without the word. I figured some answers would be in response to people who had already tried a solution, but there also might be some answers which come from someone who is uncertain in the set as well.
+#I imported the necesssary packages
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(modelr)
+library(dplyr)
+options(na.action = na.warn)
+```
+
+```{r}
+#Here I imported the datasets
+answers <- read.csv("C:/Users/ErikSvenneby/Desktop/lab10/Answers_trunc.xlsx.csv")
+questions <- read.csv("C:/Users/ErikSvenneby/Desktop/lab10/Questions_trunc.xlsx.csv")
+
+#Tests to see column names to help me decide how to left join
+#colnames(answers)
+#colnames(questions)
+#str(answers)
+#str(questions)
+
+#The left join of the datasets
+merged <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+
+#Summary of the merged dataset
+#colnames(merged)
+#str(merged)
+
+#Removing questions without scores
+merged <- merged %>% 
+  filter(!is.na(Score.x))%>%
+  filter(!is.na(Score.y))
+#original code to create column for total time
+#merged <- merged %>% 
+ # mutate(total_time = CreationDate.x - CreationDate.y) %>%
+#  filter(total_time>0)
+
+```
+```{r}
+#
+tried <- str_detect(questions$Body, "tried")
+qscores <- questions$Score
+triedframe <- data.frame(tried, qscores)
+
+didtry <- triedframe %>% filter(tried==T)
+didnttry <- triedframe %>% filter(tried==F)
+
+mean(didtry$qscores)
+#Result is 16.16564
+mean(didnttry$qscores)
+#Result is 26.16277
+mean(didtry$qscores)-mean(didnttry$qscores)
+#Result is -9.997131 (This is the difference between questions which contained the word tried and questions which did not contain the word--which was the greater category of the two)
+
+try <- str_detect(answers$Body, "try")
+ascores <- answers$Score
+tryframe <- data.frame(try, ascores)
+
+suggestedtry <- tryframe%>%filter(try==T)
+didntsuggesttry <- tryframe%>%filter(try==F)
+
+mean(suggestedtry$ascores)
+#Result is 11.24077
+mean(didntsuggesttry$ascores)
+#Result is 13.04038
+mean(suggestedtry$ascores)-mean(didntsuggesttry$ascores)
+#Result is -1.799607 (This is the difference between answers which contained the word try and answers which did not contain the word--which was the greater category of the two)
+
+#Here I set up a perm test function to determine whether or not the mean values I got above were significant or not
+meanbyperm <- function(perms = 1000, all_values, n_A)
+{
+  meanpermdiff <- numeric(perms)
+  
+  for (i in c(1:perms))
+  {
+    randorder <- sample(all_values)
+    firstgroup <- randorder[1:n_A]
+    secondgroup <- randorder[(n_A+1):length(all_values)]
+  
+  sampmeanfirst <- mean(firstgroup)
+  sampmeansecond <- mean(secondgroup)
+  
+  meansdiff <- sampmeanfirst - sampmeansecond
+  meanpermdiff[i] = meansdiff
+  }
+  return(meanpermdiff)
+}
+
+```
+
+```{r}
+#Here I plugged in the values for my questions set
+questiontest <- meanbyperm(perms=1000, all_values=triedframe$qscores, n_A=(length(triedframe$tried)/2))
+
+hist(questiontest)
+quantile(questiontest, probs = seq(0,1,0.05))
+
+mean(didtry$qscores)-mean(didnttry$qscores)
+#This mean falls outside of the quantile range, so it is statistically significant-- to my surprise, questions which contained the word tried scored lower than questions which did not.
+```
+```{r}
+#Here I plug in my answers set
+answertest <- meanbyperm(perms=1000, all_values=tryframe$ascores, n_A=(length(tryframe$try)/2))
+
+hist(answertest)
+quantile(answertest, probs = seq(0,1,0.05))
+
+mean(suggestedtry$ascores)-mean(didntsuggesttry$ascores)
+#This mean falls inside of the quantile range, so it is not statistically significant.
+```
+
+###End Erik
