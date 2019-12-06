@@ -434,7 +434,7 @@ hist(answertest)
 quantile(answertest, probs = seq(0,1,0.05))
 
 mean(suggestedtry$ascores)-mean(didntsuggesttry$ascores)
-#This mean falls inside of the quantile range, so it is not statistically significant.
+#This mean falls inside of the quantile range, but within the 0-5% area, so it is statistically significant in support of questions that did not contain the word try generally scoring higher than those that did.
 ```
 
 ###End Erik
