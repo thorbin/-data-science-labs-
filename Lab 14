@@ -438,3 +438,120 @@ mean(suggestedtry$ascores)-mean(didntsuggesttry$ascores)
 ```
 
 ###End Erik
+
+###Mandy's Analysis
+In Lab 10, I analyzed several different questions. I analyzed the score of questions with the word 'how' in it. I also analyzed the score of questions with the word 'why' in it. I found that questions with 'how' in it did better than questions with 'why' in it. But individually, questions without either of those words had a higher score. In this lab, I will create a linear model to analyze this. 
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(modelr)
+library(readxl)
+library(dplyr)
+library(stringr)
+options(na.action = na.warn)
+```
+```{r}
+answers <- read_csv("~/Desktop/Data Science Fall2019/Answers_trunc.csv")
+questions <- read_csv("~/Desktop/Data Science Fall2019/Questions_trunc.csv")
+colnames(answers)
+colnames(questions)
+str(answers)
+str(questions)
+### join relational data using the join function
+data <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+colnames(data)
+str(data)
+## create relevant columns
+data <- data %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+## rename columns 
+answers <- answers %>% rename(ScoreA = Score, BodyA=Body)
+questions <- questions %>% rename(ScoreQ = Score, BodyQ= Body)
+```
+The orginal graphs: 
+```{r}
+ggplot(data=questions)+
+  geom_jitter(mapping=aes(x=str_detect(Title, c("How", "how")), y=ScoreQ))+
+  ggtitle("Score of Questions with 'How' in it")+
+  labs(x= "Questions with 'How' in it")
+
+ggplot(data=questions)+
+  geom_jitter(mapping=aes(x=str_detect(Title, c("Why", "why")), y=ScoreQ))+
+  ggtitle("Score of Questions with 'Why' in it")+
+  labs(x= "Questions with 'Why' in it")
+```
+Filter for how and why: 
+```{r}
+howquestions <- questions %>% filter(str_detect(Title, c("How", "how")))
+whyquestions <- questions %>% filter(str_detect(Title, c("Why", "why")))
+
+
+```
+Linear model for how questions: 
+```{r}
+questions_2 <-  tibble::data_frame(
+  x = str_count(howquestions$Title),
+  y = howquestions$ScoreQ
+)
+
+head(questions_2)
+
+m1 <- lm(y ~ x, data = questions_2)
+grid <- questions_2 %>%
+  data_grid(x)
+grid
+
+grid <- grid %>%
+  add_predictions(m1)
+grid
+
+coef(m1) # y-intercept of about 69.9 and a slight negative slope of -.65
+```
+Linear model for why questions:
+```{r}
+questions_3 <-  tibble::data_frame(
+  x = str_count(whyquestions$Title),
+  y = whyquestions$ScoreQ
+)
+
+head(questions_3)
+
+m1 <- lm(y ~ x, data = questions_3)
+grid <- questions_3 %>%
+  data_grid(x)
+grid
+
+grid <- grid %>%
+  add_predictions(m1)
+grid
+
+coef(m1) # y-intercept of about 44.1 and a very slight negative slope of -.2
+```
+Residuals (how questions) 
+```{r} 
+questions_2 <- questions_2 %>%
+  add_residuals(m1)
+
+ggplot(questions_2, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+
+ggplot(questions_2, aes(x, resid)) + 
+  geom_ref_line(h = 0) +
+  geom_point()  # Between 0 and 100 points are scattered everywhere. 
+```
+Residuals (why questions): 
+```{r}
+questions_3 <- questions_3 %>%
+  add_residuals(m1)
+
+ggplot(questions_3, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+
+ggplot(questions_3, aes(x, resid)) + 
+  geom_ref_line(h = 0) +
+  geom_point() #This graph shows less points but the points do seem to be more concise from 0 to 100. 
+```
+To conclude, how questions' resid are all over the place while why questions' residuals only had a few outliers. Since the how questions had a slightly more negative slope than the why questions, we can conlude that the why questions were receiving a better score than the how questions. 
+##End Mandy
