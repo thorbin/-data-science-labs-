@@ -19,6 +19,10 @@ In lab 10 I answered the question of how length relates to score, in questions (
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(modelr)
+library(dplyr)
+library(stringr)
+library(knitr)
+library(purrr)
 options(na.action = na.warn)
 ```
 
@@ -555,3 +559,72 @@ ggplot(questions_3, aes(x, resid)) +
 ```
 To conclude, how questions' resid are all over the place while why questions' residuals only had a few outliers. Since the how questions had a slightly more negative slope than the why questions, we can conlude that the why questions were receiving a better score than the how questions. 
 ##End Mandy
+
+#### Thorbin's section 
+Thorbin's question: 
+Expanding on the question I asked for lab 10 (number of key words a predictor of score), in this lab I am curious as to whether my results are statistically significant or are circumstantial. The problem that I ran into on lab 10 was that the more key words there were, the fewer responses existed, this was likely due to increase in complexity of the question/ answer. The problem with this is that it gives biased data. I can fix this if I take an individual score and divide it by the number of observations in the group. This would make a plot that can be modeled despite the disparity in popularity between complex and simple answers. Ill only do answers for the sake of time.
+
+```{r}
+answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv") %>% rename(BodyA=Body,AnswerDate=CreationDate,ScoreA=Score)
+questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv")%>%rename(BodyQ=Body,AskedDate=CreationDate,ScoreQ=Score)
+A<-answers %>%select(BodyA,AnswerDate,Id,ScoreA) %>% group_by(Id)%>%mutate(keyword_occurance=sum(str_count(BodyA,c("if","If","Iff","iff","then","Then")))) %>% ungroup() %>% group_by(keyword_occurance) %>% mutate(mean_score=ScoreA/n(),n=n())
+
+#assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyQ
+
+```
+```{r}
+#generating plot
+ggplot(data=A,mapping=aes(x=keyword_occurance,y=mean_score))+geom_point()+ylim(0,150)
+#the y-limit was set because the giant outliers (namely 2) made it hard to read the data, the generated model will capture those though 
+
+```
+looking at this plot, I want to test all linear models (reasonable iteration) that will exist between the lines y=4(x) and y=0. I will use a linear model format in a for loop, I will also set the run (x) value to 100 so that I only have to sequence the rise (y value), also y intercept of zero should produce reasonable approximation, also you cant have a null answer with any upvotes or down votes, so this fits our picture.
+
+```{r}
+#generating the function family
+
+  storage_vector1<-numeric(25)
+  storage_vector2<-numeric(25)
+  for(i in c(1:25))
+  {
+    y1<-(25-i)/12.5 #creates slope
+    y2<-(0) #creates y intercept
+    storage_vector1[i]=y1
+    storage_vector2[i]=y2
+  }
+#storage_vector1 =slope
+#storage_vector2 = intercept
+slp_int<-tibble(storage_vector1,storage_vector2) 
+
+```
+```{r}
+#generating plot with family of functions: 
+
+ggplot(data=A,mapping=aes(x=keyword_occurance,y=mean_score))+geom_point()+ylim(0,150) + geom_abline(data=slp_int,mapping=aes(intercept=slp_int$storage_vector2,slope=slp_int$storage_vector1))
+```
+Now I need to find the vertical rms distance between each point and each function: 
+```{r}
+model<-function(a,data) #specifiying linear model
+{
+
+  m<-a[1]*data$keyword_occurance+a[2]#takes first and second colum of tibble a respectively
+}
+dist<-function(mod,data)
+{
+  diff=data$mean_score-model(mod,data)
+  m=sqrt(mean(diff^2))
+  return(m)
+}
+prep_A<-function(d1,d2,a) #prepares the distance function to be used in a mapping function
+{
+  dist(c(d1,d2),A)
+}
+final<-slp_int %>% mutate(distance=map2_dbl(slp_int$storage_vector1,slp_int$storage_vector2,prep_A)) %>% rename(slope=storage_vector1,y_int=storage_vector2)
+```
+On inspection of the table final represents, it can be easily observed that the best fitting model has an RMS vertical displacement of 11.85053. This indicates that this "best" fitting linear model is not a stellar choice, but will do in a pinch. another approach would be to construct a peicewise linear fit model for better results, but im not going to do that. Factors that may raise this would be the iteration angle, I could have just missed the best distance,or the massive outliers contributing significantly to the cumulative distance.
+
+```{r}
+ggplot(data=A,mapping=aes(x=keyword_occurance,y=mean_score))+geom_point()+ylim(0,150) + geom_abline(mapping=aes(intercept=0,slope=.32))
+```
+This plot shows that the process of selecting the linear fit was successful, suggesting that the two massive outlier not pictured were juking the stats and that this is probably a rather decent model. Drawing conclusions, I can negate and expand on my previous findings, it appears as though the number of times a key-word appears in an answer, the more likely it is that that answer will be better rated. This is possibly becuase the key words selected would tend to belong to a multi-faceted concept which would be answered by a) someone who knows what theyre tallking about and b) being able to successfuly reach a large audience each member with a slightly different question.
+####End Thorbin
