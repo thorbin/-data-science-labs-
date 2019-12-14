@@ -253,3 +253,22 @@ ggplot(m[m$spirit_servings>=50,], aes(x = spirit_servings, y = lex)) +
 Now we are able to see the trend much more clearly. Wine has a strong incline, beer a steady incline, and spirits a sharp decline.
 
 Conclusion: it is evident from these data and analyses that wine consumption is indeed associated with better health outcomes than beer, and beer is better than spirits, though more work would need to be done to tease out the confounding variables (such as doing this comparison between wine drinkers and spirit drinkers within the same country). But that would require more data and more data scientists.
+
+
+
+# Team Reflection
+
+# Individual Reflections
+
+## Ryan's:
+# How have your six-month or 5-year goals changed? 
+I've found that I need to begin studying statistics. This course is a good way to get your feet wet and learn the R tools that will take you far, but what is limiting me now is my lack of statistical knowledge more than anything.
+# What did you learn/accomplish in this course? 
+A lot of practice with R in tidyverse, which will pay dividends for me in the future. The visualizations were probably the most important part.
+# If you could give yourself advice at the beginning of the semester, what would you tell yourself to keep doing, stop doing, and start doing?
+Go to every recitation. Start out ahead in the readings and don't fall behind. Use datacamp to supplement your R work.
+
+
+# Summary of who did what.
+
+Ryan wrote the introduction of the team section and analyzed how the individual beverages affected health.
