@@ -90,7 +90,7 @@ ggplot(data = top_drink, aes(x = drink, y = lex)) +
 ```
 
 
-This is a fascinating result. Wine is the clear victor here, with the smallest standard error.
+This is a fascinating result. Wine is the clear victor here, and with the smallest standard error at that.
 
 Now let's look at how volumes of each beverage consumed relate to life expectancy using geom_points and geom_smooths:
 
