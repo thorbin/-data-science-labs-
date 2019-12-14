@@ -1,0 +1,255 @@
+---
+title: "Lab 15"
+authors: Ryan Bilkie, Jorge Robelo, Mandy Karako, Thorbin Atwell-Donoughy, Erik Svenneby
+date: "12/10/2019"
+output: html_document
+---
+
+##How does alcohol consumption relate to health and well-being?
+
+The Black Swans have been hired by the World Health Organization to analyze how the patterns of alcohol consumption affect various measures of health and well-being. This question is important because alcohol is consumed worldwide in a variety of forms, and it is estimated that drinking causes (globablly) 2.8 million premature deaths per year (https://ourworldindata.org/alcohol-consumption). It is useful to understand how and why (in what form) alcohol is dangerous (or beneficial) to health.
+
+The primary dataset we will be using is from FiveThirtyEight (https://github.com/fivethirtyeight/data/blob/master/alcohol-consumption/drinks.csv), in conjunction with various other datasets such as gapminder.org.  The alcohol dataset is a worldwide tally of total litres of alcohol consumed, in addition to total servings of beer, wine, spirits, per country for 2010.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(modelr)
+library(readxl)
+
+alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+
+```
+
+## Conclusion, Recommendation, and a plot communicating conclusion or basis for your recommendation
+
+
+##Ryan's Section
+
+I'm interested in how the individual forms of consumption (wine, beer, and spirits) relate to one another in terms of health. For the measurement of health, I will use life expectancy (from gapminder.org). First we import the data and tidy it such that life expectancy for 2010 per country is joined to the alcohol dataset.
+
+
+```{r}
+#download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
+
+
+life_exp = read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\life_expectancy_years.xlsx")
+```
+
+
+```{r}
+m <- merge(alcohol, life_exp[ , c('country', '2010')],
+           by.x = 'country', by.y = 'country')
+
+colnames(m)[ncol(m)] <- 'lex'
+# Removing countries with NA life exp.
+m <- m[!is.na(m$lex), ]
+```
+
+Now we are ready to see who were the top consumers of wine, beer and spirits:
+```{r}
+top_wine <- m[order(m$wine_servings, decreasing = TRUE),]
+top_wine <- top_wine[1:10, c('country', 'wine_servings', 'lex')]
+top_wine$drink <- 'wine'
+top_wine
+```
+
+## Beer
+```{r}
+top_beer <- m[order(m$beer_servings, decreasing = TRUE),]
+top_beer <- top_beer[1:10, c('country', 'beer_servings', 'lex')]
+top_beer$drink <- 'beer'
+top_beer
+```
+
+## Spirit
+```{r}
+top_spirit <- m[order(m$spirit_servings, decreasing = TRUE),]
+top_spirit <- top_spirit[1:10, c('country', 'spirit_servings', 'lex')]
+top_spirit$drink <- 'spirit'
+top_spirit
+```
+
+This sort of exploratory data analysis gives us an idea of which countries drink which kind of alcoholic beverage. Note that the top 9/10 wine consumers are European countries. This will be important near the end when we're analyzing our models.
+
+Let's see what a boxplot tells us about the life expectancy for wine drinkers, beer drinkers and spirit drinkers based on this data.
+
+
+```{r}
+top_drink <- rbind(top_wine[, c('lex', 'drink')],
+                   rbind(top_beer[, c('lex', 'drink')], top_spirit[, c('lex', 'drink')]))
+top_drink
+```
+
+```{r}
+ggplot(data = top_drink, aes(x = drink, y = lex)) +
+    geom_boxplot() +
+    ggtitle('Life expectancy for top 10 countries in consumption of wine, beer, and spirit')
+```
+
+
+This is a fascinating result. Wine is the clear victor here, with the smallest standard error.
+
+Now let's look at how volumes of each beverage consumed relate to life expectancy using geom_points and geom_smooths:
+
+## Wine
+```{r}
+ggplot(m, aes(x = wine_servings, y = lex)) +
+    geom_point() +
+    geom_smooth()
+```
+
+## Beer
+```{r}
+ggplot(m, aes(x = beer_servings, y = lex)) +
+    geom_point() +
+    geom_smooth()
+```
+
+
+
+## Spirits
+```{r}
+ggplot(m, aes(x = spirit_servings, y = lex)) +
+    geom_point() +
+    geom_smooth()
+```
+
+
+This gives us a clearer picture of the patterns of life expectancy in relation to the various drinks. Notice the lower life expectancy towards the lower end of the x-axis--why should that be? For spirit consumption in particular, it rises sharply up to about 100 servings and then drops down steadily. We will explore this issue near the end of our analysis. For now, we will fit some models and add predictions:
+
+
+```{r}
+
+wine_2 <-  tibble::data_frame(
+  x = m$wine_servings,
+  y = m$lex
+)
+
+head(wine_2)
+
+m2 <- lm(y ~ x, data = wine_2)
+grid <- wine_2 %>%
+  data_grid(x)
+grid
+
+grid <- grid %>%
+  add_predictions(m2)
+grid
+coef(m2)
+
+
+ggplot(data = m) +
+  geom_point(mapping = aes(x = wine_servings, y = lex))+
+  labs(title= "Predicting LifeExp from Wine Consumption", x = "Amount of wine consumed", y = "Life Expectancy")+
+  geom_line(aes(x, y = pred), data = grid, colour = 'red', size = 1)
+
+
+
+```
+
+
+```{r}
+
+beer_2 <-  tibble::data_frame(
+  x = m$beer_servings,
+  y = m$lex
+)
+
+
+m3 <- lm(y ~ x, data = beer_2)
+grid2 <- beer_2 %>%
+  data_grid(x)
+
+
+grid2 <- grid2 %>%
+  add_predictions(m3)
+
+coef(m3)
+
+
+ggplot(data = m) +
+  geom_point(mapping = aes(x = beer_servings, y = lex))+
+  labs(title= "Predicting LifeExp from Beer Consumption", x = "Amount of beer consumed", y = "Life Expectancy")+
+  geom_line(aes(x, y = pred), data = grid2, colour = 'red', size = 1)
+
+
+
+```
+
+```{r}
+
+spirit_2 <-  tibble::data_frame(
+  x = m$spirit_servings,
+  y = m$lex
+)
+
+
+m4 <- lm(y ~ x, data = spirit_2)
+grid3 <- spirit_2 %>%
+  data_grid(x)
+
+
+grid3 <- grid3 %>%
+  add_predictions(m4)
+
+coef(m4)
+
+
+ggplot(data = m) +
+  geom_point(mapping = aes(x = spirit_servings, y = lex))+
+  labs(title= "Predicting LifeExp from Spirit Consumption", x = "Amount of spirits consumed", y = "Life Expectancy")+
+  geom_line(aes(x, y = pred), data = grid3, colour = 'red', size = 1)
+
+
+
+```
+
+
+Surprisingly, all three drinks predict clearly higher life expectancy based on higher consumption. This is seems to run against the trend we saw above in our point/smooth plots. That means we need to further investiage. 
+
+It might be useful to look at the residuals. Since the slopes are similar for all three linear models, we will only look at one.
+
+```{r}
+wine_2 <- wine_2 %>%
+  add_residuals(m2)
+
+ggplot(wine_2, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+
+
+```
+
+It appears that the smallest residuals tend to be highest in count--meaning that these models are not bad, though not perfect. There is a good deal of variability, but the linear trend is still clear.
+
+One conclusion to draw from these data is that wine consumption is a strong predictor of life expectency, relative to beerand spirits. However, this might not be valid, as there could possibly be confounding variables at play, which we have not explored. We notice that the biggest wine-consumers, for instance, reside on the European continent, and it's possible that the higher life expectency there is due to other factors, such diet, climate, or lifestyle.
+
+There's something else going on here: when we look at the table of this data, we notice that there are several countries that consume 0 alcohol per year, such as Afghanistan, Libya, Iran, Yemen, Pakistan, and North Korea). These countries also happen to be countries that are war-torn, or impoverished, or both. That is a clear confounding variable that we should filter out. So what happens when we only look at countries that consume more than 50 servings of a given drink per year?
+
+
+```{r}
+ggplot(m[m$wine_servings>=50,], aes(x = wine_servings, y = lex)) +
+    geom_point() +
+    labs(title= "Wine Consumed >= 50")+
+    geom_smooth(method='lm')
+```
+
+```{r}
+ggplot(m[m$beer_servings>=50,], aes(x = beer_servings, y = lex)) +
+    geom_point() +
+    labs(title= "Beer Consumed >= 50")+
+    geom_smooth(method = 'lm')
+```
+
+```{r}
+ggplot(m[m$spirit_servings>=50,], aes(x = spirit_servings, y = lex)) +
+    geom_point() +
+    labs(title= "Spirits Consumed >= 50")+
+    geom_smooth(method = 'lm')
+```
+
+Now we are able to see the trend much more clearly. Wine has a strong incline, beer a steady incline, and spirits a sharp decline.
+
+Conclusion: it is evident from these data and analyses that wine consumption is indeed associated with better health outcomes than beer, and beer is better than spirits, though more work would need to be done to tease out the confounding variables (such as doing this comparison between wine drinkers and spirit drinkers within the same country). But that would require more data and more data scientists.
