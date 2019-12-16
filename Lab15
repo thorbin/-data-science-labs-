@@ -451,7 +451,7 @@ cor(xc,yc)
  ggplot(, aes(x = xc, y = yc))+
   geom_point()+
   geom_smooth(method = "lm")+
-  ggtitle("GPD and Life expectancy")+
+  ggtitle(" Alcohol and Life expectancy")+
   labs(y="total_litres_of_pure_alcohol", x = "life expectancy")
    
 
@@ -463,7 +463,7 @@ ggplot(, aes(x=xyc)) +
   geom_histogram(alpha=.9, fill="cornflowerblue")+
   #geom_density(alpha=.2, fill="tan")+
   labs(title="Permutated Correlation Distribution", 
-       subtitle="Correlation Distribution differences between GDP and life expectancy in from 170 countrie in 2010",
+       subtitle="Correlation Distribution differences between  alcohol and life expectancy in from 170 countrie in 2010",
        x="Diffrence in Correlation Distribution"
   )+ geom_segment(aes(x = -0.127073245,y =0, xend = -0.2345, yend = 0))+ 
   geom_segment(aes(x = -0.127073245,y =0, xend = -0.127073245, yend = 27))+
@@ -474,7 +474,7 @@ ggplot(, aes(x=xyc)) +
               color="red")+
   annotate(geom="text", x=0.2, y=6, label="critical region ",
               color="darkred")+
-  annotate(geom="text", x=cor(xc,yc), y=60, label="corralation\nlife_exp\nGDP ",
+  annotate(geom="text", x=cor(xc,yc), y=60, label="corralation\nlife_exp\nand\nalcohol ",
               color="darkgreen")
 
 
