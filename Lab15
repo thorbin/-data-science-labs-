@@ -25,15 +25,40 @@ library(purrr)
 alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
 
 ```
-Thorbins's conclusion was that alcohol type did not play a role in death rates, however, countries with small wine intake tended to have the same murder trends as the other countries exhibited but with a higher variance in murders for smaller amounts of wine consumed. 
-My recommendataion would be to generally not drink a small ammount of wine but rather none or or a moderate amount if your country of residence doesn't drink alot of wine. Beer and other hard alcohol is sort of the same but much less pronounced. A possible explanation is that maybe wine has higher intoxicative properties for smaller amounts consumed leading people
-to believe that they are not as trashed as they really are leading to more accidental deaths. Where as with beer its kind of the same but much smaller alcohol contents and hard liqour after a shot it is clear you are goint to feel the effects leading to fewer accidental deaths for beer and hard liqour.
- Jorge's correlation between alcohol consumption and life expectancy is positive strong, the implication is provoking because one might suspect that the 
- less alcohol consumption then countries would do better economically do to the toxic effect of alcohol. Yet, a possible explanation could
- be that as a country becomes more developed than it as access to alcohol resources. Thus, this analysis 
- could indicate that at some level alcohol consumption could indicate a countries economic prosperity. 
- This is likely done to a third variable effect.
-## Conclusion, Recommendation, and a plot communicating conclusion or basis for your recommendation
+# Team Conclusion and Recommendation:
+
+The sum of the individual findings tell a cautiously optimistic story about some forms of drinking, but not all. For example, Jorge's work shows that there is a strong correlation between total alcohol consumed and life expectency. Ryan's work then dives deeper into that issue and reveals that, whereas wine and beer consumption is positively correlated with higher life expectency, consumption of spirits is negatively correlated. Erik's findings showed that alcohol consumption is actually an indicator of lower rates of childhood mortality; however, as a counterpoint to this positive narrative, Mandy found that alcohol consumption is weakly correlated with higher rates of suicide, and Thorbin found that some alcohol consumption is associated with violent crime. 
+
+To further complicate the issue, in all five instances, confounding variables certainly play a role, which is detailed in the individual sections. Nevertheless, taken together, all of these data and analyses show that at minimum, the consumption of wine (and to a lesser extent, beer) is an indicator of better health and well-being (whether or not that is a causal relationship is a different story), whereas consumption of spirits is associated with less favorable outcomes, and this is best illustrated by plotting the relationship of these drinks with life expectency:
+
+(In order to properly use visualizations for the team section, it will be necessary to use Ryan's data-tidying here, rather than in his individual section):
+
+
+```{r message=FALSE, warning=FALSE}
+#download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
+
+life_exp = read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\life_expectancy_years.xlsx")
+
+m <- merge(alcohol, life_exp[ , c('country', '2010')],
+           by.x = 'country', by.y = 'country')
+
+colnames(m)[ncol(m)] <- 'lex'
+# Removing countries with NA life exp.
+m <- m[!is.na(m$lex), ]
+
+
+ggplot(data = m, warning=FALSE, message=FALSE)+
+  geom_point(aes(x = wine_servings, y = lex), color = "red")+
+  geom_smooth(aes(x = wine_servings, y = lex), color = "red", se= FALSE)+
+  geom_point(aes(x = beer_servings, y = lex), color = "springgreen4")+
+  geom_smooth(aes(x=beer_servings, y= lex), color = "springgreen4", se= FALSE)+
+  geom_point(aes(x = spirit_servings, y = lex), color = "steelblue2")+
+  geom_smooth(aes(x = spirit_servings, y = lex), color = "steelblue2", se = FALSE)+
+  xlim(c(0,375))
+
+```
+
+Therefore, the team's cautious recommendation for the holiday season is to enjoy wine and avoid spirits.
 
 
 ##Ryan's Section
@@ -41,22 +66,7 @@ to believe that they are not as trashed as they really are leading to more accid
 I'm interested in how the individual forms of consumption (wine, beer, and spirits) relate to one another in terms of health. For the measurement of health, I will use life expectancy (from gapminder.org). First we import the data and tidy it such that life expectancy for 2010 per country is joined to the alcohol dataset.
 
 
-```{r}
-#download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
 
-
-life_exp = read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\life_expectancy_years.xlsx")
-```
-
-
-```{r}
-m <- merge(alcohol, life_exp[ , c('country', '2010')],
-           by.x = 'country', by.y = 'country')
-
-colnames(m)[ncol(m)] <- 'lex'
-# Removing countries with NA life exp.
-m <- m[!is.na(m$lex), ]
-```
 
 Now we are ready to see who were the top consumers of wine, beer and spirits:
 ```{r}
