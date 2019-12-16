@@ -451,7 +451,7 @@ cor(xc,yc)
  ggplot(, aes(x = xc, y = yc))+
   geom_point()+
   geom_smooth(method = "lm")+
-  ggtitle(" Alcohol and Life expectancy")+
+  ggtitle("GPD and Life expectancy")+
   labs(y="total_litres_of_pure_alcohol", x = "life expectancy")
    
 
@@ -463,7 +463,7 @@ ggplot(, aes(x=xyc)) +
   geom_histogram(alpha=.9, fill="cornflowerblue")+
   #geom_density(alpha=.2, fill="tan")+
   labs(title="Permutated Correlation Distribution", 
-       subtitle="Correlation Distribution differences between  alcohol and life expectancy in from 170 countrie in 2010",
+       subtitle="Correlation Distribution differences between GDP and life expectancy in from 170 countrie in 2010",
        x="Diffrence in Correlation Distribution"
   )+ geom_segment(aes(x = -0.127073245,y =0, xend = -0.2345, yend = 0))+ 
   geom_segment(aes(x = -0.127073245,y =0, xend = -0.127073245, yend = 27))+
@@ -474,7 +474,7 @@ ggplot(, aes(x=xyc)) +
               color="red")+
   annotate(geom="text", x=0.2, y=6, label="critical region ",
               color="darkred")+
-  annotate(geom="text", x=cor(xc,yc), y=60, label="corralation\nlife_exp\nand\nalcohol ",
+  annotate(geom="text", x=cor(xc,yc), y=60, label="corralation\nlife_exp\nGDP ",
               color="darkgreen")
 
 
@@ -491,12 +491,168 @@ Given that the presented correlation is positive the implication is provoking be
 
  quantile(xyc, probs = seq(0, 1, 0.05))
 
-"We find a statistically significat corralation between alcohol consumption and Life Expectancy at the global scale (170 countires)"
+"We find a statistically significat corralation between GDP and Life Expectancy at the global scale (170 countires)"
 
 "corralation a positivly strongs"
 ```
 #End of Jorge analasys
 
+##Mandy's Portion:
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(modelr)
+library(readxl)
+alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+
+```
+Mandy's Question: Since alcohol is a depressant, I'm comparing suicide rates to alcohol consumption. Do countries with a large consumption of alcohol experience higher suicide rates? If so, is it conclusive to say these two are related? Does the type of alcohol make a difference? 
+The datasets I'm using are the alcohol consumption dataset from github and a suicide rates dataset I found on Kaggle.
+```{r}
+#import suicide rate data 
+suicide_rates <- read_csv("suicide-rates-by-country.csv")
+#to make this a little simpler, let's look at just a specific year in the dataset
+suicide_rates <- suicide_rates %>% filter(Year=='2005')
+suicide_rates <- suicide_rates %>% rename('suicide rate' = 'suicide rate (age-adjusted suicides per 100,000 people)', 'country'='Entity')
+suicide_rates <- suicide_rates %>% select(-Code)
+#combine datasets 
+data <- full_join(suicide_rates, alcohol, by= 'country')
+#year column in unnecassary 
+data <- data %>% select(-Year)
+#filter out NA's 
+data <- data %>% drop_na()
+```
+Let's explore the data for the different kinds of alcohol:
+```{r}
+#beer
+beer <- data %>% select(-c(4,5,6))
+beer <- beer %>% arrange(desc(beer_servings))
+#spirit 
+spirit <- data %>% select(-c(3,5,6))
+spirit <- spirit %>% arrange(desc(spirit_servings))
+#wine
+wine <- data %>% select(-c(3,4,6))
+wine <- wine %>% arrange(desc(wine_servings))
+#total
+total <- data %>% select(-c(3,4,5)) 
+total <- total %>% arrange(desc(total_litres_of_pure_alcohol))
+# It's important to note from this exploraty data analysis that in the total alcohol consumed set, the top two countries, Belarus and Lithuania, had alarmingly high suicide rates of 26.8 and 33.3. 
+# Let's look at the mean of the top half of alcohol consumption compared to the bottom half to see if we can see a major difference. There are 178 total observations so let's compare the top 89 to the bottom 89. 
+mean(total$`suicide rate`[row_number(1:89)]) #11.13972
+mean(total$`suicide rate`[row_number(89:178)]) #11.11044
+#Interestingly enough, we see almost no difference. Let's see if that goes for every type of alcohol. 
+mean(beer$`suicide rate`[row_number(1:89)]) #10.82907
+mean(beer$`suicide rate`[row_number(89:178)]) #10.78719
+mean(spirit$`suicide rate`[row_number(1:89)]) #10.34842
+mean(spirit$`suicide rate`[row_number(89:178)]) #10.24879
+mean(wine$`suicide rate`[row_number(1:89)]) #10.02403
+mean(wine$`suicide rate`[row_number(89:178)]) #10.05809
+# The means show us that there is no real difference in suicide rates between the top and bottom half. 
+```
+Let's take a better look with some graphs. 
+Total Alcohol:
+```{r}
+ggplot(data = total, mapping = aes(x=`suicide rate`, y= total_litres_of_pure_alcohol))+
+  geom_point()+
+  geom_smooth()+
+  labs( y= "total litres of pure alcohol" )+
+  ggtitle("Suicide Rate vs Total Litres of Pure Alcohol")
+```
+Beer:
+```{r}
+ggplot(data = beer, mapping = aes(x=`suicide rate`, y= beer_servings))+
+  geom_point()+
+  geom_smooth()+
+  labs(y= "Beer Servings" )+
+  ggtitle("Suicide Rate vs Beer Servings")
+```
+Wine: 
+```{r}
+ggplot(data=wine, mapping= aes(x=`suicide rate`, y= wine_servings))+
+  geom_point()+
+  geom_smooth()+
+  labs(y= "Wine Servings")+
+  ggtitle("Suicide Rate vs Wine Servings")
+```
+Spirit:
+```{r}
+ggplot(data = spirit, mapping = aes(x=`suicide rate`, y=spirit_servings))+
+  geom_point()+
+  geom_smooth()+
+  labs(y= "Spirit Servings")+
+  ggtitle("Suicide Rate vs Spirit Servings")
+```
+Let's do some linear models:
+```{r}
+#Wine
+wine2 <-  tibble::data_frame(
+  x = data$wine_servings,
+  y = data$`suicide rate`
+)
+head(wine2)
+
+data2 <- lm(y ~ x, data = wine2)
+grid <- wine2 %>% data_grid(x)
+grid <- grid %>%
+  add_predictions(data2)
+grid
+coef(data2) #Intercept = 9.099288376 x= .008744693
+ggplot(data = data) +
+  geom_point(mapping = aes(x = wine_servings, y = `suicide rate`))+
+  labs(title= "Predicting Suicide Rate from Wine Consumption", x = "Wine Consumed", y = "Suicide Rate")+
+  geom_line(aes(x, y = pred), data = grid, colour = 'blue', size = 1)
+```
+
+```{r}
+#Beer:
+beer2 <- tibble::data_frame(
+  x=data$beer_servings,
+  y=data$`suicide rate`
+)
+data3 <- lm(y~x, data = beer2)
+grid2 <- beer2 %>% data_grid(x)
+grid2 <- grid2 %>% add_predictions(data3)
+coef(data3) #Intercept = 8.37134417 x= .01104256
+ggplot(data=data)+
+  geom_point(mapping=aes(x=beer_servings, y= `suicide rate`))+
+  labs(title = "Predicting Suicide Rate from Beer Consumption", x= "Beer Consumed", y= "Suicide Rate")+
+  geom_line(aes(x, y=pred), data=grid2, colour = 'blue', size=1)
+```
+
+```{r}
+#Spirit
+spirit2 <- tibble::data_frame(
+  x=data$spirit_servings, 
+  y=data$`suicide rate`
+  )
+data4 <- lm(y~x, data=spirit2)
+grid3<- spirit2 %>% data_grid(x)
+grid3 <- grid3 %>% add_predictions(data4)
+coef(data4) #Intercept = 8.33589506 x= .01565516
+ggplot(data=data)+
+  geom_point(mapping=aes(x=beer_servings, y=`suicide rate`))+
+  labs(title = "Predicting Suicide Rate from Spirit Consumption", x= "Spirits Consumed", y= "Suicide Rate")+
+  geom_line(aes(x, y=pred), data=grid3, colour= 'blue', size=1)
+```
+
+```{r}
+#Total Alcohol:
+total2<- tibble::data_frame(
+  x=data$total_litres_of_pure_alcohol,
+  y=data$`suicide rate`
+)
+data5 <- lm(y~x, data=total2)
+grid4 <- total2 %>% data_grid(x)
+grid4 <- grid4 %>% add_predictions(data5)
+coef(data5) #Intercept= 7.1149068, x= .5185126
+ggplot(data=data)+
+  geom_point(mapping=aes(x=total_litres_of_pure_alcohol, y=`suicide rate`))+
+  labs(title= "Predicting Suicide Rate from Total Alcohol Consumed", x="Alcohol Consumed", y="Suicide Rate")+
+  geom_line(aes(x, y=pred), data= grid4, colour= 'blue', size= 1)
+```
+From all the linear models graph, we do see the prediction that countries that consume more liters of alcohol will experience higher suicide rates. The correlation, however, is slight. We see the most correlation with total alcohol consumed, which was to be expected. There are many other factors that go into suicide rates, but I thought examining the amount of alcohol consumed was interesting.  
+##End Mandy 
 
 
 # Individual Reflections
@@ -510,7 +666,10 @@ A lot of practice with R in tidyverse, which will pay dividends for me in the fu
 Go to every recitation. Start out ahead in the readings and don't fall behind. Use datacamp to supplement your R work.
 From the comments giving the best slope, y intercept and rms distance, we can see that the lines do not differ at all in their plot. But the rms distances differ slightly. This indicates that there is a variance in murder rates for each type of line, however to definitively say that it is dependent on alcohol type would be incorrect because there are no observed trends on this behavior in time. But what these results appear to indicate is that alcohol type and consumption does not play a significant role in the murder rate of any given country. 
 
-
+##Mandy's:
+My 5 year goals have definitely changed after experiencing this semester. I never thought I wanted a career in data science, but now I would love to at least make it a small part of my future. 
+I learned so much from this course. I learned more from this course than any other course this semester. I had never coded a day in my life and now I feel like I can do it fairly well. I learned how to explore data and visualize that exploration. 
+If I could give myself advice at the beginning, I would tell myself to take the class a little bit more serioulsy. I would also tell myself to ask for help!! I never asked a professor or TA for help. It's the easiest thing you can do to get a better grade. 
 ## Jorge's
 
 Individually, write a paragraph reflecting on: how have your six-month or 5-year goals changed? 
@@ -534,4 +693,5 @@ We felt that we did a good job of getting the labs done not always on time but a
 
 Ryan wrote the introduction of the team section and analyzed how the individual beverages affected health
 Thorbin wrote team reflection
+Mandy analyzed alcohol consumption and suicide rates in countries and wrote her relfection. 
 
