@@ -26,7 +26,11 @@ library(purrr)
 alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
 
 ```
-
+ Jorge's correlation is positive strong, the implication is provoking because one might suspect that the 
+ less alcohol consumption then countries would do better economically do to the toxic effect of alcohol. Yet, a possible explanation could
+ be that as a country becomes more developed than it as access to alcohol resources. Thus, this analysis 
+ could indicate that at some level alcohol consumption could indicate a countries economic prosperity. 
+ This is likely done to a third variable effect.
 ## Conclusion, Recommendation, and a plot communicating conclusion or basis for your recommendation
 
 
