@@ -48,11 +48,11 @@ alc <- rename(alc, 'wine' = 'wine_servings')
 alc <- rename(alc, 'spirit' = 'spirit_servings')
 alc <- rename(alc, 'total' = 'total_litres_of_pure_alcohol')
 
-childmort <- read.csv("C:/Users/ErikSvenneby/Desktop/child_mortality_0_5_year_olds_dying_per_1000_born.csv")
+childmort <- read.csv("~/Desktop/child_mortality_0_5_year_olds_dying_per_1000_born.csv")
 childmort <- select(childmort, 'country','X2010')
 childmort <- rename(childmort, 'MortRate' = 'X2010')
 
-GDP <- read.csv("C:/Users/ErikSvenneby/Desktop/gdppercapita_us_inflation_adjusted.csv")
+GDP <- read.csv("~/Desktop/gdppercapita_us_inflation_adjusted.csv")
 GDP <- select(GDP, 'country', 'X2010')
 GDP <- rename(GDP, 'GDP'='X2010')
 
