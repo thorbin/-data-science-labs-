@@ -11,7 +11,6 @@ The Black Swans have been hired by the World Health Organization to analyze how 
 
 The primary dataset we will be using is from FiveThirtyEight (https://github.com/fivethirtyeight/data/blob/master/alcohol-consumption/drinks.csv), in conjunction with various other datasets such as gapminder.org.  The alcohol dataset is a worldwide tally of total litres of alcohol consumed, in addition to total servings of beer, wine, spirits, per country for 2010.
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -26,8 +25,14 @@ library(purrr)
 alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
 
 ```
- Jorge's  presented correlation is positive the implication is provoking because one might suspect that the less alcohol consumption then countries would do worst in terms of life expectancy. Yet, a possible explanation could be that as a country becomes more developed than it as access to more resources such as medical attention and education. Thus, this analysis could indicate that at some level alcohol consumption could indicate countries' economic prosperity might interact with life expectancy disparity level of alcohol going up. This is likely done to a third variable effect. 
-
+Thorbins's conclusion was that alcohol type did not play a role in death rates, however, countries with small wine intake tended to have the same murder trends as the other countries exhibited but with a higher variance in murders for smaller amounts of wine consumed. 
+My recommendataion would be to generally not drink a small ammount of wine but rather none or or a moderate amount if your country of residence doesn't drink alot of wine. Beer and other hard alcohol is sort of the same but much less pronounced. A possible explanation is that maybe wine has higher intoxicative properties for smaller amounts consumed leading people
+to believe that they are not as trashed as they really are leading to more accidental deaths. Where as with beer its kind of the same but much smaller alcohol contents and hard liqour after a shot it is clear you are goint to feel the effects leading to fewer accidental deaths for beer and hard liqour.
+ Jorge's correlation between alcohol consumption and life expectancy is positive strong, the implication is provoking because one might suspect that the 
+ less alcohol consumption then countries would do better economically do to the toxic effect of alcohol. Yet, a possible explanation could
+ be that as a country becomes more developed than it as access to alcohol resources. Thus, this analysis 
+ could indicate that at some level alcohol consumption could indicate a countries economic prosperity. 
+ This is likely done to a third variable effect.
 ## Conclusion, Recommendation, and a plot communicating conclusion or basis for your recommendation
 
 
@@ -335,21 +340,43 @@ Now I need to make a function that will take each individual line and calculate 
   {
     sending_that_thing(c(d1,d2),wine) #sets us up so that we can name a data frame as an arguement to an overlapping function.
   }
-beer_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_beer))
-hard_alc_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_hard_alc))
-wine_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_wine))
+beer_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_beer))
+beer_lines<-beer_int%>% filter(rank(dist)<=10) # dist: 6586 y_int: 591 slp:5.65
+hard_alc_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_hard_alc)) 
+hard_alc_lines<-hard_alc_int%>% filter(rank(dist)<=10) # dist: 6594 y_int: 591 slp:5.65
+wine_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_wine))
+wine_lines<-wine_int%>% filter(rank(dist)<=10) # dist: 6712 y_int: 591 slp:5.65
 ```
-###End Thorbin's section (for now)
+```{r}
+ggplot(data=beer)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of beer (L) vs Murders")
+ggplot(data=hard_alc)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of Hard alcohol (L) vs Murders")
+ggplot(data=wine)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of Wine (L) vs Murders")
+```
+
+  From the comments giving the best slope, y intercept and rms distance, we can see that the lines do not differ at all in their plot. But the rms distances differ slightly. This indicates that there is a variance in murder rates for each type of line, however to definitively say that it is dependent on alcohol type would be incorrect because there are no observed trends on this behavior in time. But what these results appear to indicate is that alcohol type and consumption does not play a significant role in the murder rate of any given 
+  
+Thorbin's sub questions: 
+1) Question: Does alcohol turn us into a bunch of murderous primates? Importance: If it did people should know so that they can stay away from drunk people at all costs. Interest: It would be cool to see if there is a more subtle effect
+2)Tools used: map, loop, function, linear modeling. 
+3)Answer: since the slopes and y intercepts of each line do not differ, there is no functional difference in murder inductance between the alcohols. However the 'large' change in difference for rms distance for wine indicates that wine drinkers have a higher variation impulses of stupidity/murderous intent.
+4)Ethical:none Conclusions: Alcohol at low consumption does not generally increase Murders/deaths by murder. Recommendations: Don't drink above your tolerance to minimize risk of death.
+
+Thorbins reflection:
+6 month goal: pass the class and learn a valuable skill. 5 year goal: Retain functional knowledge of that skill to routinely apply it.
+
+Advice: Stop doing: the labs 2 hours before its due, Start doing: Do the labs earlier. Keep doing: enjoying coding 
+  
+###End Thorbin's section
 
 #Start Jorge
 
-Given that our expert domine concern about the effect of alcohol at a global scale, and the support that alcohol consumption is quite detrimental to nations then my investigation deals in exploring if there is a correlation between alcohol, measured by the total liters of consumption per person, and global life expectancy, compromise of 170 countries.
+Given that our expert domine concern about the effect of alcohol at a global scale, and the support that alcohol consumption is quite detrimental to nations then my investigation deals in exploring if there is a correlation between alcohol, measured by the total liters of consumption per person, and global GDP, compromise of 170 countries.
 
 ```{r}
 library(tidyverse)
 library(dplyr)
 
-  drinks_alcholol_csv <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+    drinks_alcholol_csv <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
 
   life_expectancy_years <-read_csv("C:/Users/chele/Documents/stats_data_sci/lab15/life_expectancy_years.csv")
 
@@ -408,7 +435,7 @@ yc<-w$life_exp
 
 
 ```
-   
+ 
 ```{r}
 xyc<-perm_cor(perms = 1000, xc, yc)
 ```
@@ -424,7 +451,7 @@ cor(xc,yc)
  ggplot(, aes(x = xc, y = yc))+
   geom_point()+
   geom_smooth(method = "lm")+
-  ggtitle("Alcohol in litres and Life expectancy")+
+  ggtitle("GPD and Life expectancy")+
   labs(y="total_litres_of_pure_alcohol", x = "life expectancy")
    
 
@@ -436,7 +463,7 @@ ggplot(, aes(x=xyc)) +
   geom_histogram(alpha=.9, fill="cornflowerblue")+
   #geom_density(alpha=.2, fill="tan")+
   labs(title="Permutated Correlation Distribution", 
-       subtitle="Correlation Distribution differences between Alcohol in litres and life expectancy in from 170 countrie in 2010",
+       subtitle="Correlation Distribution differences between GDP and life expectancy in from 170 countrie in 2010",
        x="Diffrence in Correlation Distribution"
   )+ geom_segment(aes(x = -0.127073245,y =0, xend = -0.2345, yend = 0))+ 
   geom_segment(aes(x = -0.127073245,y =0, xend = -0.127073245, yend = 27))+
@@ -447,7 +474,7 @@ ggplot(, aes(x=xyc)) +
               color="red")+
   annotate(geom="text", x=0.2, y=6, label="critical region ",
               color="darkred")+
-  annotate(geom="text", x=cor(xc,yc), y=60, label="corralation\nlife_exp\nand\nalcohol ",
+  annotate(geom="text", x=cor(xc,yc), y=60, label="corralation\nlife_exp\nGDP ",
               color="darkgreen")
 
 
@@ -455,7 +482,7 @@ ggplot(, aes(x=xyc)) +
 ```
 why the questions are important/interesting? 
 
-Given that the presented correlation is positive the implication is provoking because one might suspect that the less alcohol consumption then countries would do worst in terms of life expectancy. Yet, a possible explanation could be that as a country becomes more developed than it as access to more resources such as medical attention and education. Thus, this analysis could indicate that at some level alcohol consumption could indicate countries' economic prosperity might interact with life expectancy disparity level of alcohol going up. This is likely done to a third variable effect. 
+Given that the presented correlation is positive the implication is provoking because one might suspect that the less alcohol consumption then countries would do better economically. Yet, a possible explanation could be that as a country becomes more developed than it as access to alcohol resources. Thus, this analysis could indicate that at some level alcohol consumption could indicate a countries economic prosperity. This is likely done to a third variable effect. 
 
 
 #Anwser:
@@ -464,12 +491,11 @@ Given that the presented correlation is positive the implication is provoking be
 
  quantile(xyc, probs = seq(0, 1, 0.05))
 
-"We find a statistically significat corralation between Alcohol (in litres) and Life Expectancy at the global scale (170 countires)"
+"We find a statistically significat corralation between GDP and Life Expectancy at the global scale (170 countires)"
 
 "corralation a positivly strongs"
 ```
-
-end Jorge
+#End of Jorge analasys
 
 
 
@@ -500,10 +526,12 @@ If you could give yourself advice at the beginning of the semester, what would y
 
 My advice is to read all the chapters, but most importantly run and do every piece of code that it is presented. play with the code or concepts until it becomes implicit memory. to do this one needs to code every day. conclusion code more than reading, but most importantly have fun with it as elements of coding includes creativity and design. 
 
+### Team reflection: 
+We felt that we did a good job of getting the labs done not always on time but always to the best of our abilities. One thing we think we could start doing would have been to get the lab logisticts figured out a tad bit earlier. One thing that we should keep doing would be to keep up our communication habits as they really help us divvy up the work and break the lab down into manageable parts. I dont really know a thing we could stop doing as I feel this class went pretty smoothly on our end.  
 
 
 # Summary of who did what.
 
-Ryan wrote the introduction of the team section and analyzed how the individual beverages affected health.
-jorge did a carralation permutation test to identify if life expectancy and acholoh consumtion given 170 countries are significant. 
-This could find sopport for World Health Organization to make decition on how to megigate health at the global scale
+Ryan wrote the introduction of the team section and analyzed how the individual beverages affected health
+Thorbin wrote team reflection
+
