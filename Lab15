@@ -5,7 +5,7 @@ date: "12/10/2019"
 output: html_document
 ---
 
-##How does alcohol consumption relate to health and well-being?
+# How does alcohol consumption relate to health and well-being?
 
 The Black Swans have been hired by the World Health Organization to analyze how the patterns of alcohol consumption affect various measures of health and well-being. This question is important because alcohol is consumed worldwide in a variety of forms, and it is estimated that drinking causes (globablly) 2.8 million premature deaths per year (https://ourworldindata.org/alcohol-consumption). It is useful to understand how and why (in what form) alcohol is dangerous (or beneficial) to health.
 
