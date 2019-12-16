@@ -338,10 +338,32 @@ Now I need to make a function that will take each individual line and calculate 
   {
     sending_that_thing(c(d1,d2),wine) #sets us up so that we can name a data frame as an arguement to an overlapping function.
   }
-beer_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_beer))
-hard_alc_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_hard_alc))
-wine_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_wine))
+beer_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_beer))
+beer_lines<-beer_int%>% filter(rank(dist)<=10) # dist: 6586 y_int: 591 slp:5.65
+hard_alc_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_hard_alc)) 
+hard_alc_lines<-hard_alc_int%>% filter(rank(dist)<=10) # dist: 6594 y_int: 591 slp:5.65
+wine_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_wine))
+wine_lines<-wine_int%>% filter(rank(dist)<=10) # dist: 6712 y_int: 591 slp:5.65
 ```
+```{r}
+ggplot(data=beer)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of beer (L) vs Murders")
+ggplot(data=hard_alc)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of Hard alcohol (L) vs Murders")
+ggplot(data=wine)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of Wine (L) vs Murders")
+```
+
+  From the comments giving the best slope, y intercept and rms distance, we can see that the lines do not differ at all in their plot. But the rms distances differ slightly. This indicates that there is a variance in murder rates for each type of line, however to definitively say that it is dependent on alcohol type would be incorrect because there are no observed trends on this behavior in time. But what these results appear to indicate is that alcohol type and consumption does not play a significant role in the murder rate of any given 
+  
+Thorbin's sub questions: 
+1) Question: Does alcohol turn us into a bunch of murderous primates? Importance: If it did people should know so that they can stay away from drunk people at all costs. Interest: It would be cool to see if there is a more subtle effect
+2)Tools used: map, loop, function, linear modeling. 
+3)Answer: since the slopes and y intercepts of each line do not differ, there is no functional difference in murder inductance between the alcohols. However the 'large' change in difference for rms distance for wine indicates that wine drinkers have a higher variation impulses of stupidity/murderous intent.
+4)Ethical:none Conclusions: Alcohol at low consumption does not generally increase Murders/deaths by murder. Recommendations: Don't drink above your tolerance to minimize risk of death.
+
+Thorbins reflection:
+6 month goal: pass the class and learn a valuable skill. 5 year goal: Retain functional knowledge of that skill to routinely apply it.
+
+Advice: Stop doing: the labs 2 hours before its due, Start doing: Do the labs earlier. Keep doing: enjoying coding 
+  
 ###End Thorbin's section (for now)
 
 #Start Jorge
