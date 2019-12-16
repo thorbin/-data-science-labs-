@@ -491,7 +491,7 @@ Given that the presented correlation is positive the implication is provoking be
 
  quantile(xyc, probs = seq(0, 1, 0.05))
 
-"We find a statistically significat corralation between GDP and Life Expectancy at the global scale (170 countires)"
+"We find a statistically significat corralation between alcohol consumption and Life Expectancy at the global scale (170 countires)"
 
 "corralation a positivly strongs"
 ```
