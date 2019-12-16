@@ -341,6 +341,7 @@ wine_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting
 ###End Thorbin's section (for now)
 
 #Start Jorge
+
 Given that our expert domine concern about the effect of alcohol at a global scale, and the support that alcohol consumption is quite detrimental to nations then my investigation deals in exploring if there is a correlation between alcohol, measured by the total liters of consumption per person, and global GDP, compromise of 170 countries.
 
 ```{r}
@@ -406,7 +407,7 @@ yc<-w$life_exp
 
 
 ```
-    Corralation between GPD and Literacy rates in Kuwait
+ 
 ```{r}
 xyc<-perm_cor(perms = 1000, xc, yc)
 ```
@@ -457,27 +458,17 @@ Given that the presented correlation is positive the implication is provoking be
 
 
 #Anwser:
+
 ```{r}
-quantile(xyc, probs = seq(0, 1, 0.05))
 
-we find a statistically significat corralation between GDP and Life Expectancy at the global scale (170 countires)
+ quantile(xyc, probs = seq(0, 1, 0.05))
 
-corralation a positivly strongs
+"We find a statistically significat corralation between GDP and Life Expectancy at the global scale (170 countires)"
+
+"corralation a positivly strongs"
 ```
+#End of Jorge analasys
 
-#End jorge R
-
-# Team Reflection
-
-# Individual Reflections
-
-## Ryan's:
-# How have your six-month or 5-year goals changed? 
-I've found that I need to begin studying statistics. This course is a good way to get your feet wet and learn the R tools that will take you far, but what is limiting me now is my lack of statistical knowledge more than anything.
-# What did you learn/accomplish in this course? 
-A lot of practice with R in tidyverse, which will pay dividends for me in the future. The visualizations were probably the most important part.
-# If you could give yourself advice at the beginning of the semester, what would you tell yourself to keep doing, stop doing, and start doing?
-Go to every recitation. Start out ahead in the readings and don't fall behind. Use datacamp to supplement your R work.
 
 ## Jorge's
 
