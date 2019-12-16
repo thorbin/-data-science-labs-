@@ -26,7 +26,7 @@ library(purrr)
 alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
 
 ```
- Jorge's correlation between alcohol consumption and life expectancy is positive strong, the implication are as expected do to the toxic effect of alcohol. 
+ Jorge's  presented correlation is positive the implication is provoking because one might suspect that the less alcohol consumption then countries would do better in terms of life expectancy. Yet, a possible explanation could be that as a country becomes more developed than it as access to more resources such as medical attention and education. Thus, this analysis could indicate that at some level alcohol consumption could indicate countries' economic prosperity might interact with life expectancy disparity level of alcohol going up. This is likely done to a third variable effect. 
 
 ## Conclusion, Recommendation, and a plot communicating conclusion or basis for your recommendation
 
