@@ -334,23 +334,20 @@ Now I need to make a function that will take each individual line and calculate 
   {
     sending_that_thing(c(d1,d2),wine) #sets us up so that we can name a data frame as an arguement to an overlapping function.
   }
-beer_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_beer))
-hard_alc_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_hard_alc))
-wine_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_wine))
+beer_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_beer))
+beer_lines<-beer_int%>% filter(rank(dist)<=10) # dist: 6586 y_int: 591 slp:5.65
+hard_alc_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_hard_alc)) 
+hard_alc_lines<-hard_alc_int%>% filter(rank(dist)<=10) # dist: 6594 y_int: 591 slp:5.65
+wine_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_wine))
+wine_lines<-wine_int%>% filter(rank(dist)<=10) # dist: 6712 y_int: 591 slp:5.65
 ```
-###End Thorbin's section (for now)
+```{r}
+ggplot(data=beer)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of beer (L) vs Murders")
+ggplot(data=hard_alc)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of Hard alcohol (L) vs Murders")
+ggplot(data=wine)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of Wine (L) vs Murders")
+```
 
-# Team Reflection
-
-# Individual Reflections
-
-## Ryan's:
-# How have your six-month or 5-year goals changed? 
-I've found that I need to begin studying statistics. This course is a good way to get your feet wet and learn the R tools that will take you far, but what is limiting me now is my lack of statistical knowledge more than anything.
-# What did you learn/accomplish in this course? 
-A lot of practice with R in tidyverse, which will pay dividends for me in the future. The visualizations were probably the most important part.
-# If you could give yourself advice at the beginning of the semester, what would you tell yourself to keep doing, stop doing, and start doing?
-Go to every recitation. Start out ahead in the readings and don't fall behind. Use datacamp to supplement your R work.
+From the comments giving the best slope, y intercept and rms distance, we can see that the lines do not differ at all in their plot. But the rms distances differ slightly. This indicates that there is a variance in murder rates for each type of line, however to definitively say that it is dependent on alcohol type would be incorrect because there are no observed trends on this behavior in time. But what these results appear to indicate is that alcohol type and consumption does not play a significant role in the murder rate of any given country. 
 
 
 #Jorge R Start
@@ -469,3 +466,5 @@ corralation a positivly strongs
 # Summary of who did what.
 
 Ryan wrote the introduction of the team section and analyzed how the individual beverages affected health.
+
+Thorbin knitted the document
