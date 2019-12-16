@@ -470,6 +470,19 @@ Given that the presented correlation is positive the implication is provoking be
 #End of Jorge analasys
 
 
+
+# Individual Reflections
+
+## Ryan's:
+# How have your six-month or 5-year goals changed? 
+I've found that I need to begin studying statistics. This course is a good way to get your feet wet and learn the R tools that will take you far, but what is limiting me now is my lack of statistical knowledge more than anything.
+# What did you learn/accomplish in this course? 
+A lot of practice with R in tidyverse, which will pay dividends for me in the future. The visualizations were probably the most important part.
+# If you could give yourself advice at the beginning of the semester, what would you tell yourself to keep doing, stop doing, and start doing?
+Go to every recitation. Start out ahead in the readings and don't fall behind. Use datacamp to supplement your R work.
+From the comments giving the best slope, y intercept and rms distance, we can see that the lines do not differ at all in their plot. But the rms distances differ slightly. This indicates that there is a variance in murder rates for each type of line, however to definitively say that it is dependent on alcohol type would be incorrect because there are no observed trends on this behavior in time. But what these results appear to indicate is that alcohol type and consumption does not play a significant role in the murder rate of any given country. 
+
+
 ## Jorge's
 
 Individually, write a paragraph reflecting on: how have your six-month or 5-year goals changed? 
