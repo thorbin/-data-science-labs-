@@ -353,6 +353,119 @@ A lot of practice with R in tidyverse, which will pay dividends for me in the fu
 Go to every recitation. Start out ahead in the readings and don't fall behind. Use datacamp to supplement your R work.
 
 
+#Jorge R Start
+```{r}
+
+library(dplyr)
+
+
+
+
+
+x <- x %>% mutate_each(funs(toupper), country)
+y <- y %>% mutate_each(funs(toupper), country)
+
+w<-inner_join(y, x, by = "country")
+
+colnames(w)[colnames(w)=="2010"] <- "life_exp"
+
+
+
+```
+
+```{r}
+perm_cor <- function(perms = 1000, x, y)
+{
+  
+  perm_mean_diffC <- numeric(perms)
+  # Loop throught number of permutations
+  for (i in c(1:perms))
+  {
+    # Step 2:
+    # Randomly mix up the values in the vector "y"
+    rand_order_y <-sample(y)
+    # Step 3:
+    # Compute the correlation between x and the randomly mixed
+    # up y-vector. Store this value in the vector from step 1.
+    
+    vc<-cor(x, rand_order_y) 
+    
+    perm_mean_diffC[i]= vc
+    
+  }
+  
+  # Step 4:
+  # Return new updated vector, created in step 1
+  return(perm_mean_diffC)
+}
+
+
+```
+
+```{r}
+xc<-w$total_litres_of_pure_alcohol
+yc<-w$life_exp
+
+
+```
+
+```{r}
+xyc<-perm_cor(perms = 1000, xc, yc)
+```
+
+   "corralation between GPD and Literacy rates in Kuwait"
+
+
+```{r}
+cor(xc,yc)
+```
+
+```{r}
+ ggplot(, aes(x = xc, y = yc))+
+  geom_smooth(method = "lm")+
+  ggtitle("GPD and Life expectancy")+
+  labs(y="total_litres_of_pure_alcohol", x = "life expectancy")
+   
+
+```
+
+plot
+```{r echo=FALSE, warning=FALSE}
+ggplot(, aes(x=xyc)) +
+  geom_histogram(alpha=.9, fill="cornflowerblue")+
+  #geom_density(alpha=.2, fill="tan")+
+  labs(title="Permutated Correlation Distribution", 
+       subtitle="Correlation Distribution differences between GDP and life expectancy in from 170 countrie in 2010",
+       x="Diffrence in Correlation Distribution"
+  )+ geom_segment(aes(x = -0.127073245,y =0, xend = -0.2345, yend = 0))+ 
+  geom_segment(aes(x = -0.127073245,y =0, xend = -0.127073245, yend = 27))+
+  geom_segment(aes(x =  .129212019 ,y =0, xend = 0.234, yend = 0))+
+  geom_segment(aes(x =  .129212019 ,y =0, xend =  .129212019 , yend = 27))+
+  geom_vline(xintercept = cor(xc,yc), color="blue")+
+  annotate(geom="text", x=-0.2, y=6, label="critical region ",
+              color="red")+
+  annotate(geom="text", x=0.2, y=6, label="critical region ",
+              color="darkred")+
+  annotate(geom="text", x=cor(xc,yc), y=60, label="critical region ",
+              color="blue")
+
+
+
+```
+Your team has been hired as data science collaborators by a domain expert to answer an overall question and 4-5 sub-questions. Describe who the domain expert is, what questions you will be answering, why the questions are important/interesting, and what data you will be using. Provide a link or reference to the dataset(s).
+
+
+```
+
+```{r}
+quantile(xyc, probs = seq(0, 1, 0.05))
+
+we find a statistically significat corralation between GDP and Life Expectancy at the global scale (170 countires)
+
+corralation a positivly strongs
+
+##end Jorge R
+
 # Summary of who did what.
 
 Ryan wrote the introduction of the team section and analyzed how the individual beverages affected health.
