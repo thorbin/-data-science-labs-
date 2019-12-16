@@ -18,6 +18,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(modelr)
 library(readxl)
+library(diplyr)
+library(knitr)
+library(modelr)
+library(purrr)
 
 alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
 
@@ -255,6 +259,86 @@ Now we are able to see the trend much more clearly. Wine has a strong incline, b
 Conclusion: it is evident from these data and analyses that wine consumption is indeed associated with better health outcomes than beer, and beer is better than spirits, though more work would need to be done to tease out the confounding variables (such as doing this comparison between wine drinkers and spirit drinkers within the same country). But that would require more data and more data scientists.
 
 
+ ### Thorbin's section
+ 
+ The question I want to try and answer is: Does alcohol consumption by country have a noticeable effect on murder rates? The data I am using is from the gapminder data set and the fivethirtyeight data set on git hub. Since the first data set lists the consumption in different types of alcohol, I can do the same analysis for each different type of spirit to see if there is a noticeable general trend. 
+  My hypothesis is that if there is a positive trend in alcohol consumption, harder liqours will have the most murder-prone stats due to quicker and more significant intoxicative properties.
+  
+  ```{R}
+#importing data
+wasteage<-read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+merkage<-read_csv("~/Desktop/murder_total_deaths.csv")
+```
+```{R}
+#separating data
+merkage_10<-select(merkage,country,'2010')%>% rename("Murders"='2010')#the alcohol data is only for 2010
+merk_ineb<-full_join(merkage_10,wasteage,by="country")
+beer<-select(merk_ineb,Murders,beer_servings,)%>%rename("consumption"=beer_servings) %>% filter()
+hard_alc<-select(merk_ineb,Murders,spirit_servings)%>%rename("consumption"=spirit_servings)
+wine<-select(merk_ineb,Murders,wine_servings)%>%rename("consumption"=wine_servings)
+```
+
+Since I now have the data separated and simplified, I need to plot murder rates vs alcohol consumption, since no time variable data exists for the alcohol consumption data, an analysis by country is not possible. To get around this, what I need to do is group all people together and create a continuous scale on alcohol consumption and murder rates. I justify this by saying that when consumption of alcohol occurs, humans become intoxicated. A possible confounding variable to this analysis would certainly be altitude of each country. This is because drinking at altitude requires less alcohol to become intoxicated meaning that countries at altitude would generally show fewer Liters of alcohol consumed at the respective murder rate therefore juking the stats. Ill ignore this because I dont have the time and energy to calculate average altitude for each country. 
+
+```{r}
+#generating initial plots
+ggplot(data=beer,mapping=aes(x=consumption,y=Murders))+geom_point()+ggtitle("Beer servings in Liters vs Murders")
+ggplot(data=hard_alc,mapping=aes(x=consumption,y=Murders))+geom_point()+ggtitle("Hard alcohol servings in Liters vs Murders")
+ggplot(data=wine,mapping=aes(x=consumption,y=Murders))+geom_point()+ggtitle("Wine servings in Liters vs Murders")
+```
+
+We can see from the plots that there will not be a strong arguement for my hypothesis, but an arguement none the less. The next portion will be finding series of linear models that tell us the general but rather inaccurate trend between alchol consumption and murders, the differences in slope will tell us how significant outliers effect the linear model, since each slope will be different, general conclusions can be drawn about the murder potency of each alcohol type observed. 
+
+For each model, I will create 100 different lines of varying slope. I will then calculate the slope and y-intercept of each line and then arrange them into a tibble to be used in the next loop series. looking at the plots, I want the slopes of all lines to have a mean of 0 and standard deviation of 400 distributed normally (negative slopes are discarded). The y intercept will be uniformly distributed around 1500. 
+
+```{R}
+#creating linear models, just generates a bunch of lines. 
+slp_int<-tibble(slope=rnorm(200,0,sd=400),y_int=runif(200,0,1500)) %>% filter(slope>=0)
+```
+Now to add the family of lines to all the plots.
+
+```{r}
+#beer plot
+ggplot(data=beer,mapping=aes(x=consumption,y=Murders))+geom_point()+ geom_abline(data=slp_int,mapping=aes(intercept=slp_int$y_int,slope=slp_int$slope),alpla=.25)+ggtitle("Beer servings in Liters vs Murders")
+#hard alcohol plot
+ggplot(data=hard_alc,mapping=aes(x=consumption,y=Murders))+geom_point()+ geom_abline(data=slp_int,mapping=aes(intercept=slp_int$y_int,slope=slp_int$slope),alpha=.25)+ggtitle("Hard-Alchol servings in Liters vs Murders")
+#wine plot
+ggplot(data=wine,mapping=aes(x=consumption,y=Murders))+geom_point()+ geom_abline(data=slp_int,mapping=aes(intercept=slp_int$y_int,slope=slp_int$slope),alpha=.25)+ggtitle("wine servings in Liters vs Murders")
+```
+
+Now I need to make a function that will take each individual line and calculate the horizontal distance between each data point and then calculate the rms distance per that line. I will then integrate each of these values into a table to select the best lines based on smallest rms difference. Since I used the same distribution on each plot I shouldnt have to worry about varying line families due to different random distributions. 
+
+```{R}
+  
+  model<-function(a,data)#a=slp_int, input is deduced from getting_that_thing
+  {
+    line<-a[1]*data$consumption+a[2]
+    #this returns the murder value for each value of     consumption on a given y intercept
+  }
+  sending_that_thing<-function(mod,data) #calculates the rms distance   for a single line 
+  {
+    diff<-data$Murders-model(mod,data)
+    rms_diff<-sqrt(mean(diff^2,na.rm=TRUE))
+    return(rms_diff)
+    #returns the value, difficulty is that the vectors used are not the same length, the map function takes one operation and applies it to another function to circumvent this.
+  }
+  getting_that_thing_beer<-function(d1,d2)
+  {
+    sending_that_thing(c(d1,d2),beer) #sets us up so that we can name a data frame as an arguement to an overlapping function.
+  }
+   getting_that_thing_hard_alc<-function(d1,d2)
+  {
+    sending_that_thing(c(d1,d2),hard_alc) #sets us up so that we can name a data frame as an arguement to an overlapping function.
+   }
+    getting_that_thing_wine<-function(d1,d2)
+  {
+    sending_that_thing(c(d1,d2),wine) #sets us up so that we can name a data frame as an arguement to an overlapping function.
+  }
+beer_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_beer))
+hard_alc_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_hard_alc))
+wine_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_wine))
+```
+###End Thorbin's section (for now)
 
 # Team Reflection
 
