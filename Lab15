@@ -37,7 +37,7 @@ To further complicate the issue, in all five instances, confounding variables ce
 ```{r message=FALSE, warning=FALSE}
 #download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
 
-life_exp = read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\life_expectancy_years.xlsx")
+life_exp = read_excel("~/Desktop/life_expectancy_years.xlsx")
 
 m <- merge(alcohol, life_exp[ , c('country', '2010')],
            by.x = 'country', by.y = 'country')
@@ -385,7 +385,7 @@ library(dplyr)
 
     drinks_alcholol_csv <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
 
-  life_expectancy_years <-read_csv("C:/Users/chele/Documents/stats_data_sci/lab15/life_expectancy_years.csv")
+  life_expectancy_years <-read_csv("~/Desktop/life_expectancy_years.csv")
 
    x<-life_expectancy_years %>% select(`2010`,country)
    y<-drinks_alcholol_csv
@@ -518,7 +518,7 @@ Mandy's Question: Since alcohol is a depressant, I'm comparing suicide rates to 
 The datasets I'm using are the alcohol consumption dataset from github and a suicide rates dataset I found on Kaggle.
 ```{r}
 #import suicide rate data 
-suicide_rates <- read_csv("suicide-rates-by-country.csv")
+suicide_rates <- read_csv("~/Desktop/suicide-rates-by-country.csv")
 #to make this a little simpler, let's look at just a specific year in the dataset
 suicide_rates <- suicide_rates %>% filter(Year=='2005')
 suicide_rates <- suicide_rates %>% rename('suicide rate' = 'suicide rate (age-adjusted suicides per 100,000 people)', 'country'='Entity')
