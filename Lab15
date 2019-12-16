@@ -25,9 +25,59 @@ library(purrr)
 alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
 
 ```
+#Begin Erik
+
+```{r setup, include = FALSE}
+#I chose to analyze the effects of Alchohol Consumption on child mortality, I figured it was likely that countries that consumed more alcohol would have the propensity to have a higher child mortality rate. I decided to filter for only the 15 highest GDP countries that had no na values in any of the datasets because I figured that this would eliminate other non-alcohol-related child mortality causes. Obviously, in poorer countries, child mortality would be influenced by many other factors.
+#I imported everything that was necessary here
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(modelr)
+library(dplyr)
+library(readxl)
+options(na.action = na.warn)
+
+```
+```{r}
+#Here I load the Alcohol Consumption, Child Mortality, and GDP datasets. I used the year 2010 because the Alcohol Consumption dataset only used the year 2010. I filtered the final merged set(which used country to join the three datasets) to include only the top 15 countries by GDP.
+#download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
+
+alc <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+alc <- rename(alc, 'beer' = 'beer_servings')
+alc <- rename(alc, 'wine' = 'wine_servings')
+alc <- rename(alc, 'spirit' = 'spirit_servings')
+alc <- rename(alc, 'total' = 'total_litres_of_pure_alcohol')
+
+childmort <- read.csv("C:/Users/ErikSvenneby/Desktop/child_mortality_0_5_year_olds_dying_per_1000_born.csv")
+childmort <- select(childmort, 'country','X2010')
+childmort <- rename(childmort, 'MortRate' = 'X2010')
+
+GDP <- read.csv("C:/Users/ErikSvenneby/Desktop/gdppercapita_us_inflation_adjusted.csv")
+GDP <- select(GDP, 'country', 'X2010')
+GDP <- rename(GDP, 'GDP'='X2010')
+
+merged1 <- alc %>%
+  left_join(childmort, c('country')) 
+merged1 <- merged1 %>% filter(!is.na(MortRate))
+
+finmerged <- merged1 %>% left_join(GDP, c('country'))
+finmerged <- finmerged %>% filter(!is.na())
+finmerged <- finmerged %>% filter(GDP>45000)
+```
+```{r}
+#Here I graphed my results. I had one graph for all alcohol consumption, one for the consumption of beer, one for wine, and one for spirits. I put the alcohol consumption on the x axis and the child mortality rate on the y axis. I used a best fit line to show the correlation as a country drank more alcohol.
+ggplot(finmerged, mapping = aes(x= total, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= beer, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= wine, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= spirit, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+#Contrary to what I hypothesized, I found that as countries drank more alcohol, all four of the graphs showed there was a decrease in the child mortality rate as one followed the best fit line. I do believe that Qatar might have thrown off the data, as it is extremely wealthy but other factors may contribute to child mortality.
+```
+#End Erik
+
+
 # Team Conclusion and Recommendation:
 
-The sum of the individual findings tell a cautiously optimistic story about some forms of drinking, but not all. For example, Jorge's work shows that there is a strong correlation between total alcohol consumed and life expectency. Ryan's work then dives deeper into that issue and reveals that, whereas wine and beer consumption is positively correlated with higher life expectency, consumption of spirits is negatively correlated. Erik's findings showed that alcohol consumption is actually an indicator of lower rates of childhood mortality; however, as a counterpoint to this positive narrative, Mandy found that alcohol consumption is weakly correlated with higher rates of suicide, and Thorbin found that some alcohol consumption is associated with violent crime. 
+The sum of the individual findings tell a cautiously optimistic story about some forms of drinking, but not all. For example, Jorge's work shows that there is a strong correlation between total alcohol consumed and life expectency. Ryan's work then dives deeper into that issue and reveals that, whereas wine and beer consumption is positively correlated with higher life expectency, consumption of spirits is negatively correlated. Erik's findings showed that alcohol consumption is actually an indicator of lower rates of childhood mortality; however, as a counterpoint to this positive narrative, Mandy found that alcohol consumption is weakly correlated with higher rates of suicide, and Thorbin found that some alcohol consumption is associated with violent crime. Erik found that there was no significant correlation between alcohol consumption and child mortality.
 
 To further complicate the issue, in all five instances, confounding variables certainly play a role, which is detailed in the individual sections. Nevertheless, taken together, all of these data and analyses show that at minimum, the consumption of wine (and to a lesser extent, beer) is an indicator of better health and well-being (whether or not that is a causal relationship is a different story), whereas consumption of spirits is associated with less favorable outcomes, and this is best illustrated by plotting the relationship of these drinks with life expectency:
 
@@ -697,11 +747,6 @@ Thorbins reflection:
 
 Thorbin's Advice: Stop doing: the labs 2 hours before its due, Start doing: Do the labs earlier. Keep doing: enjoying coding 
 
-#Erik's
-I have found that I am very interested in data analysis as it applies to basivally anything that you would want it to. In 6 months I just hope to be doing well in school, but I hope to find a job in 5 years analyzing data for something like sports which I am truly passionate about.
-I learned to code in R and a lot of general ways to analyze data effectively and efficiently.
-My advice would be to practice more code outside of what we did in class and in recitation. I think that it took me far too long to get comfortable in R.
-
 ### Team reflection: 
 We felt that we did a good job of getting the labs done not always on time but always to the best of our abilities. One thing we think we could start doing would have been to get the lab logisticts figured out a tad bit earlier. One thing that we should keep doing would be to keep up our communication habits as they really help us divvy up the work and break the lab down into manageable parts. I dont really know a thing we could stop doing as I feel this class went pretty smoothly on our end.  
 
@@ -711,4 +756,5 @@ We felt that we did a good job of getting the labs done not always on time but a
 Ryan imported and tidied the initial data and wrote the introduction and conclusion of the team section.
 Thorbin wrote team reflection
 Mandy analyzed alcohol consumption and suicide rates in countries and wrote her relfection. 
+Erik contributed to the conclusion and analyzed the relationshiop between alcohol consumption and child mortality in high GDP countries.
 
