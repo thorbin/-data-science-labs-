@@ -334,27 +334,25 @@ Now I need to make a function that will take each individual line and calculate 
   {
     sending_that_thing(c(d1,d2),wine) #sets us up so that we can name a data frame as an arguement to an overlapping function.
   }
-beer_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_beer))
-beer_lines<-beer_int%>% filter(rank(dist)<=10) # dist: 6586 y_int: 591 slp:5.65
-hard_alc_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_hard_alc)) 
-hard_alc_lines<-hard_alc_int%>% filter(rank(dist)<=10) # dist: 6594 y_int: 591 slp:5.65
-wine_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_wine))
-wine_lines<-wine_int%>% filter(rank(dist)<=10) # dist: 6712 y_int: 591 slp:5.65
+beer_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_beer))
+hard_alc_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_hard_alc))
+wine_lines<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_wine))
 ```
+###End Thorbin's section (for now)
+
+#Start Jorge
+Given that our expert domine concern about the effect of alcohol at a global scale, and the support that alcohol consumption is quite detrimental to nations then my investigation deals in exploring if there is a correlation between alcohol, measured by the total liters of consumption per person, and global GDP, compromise of 170 countries.
+
 ```{r}
-ggplot(data=beer)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of beer (L) vs Murders")
-ggplot(data=hard_alc)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of Hard alcohol (L) vs Murders")
-ggplot(data=wine)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of Wine (L) vs Murders")
-```
-
-From the comments giving the best slope, y intercept and rms distance, we can see that the lines do not differ at all in their plot. But the rms distances differ slightly. This indicates that there is a variance in murder rates for each type of line, however to definitively say that it is dependent on alcohol type would be incorrect because there are no observed trends on this behavior in time. But what these results appear to indicate is that alcohol type and consumption does not play a significant role in the murder rate of any given country. 
-
-
-#Jorge R Start
-```{r}
-
+library(tidyverse)
 library(dplyr)
 
+    drinks_alcholol_csv <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+
+  life_expectancy_years <-read_csv("C:/Users/chele/Documents/stats_data_sci/lab15/life_expectancy_years.csv")
+
+   x<-life_expectancy_years %>% select(`2010`,country)
+   y<-drinks_alcholol_csv
 
 
 
@@ -369,6 +367,9 @@ colnames(w)[colnames(w)=="2010"] <- "life_exp"
 
 
 ```
+What new tools did you use? 
+
+For my analysis, I used a permutation test to verify that the correlations are significant or not
 
 ```{r}
 perm_cor <- function(perms = 1000, x, y)
@@ -405,13 +406,13 @@ yc<-w$life_exp
 
 
 ```
-
+    Corralation between GPD and Literacy rates in Kuwait
 ```{r}
 xyc<-perm_cor(perms = 1000, xc, yc)
 ```
 
-   "corralation between GPD and Literacy rates in Kuwait"
 
+  What is the answer to the question?
 
 ```{r}
 cor(xc,yc)
@@ -419,6 +420,7 @@ cor(xc,yc)
 
 ```{r}
  ggplot(, aes(x = xc, y = yc))+
+  geom_point()+
   geom_smooth(method = "lm")+
   ggtitle("GPD and Life expectancy")+
   labs(y="total_litres_of_pure_alcohol", x = "life expectancy")
@@ -443,28 +445,57 @@ ggplot(, aes(x=xyc)) +
               color="red")+
   annotate(geom="text", x=0.2, y=6, label="critical region ",
               color="darkred")+
-  annotate(geom="text", x=cor(xc,yc), y=60, label="critical region ",
-              color="blue")
+  annotate(geom="text", x=cor(xc,yc), y=60, label="corralation\nlife_exp\nGDP ",
+              color="darkgreen")
 
 
 
 ```
-Your team has been hired as data science collaborators by a domain expert to answer an overall question and 4-5 sub-questions. Describe who the domain expert is, what questions you will be answering, why the questions are important/interesting, and what data you will be using. Provide a link or reference to the dataset(s).
+why the questions are important/interesting? 
+
+Given that the presented correlation is positive the implication is provoking because one might suspect that the less alcohol consumption then countries would do better economically. Yet, a possible explanation could be that as a country becomes more developed than it as access to alcohol resources. Thus, this analysis could indicate that at some level alcohol consumption could indicate a countries economic prosperity. This is likely done to a third variable effect. 
 
 
-```
-
+#Anwser:
 ```{r}
 quantile(xyc, probs = seq(0, 1, 0.05))
 
 we find a statistically significat corralation between GDP and Life Expectancy at the global scale (170 countires)
 
 corralation a positivly strongs
+```
 
-##end Jorge R
+#End jorge R
+
+# Team Reflection
+
+# Individual Reflections
+
+## Ryan's:
+# How have your six-month or 5-year goals changed? 
+I've found that I need to begin studying statistics. This course is a good way to get your feet wet and learn the R tools that will take you far, but what is limiting me now is my lack of statistical knowledge more than anything.
+# What did you learn/accomplish in this course? 
+A lot of practice with R in tidyverse, which will pay dividends for me in the future. The visualizations were probably the most important part.
+# If you could give yourself advice at the beginning of the semester, what would you tell yourself to keep doing, stop doing, and start doing?
+Go to every recitation. Start out ahead in the readings and don't fall behind. Use datacamp to supplement your R work.
+
+## Jorge's
+
+Individually, write a paragraph reflecting on: how have your six-month or 5-year goals changed? 
+ 
+
+Now I find my self more interested in tiding data. I found out that there is an abundance of data in the net and devises yet it is not organized for analysis. working on the labs I found my self challenged in this notion of tidy data yet once tidy the end result is gratifying. I find utility in this skill and wish to continue developing it. I thought at first that visualizing data was of my priority now I see that to get there realistically one need tidy data. 
+
+What did you learn/accomplish in this course? 
+
+After this course, I have acquired the confidence to guide my self to problem solve by using a multitude of sources. the book helps but I found that online communities are more helpful. 
+
+If you could give yourself advice at the beginning of the semester, what would you tell yourself to keep doing, stop doing, and start doing?
+
+My advice is to read all the chapters, but most importantly run and do every piece of code that it is presented. play with the code or concepts until it becomes implicit memory. to do this one needs to code every day. conclusion code more than reading, but most importantly have fun with it as elements of coding includes creativity and design. 
+
+
 
 # Summary of who did what.
 
 Ryan wrote the introduction of the team section and analyzed how the individual beverages affected health.
-
-Thorbin knitted the document
