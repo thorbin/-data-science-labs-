@@ -1,5 +1,5 @@
 ---
-title: "Lab 15"
+title: "Lab 15 Black Swans"
 authors: Ryan Bilkie, Jorge Robelo, Mandy Karako, Thorbin Atwell-Donoughy, Erik Svenneby
 date: "12/10/2019"
 output: html_document
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(modelr)
 library(readxl)
-library(diplyr)
+library(dplyr)
 library(knitr)
 library(modelr)
 library(purrr)
@@ -25,54 +25,6 @@ library(purrr)
 alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
 
 ```
-#Begin Erik
-
-```{r setup, include = FALSE}
-#I chose to analyze the effects of Alchohol Consumption on child mortality, I figured it was likely that countries that consumed more alcohol would have the propensity to have a higher child mortality rate. I decided to filter for only the 15 highest GDP countries that had no na values in any of the datasets because I figured that this would eliminate other non-alcohol-related child mortality causes. Obviously, in poorer countries, child mortality would be influenced by many other factors.
-#I imported everything that was necessary here
-knitr::opts_chunk$set(echo = TRUE)
-library(tidyverse)
-library(modelr)
-library(dplyr)
-library(readxl)
-options(na.action = na.warn)
-
-```
-```{r}
-#Here I load the Alcohol Consumption, Child Mortality, and GDP datasets. I used the year 2010 because the Alcohol Consumption dataset only used the year 2010. I filtered the final merged set(which used country to join the three datasets) to include only the top 15 countries by GDP.
-#download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
-
-alc <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
-alc <- rename(alc, 'beer' = 'beer_servings')
-alc <- rename(alc, 'wine' = 'wine_servings')
-alc <- rename(alc, 'spirit' = 'spirit_servings')
-alc <- rename(alc, 'total' = 'total_litres_of_pure_alcohol')
-
-childmort <- read.csv("~/Desktop/child_mortality_0_5_year_olds_dying_per_1000_born.csv")
-childmort <- select(childmort, 'country','X2010')
-childmort <- rename(childmort, 'MortRate' = 'X2010')
-
-GDP <- read.csv("~/Desktop/gdppercapita_us_inflation_adjusted.csv")
-GDP <- select(GDP, 'country', 'X2010')
-GDP <- rename(GDP, 'GDP'='X2010')
-
-merged1 <- alc %>%
-  left_join(childmort, c('country')) 
-merged1 <- merged1 %>% filter(!is.na(MortRate))
-
-finmerged <- merged1 %>% left_join(GDP, c('country'))
-finmerged <- finmerged %>% filter(!is.na())
-finmerged <- finmerged %>% filter(GDP>45000)
-```
-```{r}
-#Here I graphed my results. I had one graph for all alcohol consumption, one for the consumption of beer, one for wine, and one for spirits. I put the alcohol consumption on the x axis and the child mortality rate on the y axis. I used a best fit line to show the correlation as a country drank more alcohol.
-ggplot(finmerged, mapping = aes(x= total, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
-ggplot(finmerged, mapping = aes(x= beer, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
-ggplot(finmerged, mapping = aes(x= wine, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
-ggplot(finmerged, mapping = aes(x= spirit, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
-#Contrary to what I hypothesized, I found that as countries drank more alcohol, all four of the graphs showed there was a decrease in the child mortality rate as one followed the best fit line. I do believe that Qatar might have thrown off the data, as it is extremely wealthy but other factors may contribute to child mortality.
-```
-#End Erik
 
 
 # Team Conclusion and Recommendation:
@@ -87,7 +39,7 @@ To further complicate the issue, in all five instances, confounding variables ce
 ```{r message=FALSE, warning=FALSE}
 #download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
 
-life_exp = read_excel("~/Desktop/life_expectancy_years.xlsx")
+life_exp <- read_csv("~/Desktop/life_expectancy_years.csv")
 
 m <- merge(alcohol, life_exp[ , c('country', '2010')],
            by.x = 'country', by.y = 'country')
@@ -109,6 +61,49 @@ ggplot(data = m, warning=FALSE, message=FALSE)+
 ```
 
 Therefore, the team's cautious recommendation for the holiday season is to enjoy wine and avoid spirits.
+
+#Begin Erik
+
+I chose to analyze the effects of Alchohol Consumption on child mortality, I figured it was likely that countries that consumed more alcohol would have the propensity to have a higher child mortality rate. I decided to filter for only the 15 highest GDP countries that had no na values in any of the datasets because I figured that this would eliminate other non-alcohol-related child mortality causes. Obviously, in poorer countries, child mortality would be influenced by many other factors.
+
+
+
+```{r}
+#Here I load the Alcohol Consumption, Child Mortality, and GDP datasets. I used the year 2010 because the Alcohol Consumption dataset only used the year 2010. I filtered the final merged set(which used country to join the three datasets) to include only the top 15 countries by GDP.
+#download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
+
+alc <- alcohol
+alc <- rename(alc, 'beer' = 'beer_servings')
+alc <- rename(alc, 'wine' = 'wine_servings')
+alc <- rename(alc, 'spirit' = 'spirit_servings')
+alc <- rename(alc, 'total' = 'total_litres_of_pure_alcohol')
+
+childmort <- read.csv("~/Desktop/child_mortality_0_5_year_olds_dying_per_1000_born.csv")
+childmort <- select(childmort, 'country','X2010')
+childmort <- rename(childmort, 'MortRate' = 'X2010')
+
+GDP <- read.csv("~/Desktop/gdppercapita_us_inflation_adjusted.csv")
+GDP <- select(GDP, 'country', 'X2010')
+GDP <- rename(GDP, 'GDP'='X2010')
+
+merged_temp <- alc %>%
+  left_join(childmort, c('country')) 
+merged1 <- merged_temp %>% filter(!is.na(MortRate))
+
+finmerged1 <- merged1 %>% left_join(GDP, c('country'))
+finmerged <- finmerged1 %>% filter(!is.na("country"),GDP>45000)
+
+```
+```{r}
+#Here I graphed my results. I had one graph for all alcohol consumption, one for the consumption of beer, one for wine, and one for spirits. I put the alcohol consumption on the x axis and the child mortality rate on the y axis. I used a best fit line to show the correlation as a country drank more alcohol.
+ggplot(finmerged, mapping = aes(x= total, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= beer, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= wine, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= spirit, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+#Contrary to what I hypothesized, I found that as countries drank more alcohol, all four of the graphs showed there was a decrease in the child mortality rate as one followed the best fit line. I do believe that Qatar might have thrown off the data, as it is extremely wealthy but other factors may contribute to child mortality.
+```
+
+#End Erik
 
 
 ##Ryan's Section
@@ -330,9 +325,9 @@ Conclusion: it is evident from these data and analyses that wine consumption is 
  The question I want to try and answer is: Does alcohol consumption by country have a noticeable effect on murder rates? The data I am using is from the gapminder data set and the fivethirtyeight data set on git hub. Since the first data set lists the consumption in different types of alcohol, I can do the same analysis for each different type of spirit to see if there is a noticeable general trend. 
   My hypothesis is that if there is a positive trend in alcohol consumption, harder liqours will have the most murder-prone stats due to quicker and more significant intoxicative properties.
   
-  ```{R}
+```{R}
 #importing data
-wasteage<-read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+wasteage<-alcohol
 merkage<-read_csv("~/Desktop/murder_total_deaths.csv")
 ```
 ```{R}
@@ -430,10 +425,8 @@ Thorbin's sub questions:
 Given that our expert domine concern about the effect of alcohol at a global scale, and the support that alcohol consumption is quite detrimental to nations then my investigation deals in exploring if there is a correlation between alcohol, measured by the total liters of consumption per person, and global GDP, compromise of 170 countries.
 
 ```{r}
-library(tidyverse)
-library(dplyr)
 
-    drinks_alcholol_csv <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+    drinks_alcholol_csv <- alcohol
 
   life_expectancy_years <-read_csv("~/Desktop/life_expectancy_years.csv")
 
@@ -555,17 +548,9 @@ Given that the presented correlation is positive the implication is provoking be
 #End of Jorge analasys
 
 ##Mandy's Portion:
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
-library(tidyverse)
-library(modelr)
-library(readxl)
-alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
-
-```
 Mandy's Question: Since alcohol is a depressant, I'm comparing suicide rates to alcohol consumption. Do countries with a large consumption of alcohol experience higher suicide rates? If so, is it conclusive to say these two are related? Does the type of alcohol make a difference? 
 The datasets I'm using are the alcohol consumption dataset from github and a suicide rates dataset I found on Kaggle.
+
 ```{r}
 #import suicide rate data 
 suicide_rates <- read_csv("~/Desktop/suicide-rates-by-country.csv")
@@ -723,27 +708,25 @@ From all the linear models graph, we do see the prediction that countries that c
 #Here I load the Alcohol Consumption, Child Mortality, and GDP datasets. I used the year 2010 because the Alcohol Consumption dataset only used the year 2010. I filtered the final merged set(which used country to join the three datasets) to include only the top 15 countries by GDP.
 #download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
 
-alc <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+alc <- alcohol
 alc <- rename(alc, 'beer' = 'beer_servings')
 alc <- rename(alc, 'wine' = 'wine_servings')
 alc <- rename(alc, 'spirit' = 'spirit_servings')
 alc <- rename(alc, 'total' = 'total_litres_of_pure_alcohol')
 
-childmort <- read.csv("C:/Users/ErikSvenneby/Desktop/child_mortality_0_5_year_olds_dying_per_1000_born.csv")
+childmort <- read.csv("~/Desktop/child_mortality_0_5_year_olds_dying_per_1000_born.csv")
 childmort <- select(childmort, 'country','X2010')
 childmort <- rename(childmort, 'MortRate' = 'X2010')
 
-GDP <- read.csv("C:/Users/ErikSvenneby/Desktop/gdppercapita_us_inflation_adjusted.csv")
+GDP <- read.csv("~/Desktop/gdppercapita_us_inflation_adjusted.csv")
 GDP <- select(GDP, 'country', 'X2010')
 GDP <- rename(GDP, 'GDP'='X2010')
 
-merged1 <- alc %>%
+merged_temp <- alc %>%
   left_join(childmort, c('country')) 
-merged1 <- merged1 %>% filter(!is.na(MortRate))
+merged1 <- merged_temp %>% filter(!is.na(MortRate))
 
-finmerged <- merged1 %>% left_join(GDP, c('country'))
-finmerged <- finmerged %>% filter(!is.na())
-finmerged <- finmerged %>% filter(GDP>45000)
+finmerged <- merged1 %>% left_join(GDP, c('country')) %>% filter(!is.na("country"),GDP>45000)
 ```
 ```{r}
 #Here I graphed my results. I had one graph for all alcohol consumption, one for the consumption of beer, one for wine, and one for spirits. I put the alcohol consumption on the x axis and the child mortality rate on the y axis. I used a best fit line to show the correlation as a country drank more alcohol.
@@ -807,4 +790,5 @@ Thorbin wrote team reflection and debugged/knitted the final code.
 Jorge helped conceive the initial question and showed the statistical relationship between total alcohol consumption and life expectency.
 Mandy analyzed alcohol consumption and suicide rates in countries and wrote her relfection. 
 Erik contributed to the conclusion and analyzed the relationshiop between alcohol consumption and child mortality in high GDP countries.
+
 
