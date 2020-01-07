@@ -1,0 +1,1228 @@
+---
+title: "Lab 11"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "11/4/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(babynames)
+library(dplyr)
+```
+
+
+Thorbins stuff:
+```{r}
+#strategy: find the say 20 most popular names in any given year then plot their prop as a time series that way we dont have to deal with any silly regular expression BS. 
+male<-filter(babynames,sex=="M",year>=2007) %>% group_by(name) %>%arrange(desc(prop))
+#most popular name for 2007-2008 is Jacob
+female<-filter(babynames,sex=="F",year>=2007) %>% group_by(name) %>% arrange(desc(prop))
+```
+
+
+Mandy's Portion: 
+```{r}
+library(tidyverse)
+library(stringr)
+library(babynames)
+names <- babynames
+```
+2018 tidy data
+```{r}
+#import 2018 data and tidy
+names2018 <- read.csv(file = "yob2018.txt")
+names2018 <- names2018 %>% rename("name"= "Emma", "sex" = "F", "n"= "X18688")
+names2018 <- names2018 %>% add_column(year = 2018)
+names2018 <- names2018 %>% mutate(prop = n/sum(names2018$n))
+# join 2018 with other dataset
+allnames <- full_join(names, names2018, by= NULL)
+```
+My name's popularity overtime:
+How popular is your name now compared to when you were born?
+How poplular is your name now relative to the other names that start with the same three letters? 
+```{r}
+man <- allnames %>% filter(str_detect(name, "Man"))
+myname <- allnames%>%filter(str_detect(name, "^M[a][n]+[d]e?[yie]?$"))
+ggplot()+ 
+  geom_line(data=man, aes(x=year,y=prop), color='blue')+
+  geom_line(data=myname, aes(x=year, y=prop), color='red')
+# My name was far more popular when I was born than now. Compared to names that start with the same 3 letters, ny name is a very small proportion of the total. 
+```
+
+
+
+How many versions of the female name "Ariel" were there in 1973? 1988? 1990?
+How many versions for the female name "Rachel" for those years?
+```{r}
+# names that start with A or B: "^[AB]; [st]+.$"
+## How many versions of the female name "Ariel" were there in 1973? 1988? 1990?
+## How many versions for the female name "Rachel" for those years?
+a_r <- names %>% 
+  filter(str_detect(name, "^A[r]+[iye][ea][l]+[ea]*") | 
+           str_detect(name,"^R[ae][aey]*[sc]h[aey]+[l]+e?$"))%>% 
+  filter(year %in% list(1973,1988,1990))%>%
+  filter(sex=='F')
+# find the number of names per year 
+a_r %>%
+  group_by(year, initial =  str_sub(name,1,1))%>%
+  summarise(variants=n())
+## ARIEL: 
+# 1973: 3
+# 1988: 12
+# 1990: 13
+## RACHEL:
+# 1973: 15
+# 1988: 20
+# 1990: 21 
+```
+What are the chances a girl born in 1973 would be named either Rachel or Ariel?
+```{r}
+## What are the chances a girl born in 1973 would be named either Rachel or Ariel?
+# prop of rachel or ariel in 1973, 1988, 1990
+prop_A_R <- a_r %>% 
+  group_by(year)%>%
+  summarise(prop_A_R = sum(prop))
+# 1973: .00546
+# 1988: .0113
+# 1990: .0127
+```
+What are the chances a girl in 2018 would be named either Rachel or Ariel?
+```{r}
+a_r <- allnames %>% 
+  filter(str_detect(name, "^A[r]+[iye][ea][l]+[ea]*") | 
+           str_detect(name,"^R[ae][aey]*[sc]h[aey]+[l]+e?$"))%>% 
+  filter(year %in% list(1973,1988,1990,2018))%>%
+  filter(sex=='F')
+prop_A_R <- a_r %>% 
+  group_by(year)%>%
+  summarise(prop_A_R = sum(prop))
+##2018: .0017 
+```
+Considering all the changes in female names starting with a vowel from 1988 to 1990, what percentile is the change in Ariel names?
+```{r}
+vowelnames <- allnames %>% filter(str_detect(name, "^[AEIOU]"))%>% 
+  filter(year%in% list(1988,1989, 1990))%>%
+  filter(sex=='F')
+vowelnames <- vowelnames %>% mutate(prop= n/sum(vowelnames$n))
+ariel <- vowelnames %>% filter(str_detect(name,"^A[r]+[iye][ea][l]+[ea]*"))
+prop_ariel <- ariel %>% 
+  group_by(year)%>%
+  summarise(prop_A_R = sum(prop)) 
+arielvariants <- ariel %>%  group_by(year, initial =  str_sub(name,1,1))%>%
+  summarise(variants=n())
+#1988: 0.001567755 with 12 variants
+#1989: 0.002805792 with 13 variants
+#1990: 0.005073860 with 13 variants 
+```
+What about the changes of all the other names? Is the change in the proportion of Ariels big, medium, or small compared to the changes in other female names over that time period? Create a plot that shows the change in Ariel female names from 1988 to 1990 in the context of changes in proportions for other female names over that same time period. How does the change in Ariel names compare? Describe your plot in words and include answers to the questions in this paragraph in your description of your plot.
+```{r}
+arielnames <- allnames %>% filter(sex=='F') %>% filter(year<=1990, year>= 1988)%>%filter(str_detect(name, "^A[r]+[iye][ea][l]+[ea]*"))%>%arrange(desc(prop))
+arielnames2 <- arielnames %>% filter(name=='Ariel')
+# I just wanted to look at the regular spelling of the name "Ariel" because that is how they spelt it in The Little Mermaid. There is a change in proportion of Ariel from 1988 to 1990. The change is .00128.
+# How does this proportion change compare to other female names in this time period? Let's look at the proportion changes of some really popular names:
+allnames2 <- allnames %>% filter(sex=='F')%>% filter(year>=1988, year<=1990)%>%arrange(desc(prop))
+#The two most popular names are Jessica and Ashley which show proportion changes. Jessica is about .0042. Ashley is about .003. Both of these proportion changes are larger than Ariel. This still doesn't really show us anything we want. Let's try something else 
+allnames3 <- allnames %>% filter(sex=='F')%>% filter(year==1988 |year==1990) %>% arrange(name)
+# I wanted to mutate the data and find proportion changes from 1988 to 1990 of each name and then compare those proportion changes to the change in Ariel's name. However, I could not figure out how to do that. But just from looking at the data, I would say that the change in proportion of Ariel's name was fairly large comparatively, concluding that the move, The Little Mermaid, could have been a deciding factor in naming females in that timespan. 
+```
+How did the popularity of your name (in the US) change from the year you were born to 2018? How did the popularity of your name change from X years before your birth year to your birth year (X is 2018 minus your birth year)? Use a regex to match most of the versions of your name. If your name was not a popular name in the US, you should use a similar name (or a nickname) that does appear in the dataset.
+```{r}
+#1997 to 2018. Popularity of Mandy and Amanda 
+mandy <- allnames %>% filter(str_detect(name, "Mandy$")) %>% filter(sex=='F')%>%filter(year >= 1997)
+
+#Mandy was never very popular, but it became even less popular since 1997. 
+#A) 240 to 65
+#B) 1.25730e-04 to 1.87392e-05
+amanda <- allnames %>% filter(str_detect(name, "Amanda$")) %>% filter(sex=='F')%>%filter(year >= 1997)
+
+#Amanda was fairly popular in 1997, but is way less popular now. 
+#A) 12242 to 844
+#B) 0.0064134300 to 0.0002433213
+
+#1997 minus 22 years. 1975 to 1997. Popularity of Mandy and Amanda
+mandy2 <- allnames %>% filter(str_detect(name, "Mandy$")) %>% 
+  filter(sex=='F')%>%filter(year <= 1997, year>=1975)
+#Mandy wasn't very popular in 1975 but more popular than in 1997.
+#A) 2710 to 240 
+#B) 0.00173636 to 0.00012573
+amanda2 <- allnames %>% filter(str_detect(name, "Amanda$"))%>% 
+  filter(sex=='F') %>% filter(year <=1997, year>= 1975)
+#Amanda had about the same popularity in 1975 and in 1997. It became very popular in the late 1980's.
+#A) 12655 to 12242
+#B) 0.00810834 to 0.00641343
+```
+All of our names popularity from birth year to now 
+```{r}
+ryan <- allnames %>% filter(str_detect(name, "^R[iy][a][n]+[e]?$"))%>% filter(sex== 'M')%>% filter(year >=1988)
+jorge <- allnames %>% filter(str_detect(name, "Jorge$")) %>% filter(sex== 'M')%>% filter(year>=1994)
+erik <- allnames %>% filter(str_detect(name, "^E[r]+i[ck]+[eh]?$")) %>% filter(sex=='M') %>% filter(year>=2000)
+thorbin <- allnames %>% filter(str_detect(name, "^To[b]+[e]?[ye]+$")) %>% filter(sex=='M')%>%filter(year>=1998)
+mandy3 <- myname %>% filter(year>=1997)
+ournames <- full_join(ryan,jorge,by=NULL)
+ournames <- full_join(ournames, erik, by=NULL)
+ournames <- full_join(ournames, thorbin, by=NULL)
+ournames <- full_join(ournames, mandy3, by=NULL)
+ggplot(data=ournames, mapping= aes(x=prop,stat=n,fill=name))+
+  geom_histogram()
+```
+
+
+
+
+All of our names popularity from X to birth year 
+```{r}
+ryan2 <- allnames %>% filter(str_detect(name, "^R[iy][a][n]+[e]?$"))%>% filter(sex== 'M')%>% filter(year>=1958,year <=1988)
+jorge2 <- allnames %>% filter(str_detect(name, "Jorge$")) %>% filter(sex== 'M')%>% filter(year>=1970, year<=1994)
+erik2 <- allnames %>% filter(str_detect(name, "^E[r]+i[ck]+[eh]?$")) %>% filter(sex=='M') %>% filter(year>=1982, year<=2000)
+thorbin2 <- allnames %>% filter(str_detect(name, "^To[b]+[e]?[ye]+$")) %>% filter(sex=='M')%>%filter(year>=1978, year<=1998)
+mandy4 <- myname %>% filter(year>=1975, year<=1997)
+ournames2 <- full_join(ryan2,jorge2,by=NULL)
+ournames2 <- full_join(ournames2, erik2, by=NULL)
+ournames2 <- full_join(ournames2, thorbin2, by=NULL)
+ournames2 <- full_join(ournames2, mandy4, by=NULL)
+ggplot(data=ournames2, mapping=aes(x=prop, stat=n, fill=name))+
+  geom_histogram()
+```
+
+
+
+How did your team decide to deal with gender and the fact that you aren't all born in the same year? 
+We filtered out each of our names individually by string detect and the year and then full joined all our names together to create a new dataset. We made two different datasets for the different spans of time: one for birth year to now and one for X to birth year
+Which of your teams' names show a "significant" change over the years? 
+
+
+Picking two baby names for our client: They want a name clearly for males or females (no gender-ambiguous names), “trending” but not “trendy”, i.e., on the upslope but not super-popular today, maybe very popular in 10-20 years, and cannot be easily (and commonly) shortened to a nickname (like “Benjamin” to “Ben”). 
+```{r}
+# Let's look at names from the last ten years and rule out the most popular names. Let's say we want n to be less than 5,000 but greater than 500. 
+clientsbaby <- allnames %>% filter(year>=2008) %>% arrange(name) %>% filter(n < 5000, n>500)
+rhett <- clientsbaby %>% filter(name == "Rhett")
+ivy <- clientsbaby %>% filter(name== "Ivy")
+
+#From the dataset, I have picked the name Rhett for a boy, and the name Ivy for a girl. Both names are trending but not trendy. The names are slowly becoming more popular overtime. Both the names are not unisex. Both names cannot be easily shortened into a nickname. 
+
+
+```
+
+# Jorge Portion:  
+
+
+```{r}
+#setup
+
+#install.packages("htmlwidgets") 
+#install.packages("babynames")
+#install.packages("tidyverse")
+
+library(tidyverse)
+library(babynames)
+library(readr)
+library(gridExtra)
+library(magrittr)
+
+
+names2018 <- read_csv("/Users/joro7386/Downloads/names/yob2018.txt",     col_names = FALSE, col_types = cols(X2 = col_character()))
+```
+
+# Problem 1, complete dataset for baby names
+
+
+
+```{r}
+
+
+names<-babynames
+
+names2018<-add_column(names2018, year = 2018 )
+
+names(names2018) <- c("name", "sex","n","year")
+
+names2018 <-names2018 %>% mutate( porp = n/sum(names2018$n))
+
+N2018 <- names2018
+
+Mname<-N2018 %>% filter (sex=="M") 
+Mname<-Mname %>% mutate( prop = n/sum(n))
+Fname<-N2018 %>% filter (sex=="F") 
+Fname<-Fname %>% mutate( prop = n/sum(n))
+
+MFname <-full_join(Fname, Mname, by = NULL )
+
+#adding prop. prop (n divided by total number of applicants in that year, 
+#which means proportions are of people of that gender with that name born in that year).
+
+allnames1 <-full_join(names, MFname, by = NULL ) 
+
+```
+
+#------------Problem 2 #Individual plots of your name’s popularity over time
+
+```{r }
+#Create a plot over time (1880-2018) of the proportion of names in a given year that 
+#start with the first three letters of your name (i.e., a time series of the popularity 
+#of the first three letters of your name). On the same plot, show the proportion of your name over time.
+#Use a regular expression to match most of the various spellings of your name.
+
+
+
+#str_view(allnames1$name, "^J.rg.", match = TRUE)
+sum(str_detect(allnames1$name, "^J.rg."))
+var(str_detect(allnames1$name, "^J.rg."))
+
+#str_view(allnames1$name, "^Jor...", match = TRUE)
+sum(str_detect(allnames1$name, "^Jor..."))
+var(str_detect(allnames1$name, "^Jor..."))
+
+#plot time series 
+
+g1 <- allnames1 %>%
+  filter(grepl("^Jor...", name)) %$% 
+  ggplot(., aes(year, prop)) +
+  geom_line(aes(color=sex), size=.25) +
+  scale_color_manual(values = c("firebrick1", "dodgerblue")) +
+  theme_bw() +
+  ggtitle("First three letters\nName variation: Jorge\nTime series of the popularity")
+
+
+
+g2 <- allnames1 %>%
+  filter(str_detect(name, "^J.rg.")) %$% 
+  ggplot(., aes(year, prop)) +
+  geom_line(aes(color=sex), size=.25) +
+  scale_color_manual(values = c("darkgreen", "orange")) +
+  theme_bw() +
+  ggtitle("Time series of the popularity\nOf variation names: Jorge")
+
+
+
+
+
+
+```
+
+
+```{r }
+#joining both pop plots into one
+
+Jor <- allnames1 %>%
+  filter(grepl("^Jor...", name))%>%  
+  mutate(Type = 'Names: jor') 
+
+Vjorge <- allnames1 %>%
+  filter(str_detect(name, "^J.rg."))%>%  
+  mutate(Type = 'Names: Jorge') 
+
+jorgevall <-full_join(Vjorge, Jor, by = NULL ) 
+
+jorgevall$Type <- as.factor(jorgevall$Type)
+
+p1 = ggplot(data = jorgevall) + 
+  geom_line( aes(x = year, y = prop, color = Type)) +
+ # geom_point(mapping = aes(x = year, y = prop, color = Type, alpha = 1/1000, stroke = 0.00000000002))+
+  xlab('year') +
+  ylab('percent.change') +
+  theme_bw() +
+  ggtitle(label = "Time series of the popularity (1880-2018)\nVariation of: Jorge\n", 
+          subtitle = "First three letters: regexps= grepl(^Jor..., name)) \n      &\nComplete name: regexps=(str_detect(name, ^J.rg.)")
+```
+#ploting timeseries
+
+```{r }
+plot(g1)
+```
+
+```{r }
+plot(g2)
+```
+
+```{r }
+print(p1)
+
+#Show what regular expression you used to find your name in the dataset.
+
+#         grepl("^Jor...", name)) & (str_detect(name, "^J.rg.")
+
+```
+
+
+#How popular is your name now compared to when you were born? 
+
+```{r }
+g3 <-allnames1 %>% filter( between(year, 1994, 2018), str_detect(name, "^J.rg.")) 
+
+  ggplot(g3, aes(year, prop)) +
+    geom_line(aes(color=sex), size=.25, alpha=1) +
+    theme_bw() +
+    ggtitle("Proportions change from 1994 to 2018\nusing variation of the the name:\nJorge")
+  
+```
+```{r}
+ggplot(data=g3, aes(x=year, y=prop, color=sex)) +
+  geom_bar(stat="identity" , alpha=.01)+
+ scale_fill_brewer(palette="Blues") +
+    ggtitle("Proportions change from 1994 to 2018\nusing variation of the the name:\nJorge")
+```
+
+
+```{r }
+ggplot(g3, aes(x=year, color=sex)) +
+    geom_density(alpha=.2, fill="#FF6666") +
+    ggtitle("Density distribution over 1994 to 2018\nusing variation of the the name:\nJorge")
+```
+
+
+#total difference
+```{r}
+  jorge1994<-allnames1 %>% filter (year==1994, str_detect(name, "^J.rg."))
+  
+  jorge2018<-allnames1 %>% filter (year==2018, str_detect(name, "^J.rg."))%>%  
+    mutate(Type = 'Names: jorge') 
+  
+  diffjorge9418<-jorge1994$prop-jorge2018$prop
+  
+  diffjorge9418
+  
+"Total sum of prop in 1994"
+sum(jorge1994$prop)
+"Total sum of prop in 2018"
+sum(jorge2018$prop)
+"Total Difference" 
+ -sum(jorge1994$prop)-sum(jorge2018$prop)
+"Mean of prop in 1994"
+mean(jorge1994$prop)
+"Mean of prop in 2018"
+  mean(jorge2018$prop)
+"Mean Difference" 
+  -mean(jorge1994$prop)-mean(jorge2018$prop)
+  #mean difference
+
+
+```
+```{r}
+ggplot(, aes(x=diffjorge9418)) +
+    geom_histogram()+
+    geom_density(alpha=.2, fill="#FF6666")+
+    labs(title="Density plot", 
+         subtitle=" Distibution change over 1994 to 2018\nusing variation of the the name:\nJorge",
+         x="Diffrence in prop"
+         )
+```
+
+#The name Jorge is less popular in 2018 than 1994 by a mean diffrance of 0.0004624444
+
+
+
+```{r}
+g4 <-allnames1 %>% filter( between(year, 1994, 2018), str_detect(name, "^Jor...")) 
+  
+  ggplot(g4, aes(year, prop)) +
+    geom_line(aes(color=sex), size=.25, alpha=.9) +
+    theme_bw() +
+    ggtitle("Proportions change over 1994 to 2018\nby observing variations with names that start with:\n Jor")
+
+```
+
+```{r}
+ggplot(g4, aes(x=year, color=sex))+
+    geom_density(alpha=.2, fill="#FF6666") +
+    ggtitle("Density distribution from  1994 to 2018\nobserving variations with names that start with:\nJor")
+
+```
+#How popular is your name now relative to the other names that start with the same three letters?
+```{r}
+
+
+ jor2018<-allnames1 %>% filter (year==2018, str_detect(name, "^Jor..."))%>%  
+    mutate(Type = 'Names: jor') 
+  
+  jorjorge2018 <-full_join(jorge2018, jor2018, by = NULL ) 
+  
+
+```
+
+#Names that start with Jor are predomintant over diffrent variation of Jorge as in 2018
+```{r}
+ ggplot(jorjorge2018, aes(x=prop, color=Type)) +
+    geom_density(alpha=.2, fill="#FF6666") +
+    ggtitle("Density displacement\nUsing variations of the the name:\nJorge\n&\nJor")+
+    ylim(0,5000)
+
+```
+
+
+
+```{r}
+ggplot(data=jorjorge2018, aes(x=Type, y=prop)) +
+  geom_bar(stat="identity")+
+ scale_fill_brewer(palette="Blues") +
+    ggtitle("Box plot comparing prop as in 2018 for names that start with:\n Jor and  variants of jorge")
+```
+
+#-----------Problem 3 Ariel and Rachel regexs
+
+#How many versions of the female name “Ariel” 
+
+#1973?
+```{r}
+ArN1973<-allnames1 %>% filter (year== 1973) 
+ # str_view(ArN1973$name, "^Ar..l$", match = TRUE)
+  sum(str_detect(ArN1973$name, "^Ar..l$"))-1
+```
+#1988?
+```{r}
+
+  ArN1988<-allnames1 %>% filter (year== 1988) 
+  #str_view(ArN1988$name, "^Ar..l$", match = TRUE)
+  sum(str_detect(ArN1988$name, "^Ar..l$"))-1
+```
+#1990?
+```{r}
+ArN1990<-allnames1 %>% filter (year== 1990) 
+  #str_view(ArN1990$name, "^Ar..l$", match = TRUE)
+  sum(str_detect(ArN1988$name, "^Ar..l$"))-1
+```
+
+#How many versions for the female name “Rachel” for those years? 
+
+#1973
+```{r}
+ 
+  RaN1973<-allnames1 %>% filter (year== 1973) 
+  #str_view(RaN1973$name, "^R.(ch|sh).l", match = TRUE)
+  sum(str_detect(RaN1973$name, "^R.(ch|sh).l"))
+```
+#1988?
+
+```{r}
+  RaN1988<-allnames1 %>% filter (year== 1988) 
+  #str_view(RaN1988$name, "^R.(ch|sh).l", match = TRUE)
+  sum(str_detect(RaN1988$name, "^R.(ch|sh).l"))
+```
+#1990
+```{r}
+RaN1990<-allnames1 %>% filter (year== 1990) 
+  #str_view(RaN1990$name, "^R.(ch|sh).l", match = TRUE)
+  sum(str_detect(RaN1990$name, "^R.(ch|sh).l"))
+```
+
+#What are the chances a girl born in 1973/88/90/2018 would be named either Rachel or Ariel (including various versions)? 
+
+#In 1973
+```{r}
+"Ariel variants porpotion mean in 73"
+ A73<-ArN1973 %>% filter (sex=="F", str_detect(name, "^Ar..l$" )) 
+ 
+  mean(A73$prop)
+  "Rachel variants porpotion mean in 73"
+R73<-RaN1973 %>% filter (sex=="F", str_detect(name, "^R.(ch|sh).l" )) 
+  mean(R73$prop)
+```
+
+#In 1988? 
+```{r}
+ 
+  "Ariel variants porpotion mean in 88"
+  A88<-ArN1988 %>% filter (sex=="F", str_detect(name, "^Ar..l$" )) 
+  mean(A88$prop)
+  
+  "Rachel variants porpotion mean in 88"
+  R88<-RaN1988 %>% filter (sex=="F", str_detect(name, "^R.(ch|sh).l" )) 
+  mean(R88$prop)
+```
+#In 1990? 
+```{r}
+
+  "Ariel variants porpotion mean in 90"
+  A90<-ArN1990 %>% filter (sex=="F", str_detect(name, "^Ar..l$" )) 
+  mean(A90$prop)
+  "Rachel variants porpotion mean in 90"
+  R90<-RaN1990 %>% filter (sex=="F", str_detect(name, "^R.(ch|sh).l" )) 
+  mean(R90$prop)
+```
+#In 2018?
+```{r}
+ ArN2018<-allnames1 %>% filter (year== 2018) 
+  RaN2018<-allnames1 %>% filter (year== 2018) 
+  "Ariel variants porpotion mean in 2018"
+  A18<-ArN2018 %>% filter (sex=="F", str_detect(name, "^Ar..l$" )) 
+  mean(A18$prop)
+  "Rachel variants porpotion mean in 2018"
+  R18<-RaN2018 %>% filter (sex=="F", str_detect(name, "^R.(ch|sh).l" )) 
+  mean(R18$prop)
+  
+```
+
+#Create a plot that shows the change in Ariel female names from 1988 to 1990 in the context of changes in proportions for other female names over that same time period. 
+
+```{r}
+A88<-ArN1990 %>% filter (sex=="F", str_detect(name, "^Ar..l$" )) %>%  
+    mutate(Type = 'Ariel: 1990') 
+
+A88<-ArN1988 %>% filter (sex=="F", str_detect(name, "^Ar..l$" )) %>%  
+    mutate(Type = 'Ariel: 1988') 
+ 
+
+A9088 <-full_join(A88, A88, by = NULL )
+
+A9088x<-A9088 %>%  
+    mutate(PC = A88$prop-A90$prop) 
+
+
+
+ diffAlier8890<-A88$prop-A90$prop
+ 
+ 
+ Fnames88<-allnames1 %>% filter (year== 1988, sex== "F") %>%  
+    mutate(Type = 'All Femals: 1988') 
+ 
+ Fnames90<-allnames1 %>% filter (year== 1990,  sex== "F") %>%  
+    mutate(Type = 'All Femals: 1990') 
+ 
+ ALLf9088 <-full_join(Fnames88, Fnames88, by = NULL )
+ 
+ #ALLf9088x<-
+   #ALLf9088 %>%  
+    #mutate( PC=Fnames90$prop-Fnames88$prop ) 
+ 
+ diffallF8890<-Fnames88$prop-Fnames90$prop
+ 
+```
+
+
+
+
+#How does the change in Ariel names compare? Describe your plot in words and include answers to the questions in this paragraph in your description of your plot.
+
+```{r}
+
+Ariel1994 <-allnames1 %>% filter  (year == 1988, str_detect(name, "^Ar..l$"), sex== "F")
+
+allfemale <- allnames1 %>% filter(between (year, 1984, 1994),  sex== "F")
+vowel <- allnames1 %>% filter(between (year, 1984, 1994), str_detect(name, "^[AEIOU]"), sex== "F")
+
+ diffjorge9418<-jorge1994$prop-jorge2018$prop
+  
+  diffjorge9418
+  
+ggplot(, aes(x=diffjorge9418)) +
+    geom_histogram()+
+    geom_density(alpha=.2, fill="#FF6666")+
+    labs(title="Density plot", 
+         subtitle=" Distibution change over 1994 to 2018\nusing variation of the the name:\nJorge",
+         x="Diffrence in prop"
+         )
+
+```
+
+```{r}
+ g5 <-allnames1 %>% filter(between (year, 1984, 1994), str_detect(name, "^Ar..l$"), sex== "F")
+  allfemale <- allnames1 %>% filter(between (year, 1984, 1994),  sex== "F")
+  vowel <- allnames1 %>% filter(between (year, 1984, 1994), str_detect(name, "^[AEIOU]"), sex== "F")
+
+```
+
+```{r}
+ggplot(g5, aes(year, prop)) +
+    geom_line( , size=.25) +
+    theme_bw() +
+    ggtitle("Proportions change over 1984 to 1994\nby observing variations names:\nAriel")
+```
+
+```{r}
+ ggplot(g5, aes(x=prop))+
+    geom_density(alpha=.2, fill="#FF6666") +
+    ggtitle("Density in Prop from 1984 to 1994\nby observing variations names:\nAriel")
+```
+```{r}
+ggplot(data=g5, aes(x=year, y=prop)) +
+  geom_bar(stat="identity" )+
+ scale_fill_brewer(palette="Blues") +
+    ggtitle("Proportions change from 1984 to 1994\nby observing variations names:\nAriel")
+```
+
+
+
+```{r}
+PCA<-allnames1 %>% filter(year== 1984 , str_detect(name, "^^Ar..l$"), sex== "F")
+"proportion in females named Ariel in 1984"
+  (PCA1<-sum(PCA$prop))
+  PCA90<-allnames1 %>% filter(year== 1990 , str_detect(name, "^^Ar..l$"), sex== "F")
+"proportion in females named Ariel in 1990"
+  (PCA2<-sum(PCA90$prop))
+```
+
+```{r}
+"Change or diffrance in proportion from 84 to 90 females named Ariel baby names is :"
+  PCA2-PCA1
+```
+
+```{r}
+ggplot(allfemale, aes(year, prop)) +
+    geom_line( , size=.25) +
+    theme_bw() +
+    ggtitle("Proportions change over 1984 to 1994\nby observing variations all female names")
+  
+  
+```
+
+```{r}
+ggplot(data=allfemale, aes(x=year, y=prop)) +
+  geom_bar(stat="identity" )+
+    ggtitle("Proportions change from 1984 to 1994\nby observing variations for all female names")
+```
+ 
+
+```{r}
+PCALL<-allnames1 %>% filter(year== 1984 , sex== "F")
+"proportion in all females in 1984"
+  (PCALL1<-sum(PCALL$prop))
+  PCALL90<-allnames1 %>% filter(year== 1990 , sex== "F")
+"proportion in all females in 1990"
+  (PCALL2<-sum(PCALL90$prop))
+"Change or diffrance in proportion from 84 to 90 All females names :"
+  PCALL1-PCALL2
+```
+
+# Consider all the changes in female names starting with a vowel from 1988 to 1990
+
+```{r}
+ggplot(vowel, aes(year, prop)) +
+    geom_line( , size=.25) +
+    theme_bw() +
+    ggtitle("Proportions change over 1984 to 1994\nby observing variations all female names stating with Vowels")
+
+```
+
+```{r}
+ggplot(data=vowel, aes(x=year, y=prop)) +
+  geom_bar(stat="identity" )+
+    ggtitle("Proportions change from 1984 to 1994\nby observing variations for all female names")
+```
+
+#Discriptive analysis: it seems that from 1986 to 1992 the proportion change for variants of babies named Airel displays a positive increase until the year 1990 followed by a decline in prop. all other female names including those which start with a vowel display no significant change in proportion
+
+
+#Your names 
+#How did the popularity of your name (in the US) change from the year you were born to 2018? 
+
+
+```{r}
+g6 <-allnames1 %>% filter(between (year, 1994, 2018), str_detect(name, "^J.rg."), sex== "M")
+  
+  ggplot(g6, aes(year, prop)) +
+    geom_line( , size=.25) +
+    theme_bw() +
+    ggtitle("Proportions change from 1994 to 2018\nby observing variations names:\nJorge")
+
+```
+
+```{r}
+ggplot(data=g6, aes(x=year, y=prop)) +
+  geom_bar(stat="identity" )+
+ scale_fill_brewer(palette="Blues") +
+    ggtitle("Proportions change from 1994 to 2018\nby observing variations names:\nJorge")
+
+```
+
+
+```{r}
+ggplot(g6, aes(x=prop))+
+     geom_density(alpha=.2, fill="#FF6666") +
+     ggtitle("Prop Density from 1984 to 1994\nBy observing variations names:\nJorge")
+
+```
+```{r}
+jorge1894PC <- jorge1994$prop-jorge2018$prop
+
+
+ggplot(, aes(x=jorge1894PC)) +
+    geom_histogram()+
+    geom_density(alpha=.2, fill="#FF6666")+
+    labs(title="Density plot", 
+         subtitle=" Histogram: Prop change from 1994 to 2018\nusing variation of the the name:\nJorge",
+         x="Diffrence in prop"
+         )
+```
+
+#How did the popularity of your name change from 25 years before your birth year to your birth year (X is 2018 minus your birth year)? 
+
+```{r}
+g7 <-allnames1 %>% filter(between (year, 1969, 1994), str_detect(name, "^J.rg."), sex== "M")
+   ggplot(g7, aes(year, prop)) +
+     geom_line( , size=.25) +
+     theme_bw() +
+     ggtitle("Proportions change over 1969 to 1994\nBy observing variations names:\nJorge")
+   
+
+```
+
+```{r}
+
+   ggplot(g7, aes(x=prop))+
+     geom_density(alpha=.2, fill="#FF6666") +
+     ggtitle("Density change over 1969 to 1994\nBy observing variations names:\nJorge")
+
+```
+
+#The popularity of my name, Jorge or its variations, from 1969 to the 1994 displays an upward trend. Meaning that the name was trending during that period
+
+#The popularity of my name, Jorge or its variations, from 1994 to the 2000 displays an constant neutral trend. However, from 2000 to 2018 the trend is downwards
+
+
+#A) the actual change in proportions and B) the relative change, expressed as a percentile of all changes in baby name proportions over those timeframes.
+```{r}
+
+
+#jorge69 <-allnames1 %>% filter( year== 1969, str_detect(name, "^J.rg."), sex== "M")%>%  
+ #   mutate(Type = 'Jorge: 1969') 
+#jorge94 <-allnames1 %>% filter( year== 1994, str_detect(name, "^J.rg."), sex== "M")%>%  
+#    mutate(Type = 'Jorge: 1994') 
+
+#jorge6994 <-full_join(jorge69, jorge94, by = NULL ) 
+
+#PCjor6994 = jorge69$prop-jorge94$prop 
+
+
+
+```
+
+```{r}
+
+trending <- allnames1  %>% group_by(name) %>%arrange(desc(prop)) %>% filter(between(year, 1990, 2018))
+
+
+
+
+ggplot(trending, aes(x=prop)) +
+    
+    geom_density(alpha=.2, fill="#FF6666")+
+    labs(title="Density plot", 
+         subtitle=" histogram: Prop change from 1969 to 1994\nusing variation of the the name:\nJorge",
+         x="Diffrence in prop"
+         )+
+          xlim(0, 0.003)+
+  ylim(0,4000)
+```
+
+```{r}
+
+"first lets find a name that is corrently trending "
+
+#emma: "^Emm." Lauren "L..r.n" 
+#Ryan: "R(y|i).n$" Zachary: 
+
+
+
+gt <- allnames1 %>%
+  filter(sex=="M", str_detect(name, "^Jacob$")) %$% 
+  ggplot(., aes(year, prop)) +
+  geom_line(aes(color=sex), size=.25) +
+  scale_color_manual(values = c("darkgreen", "orange")) +
+  theme_bw() +
+  ggtitle("Time series of the popularity\nOf  names: Jacob")
+
+print(gt)
+
+
+gt2 <- allnames1 %>%
+  filter(sex=="F", str_detect(name, "^Emm.$")) %$% 
+  ggplot(., aes(year, prop)) +
+  geom_line(aes(color=sex), size=.25) +
+  scale_color_manual(values = c("darkgreen", "orange")) +
+  theme_bw() +
+  ggtitle("Time series of the popularity\nOf  names: Emma")
+print(gt2)
+
+
+"Perhaps if we can locate names that display similar behavior to those names that have been trending or are trendy we can use that as a model to locate names that are trending"
+
+```
+
+
+```{r}
+
+gt3 <- allnames1 %>%
+  filter(sex=="M", str_detect(name, "^Zane$")) %$% 
+  ggplot(., aes(year, prop)) +
+  geom_line(aes(color=sex), size=.25) +
+  scale_color_manual(values = c("darkgreen", "orange")) +
+  theme_bw() +
+  ggtitle("Time series of the popularity\nOf  names: Zane")
+
+print(gt3)
+
+
+gt4 <- allnames1 %>%
+  filter(sex=="F", str_detect(name, "^Juliana$")) %$% 
+  ggplot(., aes(year, prop)) +
+  geom_line(aes(color=sex), size=.25) +
+  scale_color_manual(values = c("darkgreen", "orange")) +
+  theme_bw() +
+  ggtitle("Time series of the popularity\nOf  names: Juliana")
+
+print(gt4)
+
+
+
+```
+#I believe that the names: Juliana, female, and Zane, male, are approaching values that could indicate potential in terms of it being trendy in the near future. Values for a name being trendy would be porp=.001. Zane and Juliana display an upward behavior that approximating proportions of  .001.
+
+# End Jorge
+#Begin Erik
+
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(babynames)
+#summary(babynames)
+babynames <- filter(babynames,!is.na(sex))
+male<-filter(babynames,sex=="M") %>% group_by(name) %>%arrange(desc(prop))
+female<-filter(babynames,sex=="F") %>% group_by(name) %>%arrange(desc(prop))
+#Here I set up the sets I needed and split the data by male and female.
+```
+```{r}
+erik<- male %>% filter(str_detect(name, "^E[r]+i[ck]+[eh]?"))
+#Here I made a dataset with names similiar to my own
+```
+```{r}
+ggplot(erik, mapping=aes(x=year, y =n, color = name)) + geom_point()
+#Here I graphed the number of instances of names similar to mine over time
+```
+```{r}
+rachorari <- female %>% filter(str_detect(name, "^A+r+i")||str_detect(name, "^R+a+c"))
+rachorari1988 <- rachorari %>% filter(year==1988)
+?sum(rachorari1988, prop)
+#There were 58 instances of rachel or ariana in 1988
+
+rachorari1990 <- rachorari %>% filter(year==1990)
+#There were 63 observations of rachel or ariana in 1990
+rachorari2017 <- rachorari %>% filter(year==2017)
+#There was no 2018, so I checked for 2017, there are 112 instances of versions of rachel or ariana prop of 
+  
+ariel1973 <- female %>% filter(str_detect(name, "^A+r+i")) %>% filter(year==1973)
+#There are 18 instances of versions of ariel in 1973
+ariel1988 <- female %>% filter(str_detect(name, "^A+r+i")) %>% filter(year==1988)
+#There are 39 instances of versions of ariel in 1988
+ariel1990 <- female %>% filter(str_detect(name, "^A+r+i")) %>% filter(year==1990)
+#There are 47 instances of versions of ariel in 1990
+
+rachel1973 <- female %>% filter(str_detect(name, "^R+a+c")) %>% filter(year==1973)
+#There are 11 instances of versions of Rachel in 1973
+rachel1988 <- female %>% filter(str_detect(name, "^R+a+c")) %>% filter(year==1988)
+#There are 19 instances of versions of Rachel in 1988
+rachel1990 <- female %>% filter(str_detect(name, "^R+a+c")) %>% filter(year==1990)
+#There are 16 instances of versions of Rachel in 1990
+
+```
+```{r}
+#Here I joined datasets of the occurrences of all of our names. 
+specerik <- male %>% filter(str_detect(name, "Erik"))
+specmandy <- female %>% filter(str_detect(name, "Mandy"))
+trythorbin <- male %>% filter(str_detect(name, "Toby"))
+specryan <- male %>% filter(str_detect(name, "Ryan"))
+specjorge <- male %>% filter(str_detect(name, "Jorge"))
+names <- full_join(specerik, specmandy, by=NULL)
+names <- full_join(names,trythorbin, by=NULL)
+names <- full_join(names,specryan, by=NULL)
+names <- full_join(names,specjorge, by=NULL)
+names <- filter(names, year>1963)
+#This is the set 28 years before ryan was born to 28 years after.
+```
+
+```{r}
+ggplot(names, mapping=aes(x=year, y = n, color = name))+geom_point()
+#Here I graphed the dataset by name
+```
+#End erik
+
+
+#Ryan's
+
+```{r cars}
+library(babynames)
+library(stringr)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+data <- babynames
+```
+
+
+
+**Problem:**
+
+We need to analyse the names of newborn babies, male or female, born between 1880 to 2017, looking up the trends, and selecting two good, uprising (but not trendy) non gender-neutral names to cover both possible outcomes of the pregnancy.
+
+**Why is this important or interesting?**
+
+It should interesting to see how names change through years. For example, a gender-neutral name like "Elon" has now become a mostly male name because of (apparently) one person. We want a name to be interesting, widespread enough to be understandable, but not too trendy and not evocative of your old aunt or uncle.
+
+**How will our solution be used?**
+
+It will be used to name a newborn child somewhere near to the middle of December, and it could be used in the future by other customers or maybe even applications to help couples in the naming process.
+
+**4. In a perfrect world, what data can be used to analyse this solution?**
+
+The dataset we're using only includes U.S. data. Worldwide data would be ideal, and data from the future would be even better. The former is difficult, the latter is impossible.
+
+**5. What data have been collected? **
+
+Full baby names in the U.S., which includes all names with at least 5 uses.
+
+## Plot
+
+```{r}
+filtered_rya <- data[str_detect(data$name, regex("^rya.", ignore_case = TRUE)),]
+filtered_rya <- filtered_rya %>% group_by(year) %>% summarise(total = sum(prop))
+```
+
+```{r}
+filtered_ryan <- data[str_detect(data$name, regex("^ryan$", ignore_case = TRUE)),]
+filtered_ryan <- filtered_ryan %>% group_by(year) %>% summarise(total = sum(prop))
+```
+
+```{r}
+total <- merge(filtered_rya, filtered_ryan, by='year')
+```
+
+```{r}
+ggplot(data = total, aes(x = year)) + geom_line(aes(y=total.x, colour=blues9[1])) +  geom_line(aes(y=total.y, colour=blues9[3])) + labs(caption = "Data source: babynames", x = "Year", y = "Proportion") + scale_colour_discrete(name = "Regexp", labels = c("^ryan$", "^rya."))
+```
+
+You can also embed plots, for example:
+
+```{r}
+filtered_rachel <- data[str_detect(data$name, regex("^rach.", ignore_case = TRUE)) & data$sex == 'F',]
+filtered_ariel <- data[str_detect(data$name, regex("^ariel.", ignore_case = TRUE)) & data$sex == 'F',]
+```
+
+```{r}
+filtered_ariel[filtered_ariel$year==1973,]$name
+```
+```{r}
+filtered_ariel[filtered_ariel$year==1988,]$name
+```
+```{r}
+filtered_ariel[filtered_ariel$year==1990,]$name
+```
+
+```{r}
+filtered_rachel[filtered_rachel$year==1973,]$name
+```
+
+```{r}
+filtered_rachel[filtered_rachel$year==1988,]$name
+```
+
+```{r}
+filtered_rachel[filtered_rachel$year==1990,]$name
+```
+
+```{r}
+filtered_rachel_ariel <- data[(str_detect(data$name, regex("^rach.", ignore_case = TRUE)) | str_detect(data$name, regex("^ariel.", ignore_case = TRUE))) & data$sex == 'F',]
+```
+
+```{r}
+filtered_rachel_ariel <- filtered_rachel_ariel %>% group_by(year) %>% summarise(total = sum(prop))
+```
+
+```{r}
+filtered_rachel_ariel[filtered_rachel_ariel$year==1973,]$total
+```
+
+```{r}
+filtered_rachel_ariel[filtered_rachel_ariel$year==1988,]$total
+```
+
+```{r}
+filtered_rachel_ariel[filtered_rachel_ariel$year==1990,]$total
+```
+
+```{r}
+filtered_rachel_ariel[filtered_rachel_ariel$year==2017,]$total
+```
+
+
+Below, we will consider the change as the difference of proportion of a name in the current year compared to the previous year. Therefore, we would compare the change of girls called Ariel (or other variations) with the mean change in given year.
+
+```{r}
+change_ariel <- (filtered_ariel[filtered_ariel$year==1990,] %>% summarise(total = sum(prop)))$total - (filtered_ariel[filtered_ariel$year==1988,] %>% summarise(total = sum(prop)))$total
+change_ariel
+```
+
+```{r}
+(filtered_ariel[filtered_ariel$year==1989,] %>% summarise(total = sum(prop)))$total - (filtered_ariel[filtered_ariel$year==1988,] %>% summarise(total = sum(prop)))$total
+```
+
+Change in proportion was big, but not very significant, meaning that movie have not boosted it.
+
+```{r}
+filtered_vowels <- data[str_detect(data$name, regex("^[aeiou].", ignore_case = TRUE)) & data$sex == 'F' & data$year >= 1988 & data$year <= 1990,]
+```
+
+```{r}
+differences <- filtered_vowels %>% group_by(name) %>% summarise(abs_diff = max(prop) - min(prop))
+```
+
+```{r}
+mean(differences$abs_diff)
+```
+
+```{r}
+percentile <- ecdf(differences$abs_diff)
+percentile(change_ariel)
+```
+
+  However, change_ariel falls into the 99th percentile, so it's a pretty big change!
+
+```{r}
+filtered_females <- data[data$sex == 'F' & data$year >= 1987 & data$year <= 1990,]
+
+filtered_females <- filtered_females %>% group_by(name) %>% mutate(popularity_diff = prop - lag(prop, order_by=year))
+
+filtered_females <- na.omit(filtered_females)
+```
+
+```{r}
+filtered_females <- filtered_females %>% group_by(year) %>% mutate(max_prop = max(prop)) %>% mutate(mean_prop = mean(prop)) %>% filter(str_detect(name, regex("^ariel.", ignore_case = TRUE))) %>% summarise(total = sum(prop), max = mean(max_prop), mean = mean(mean_prop)) 
+```
+
+```{r}
+ggplot(filtered_females, aes(x=year)) + 
+    stat_smooth(aes(y = total, colour=blues9[1])) +
+    stat_smooth(aes(y = max, colour=blues9[3])) +
+    stat_smooth(aes(y = mean, colour=blues9[5]))
+```
+
+```{r}
+ggplot(filtered_females, aes(x=year)) + 
+    stat_smooth(aes(y = total, colour=blues9[1])) +
+    stat_smooth(aes(y = mean, colour=blues9[5])) + labs(caption = "Data source: babynames", x = "Year", y = "Change in proportion") + scale_colour_discrete(name = "Legend", labels = c("Other names", "Ariel"))
+```
+
+
+### Prediction
+
+I will use the last 3 years to predict the names that would be moderately trendy today, but will probably become popular later (e.g. they are showing a positive popularity change).
+
+```{r}
+filtered_names <- data %>% filter(year >= 2013 & year <= 2017) %>% mutate(popularity_diff = prop - lag(prop, order_by=year))
+
+filtered_names <- na.omit(filtered_names)
+```
+
+
+```{r}
+growing_names <- filtered_names %>% filter(popularity_diff >= 0 & prop > 0.000001
+) %>% filter(year==2017)
+```
+
+```{r}
+head(growing_names)
+```
+
+```{r}
+names_girl <- data %>% filter(year == 2017 & sex == 'F')
+```
+
+```{r}
+possible_girls <- intersect(names_girl[order(-names_girl$prop),][20:30,]$name,  growing_names$name)
+possible_girls
+```
+```{r}
+names_boy <- data %>% filter(year == 2017 & sex == 'M')
+```
+
+```{r}
+possible_boys <- intersect(names_boy[order(-names_boy$prop),][20:30,]$name,  growing_names$name)
+possible_boys
+```
+
+Therefore, I'd recommend the names Mila (F) and Luke (M) since these names are not decreasing in popularity, cannot be shortened, and are not so trendy now (but still trendy enough).
+
+```{r}
+mia_luke <- data %>% filter(str_detect(name, regex("^mila$", ignore_case = TRUE)) | str_detect(name, regex("^luke$", ignore_case = TRUE)))
+```
+
+
+```{r}
+ggplot(data = mia_luke, aes(x = year, y = prop, colour = name)) + geom_smooth() + labs(caption = "Data source: babynames", x = "Year", y = "Proportion")
+```
+
+
+### My team names analysis
+
+```{r}
+nameChanges <- function(regex, yob){
+  X <- (2018 - yob)
+  names_before <- data %>% filter(year == yob - X | year == yob)
+  names_after <- data %>% filter(year == yob | year == 2017)
+  change_before <- names_before %>% group_by(name) %>% summarise(change = max(prop) - min(prop))
+  change_after <- names_after %>% group_by(name) %>% summarise(change = max(prop) - min(prop))
+  name_filtered <- data %>% filter(str_detect(name, regex(regex, ignore_case = TRUE))) %>% group_by(year) %>% summarise(total = sum(prop))
+  absolute_change_after <- name_filtered[name_filtered$year == 2017,]$total[1] - name_filtered[name_filtered$year == yob,]$total[1]
+  absolute_change_before <- name_filtered[name_filtered$year == yob,]$total[1] - 
+    name_filtered[name_filtered$year == yob - X,]$total[1]
+  
+  percentile_before <- ecdf(change_before$change)
+  relative_change_before <- percentile_before(abs(absolute_change_before))
+  
+  percentile_after <- ecdf(change_after$change)
+  relative_change_after <- percentile_after(abs(absolute_change_after))
+  
+  result <- c(absolute_change_after, relative_change_after, absolute_change_before, relative_change_before)
+  return(result);
+}
+```
+
+```{r}
+result <- data.frame("Name"=c(), "AbsoluteAfter"=c(), "RelativeAfter"=c(), "AbsoluteBefore"=c(), "RelativeBefore"=c())
+
+res <- nameChanges("^ryan$", 1988)
+data_new <- data.frame(c("Ryan"), c(res[1]), c(res[2]), c(res[3]), c(res[4]))
+names(data_new) <- c("Name", "AbsoluteAfter", "RelativeAfter", "AbsoluteBefore", "RelativeBefore")
+result <- rbind(result, data_new)
+
+res <- nameChanges("^jeorg.", 1994)
+data_new <- data.frame(c("Jeorge"), c(res[1]), c(res[2]), c(res[3]), c(res[4]))
+names(data_new) <- c("Name", "AbsoluteAfter", "RelativeAfter", "AbsoluteBefore","RelativeBefore")
+result <- rbind(result, data_new)
+
+res <- nameChanges("^mandy$", 1997)
+data_new <- data.frame(c("Mandy"), c(res[1]), c(res[2]), c(res[3]), c(res[4]))
+names(data_new) <- c("Name", "AbsoluteAfter", "RelativeAfter", "AbsoluteBefore", "RelativeBefore")
+result <- rbind(result, data_new)
+
+res <- nameChanges("^thorb.", 1998)
+data_new <- data.frame(c("Thorbin"), c(res[1]), c(res[2]), c(res[3]), c(res[4]))
+names(data_new) <- c("Name", "AbsoluteAfter", "RelativeAfter", "AbsoluteBefore", "RelativeBefore")
+result <- rbind(result, data_new)
+
+res <- nameChanges("^erik$", 2000)
+data_new <- data.frame(c("Erik"), c(res[1]), c(res[2]), c(res[3]), c(res[4]))
+names(data_new) <- c("Name", "AbsoluteAfter", "RelativeAfter", "AbsoluteBefore", "RelativeBefore")
+result <- rbind(result, data_new)
+```
+
+
+```{r}
+head(result)
+```
+
+Unfortunately, there was no data for Thorbin.
+
+```{r}
+ggplot(data = result, aes(x=Name)) + 
+    geom_bar(position="dodge", stat="identity", aes(fill=RelativeAfter, y=AbsoluteAfter))
+```
+
+```{r}
+ggplot(data = result, aes(x=Name)) + 
+    geom_bar(position="dodge", stat="identity", aes(fill=RelativeBefore, y=AbsoluteBefore))
+```
+
+
+The most significant change was for Ryan and Mandy.

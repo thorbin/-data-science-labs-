@@ -1,0 +1,685 @@
+---
+title: "Lab 10 Black Swans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "11/1/2019"
+output: html_document
+---
+```{r,include=FALSE}
+#for this to work store the file containing the data on your desktop 
+library(dplyr)
+library(tidyverse)
+library(stringr)
+library(knitr)
+```
+```{r}
+answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv")%>% rename(ScoreA=Score,AnswerDate=CreationDate,X7A=X7,BodyA=Body)
+questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv") %>% rename(ScoreQ=Score,AskedDate=CreationDate,X7Q=X7,BodyQ=Body)
+#just makes variables easier to recognize after Join
+Q_A<-full_join(answers,questions,by="Id")
+
+answersj <- read_csv("~/Desktop/lab10/Answers_trunc.csv")
+questionsj <- read_csv("~/Desktop/lab10/Questions_trunc.csv")
+
+merged <- answersj %>%
+  left_join(questionsj, c('ParentId' = 'Id')) 
+merged <- merged %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+
+```
+
+#Team analysis
+
+Answer score is normally distributed but the tails are not symmetrically proportionate. The right tail is largly skewed. 
+```{r echo=FALSE,  warning=FALSE }
+#exploring data as a whole
+ggplot(answersj, aes(Score)) +
+  geom_histogram(aes(x=Score, y=..density..), bins=50) +
+  geom_density(color="red")+ 
+  xlim(c(-10, 100))+ ggtitle("Histogram and Density plot for answersj Scores")
+```
+```{r eval=TRUE, echo=FALSE, results='markup'}
+<<<<<<< HEAD
+writeLines("Mean for questionjs Score")
+mean(questionsj$Score)
+writeLines("\nRange for questionjs Score")
+range(questionsj$Score)
+writeLines("\nSD for questionjs Score")
+=======
+writeLines("Mean for questionsj Score")
+mean(questionsj$Score)
+writeLines("\nRange for questionsj Score")
+range(questionsj$Score)
+writeLines("\nSD for questionsj Score")
+>>>>>>> 52ca664673acf9c18a74cd9670b1441e68681620
+sd(questionsj$Score)
+```
+we can calculate z-scores and percentiles of an individual’s answer score
+
+```{r , results='markup'}
+#working with z scores to orient (verb)
+ans_score_sd <- sd(answersj$Score)*sqrt((length(answersj$Score)-1)/(length(answersj$Score)))
+z <- (55 - mean(answersj$Score)) / ans_score_sd
+p_yellow2 <- pnorm(z)  
+p_blue2 <- 1 - p_yellow2 
+"displaying z score for score at 55"
+print(z)
+"displaying percentiles score for score at 55"
+"right"
+print(p_blue2)
+"left"
+print(p_yellow2)
+```
+
+#Timeliness analysis
+Mean, median, Standard deviation, range, and IQR for total time in Secs
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean-------------------------------------------\n")
+mean(merged$total_time)
+writeLines("\nMedian-----------------------------------------\n")
+median(merged$total_time)
+writeLines("\nSD---------------------------------------------\n")
+sd(merged$total_time)
+writeLines("\nRange------------------------------------------\n")
+range(merged$total_time)
+writeLines("\nIQR--------------------------------------------\n")
+quantile(merged$total_time)
+```
+
+
+Mean, median, variance, Standard deviation, range, and IQR for answersj Scores
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean----------------------\n")
+mean(merged$Score.x)
+writeLines("\nMedian--------------------\n")
+median(merged$Score.x)
+writeLines("\nSD------------------------\n")
+sd(merged$Score.x)
+writeLines("\nRange---------------------\n")
+range(merged$Score.x)
+writeLines("\nIQR-----------------------\n")
+quantile(merged$Score.x)
+```
+
+```{r echo=FALSE,  warning=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 100))+ 
+  ggtitle("Box plot of total time in hours per Answer Scores")+
+  labs(y= "Ans Score", x = "Hours")
+```
+
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 1400))+ 
+  ggtitle("Scatter plot of total time in hours per Answer Scores ")+
+  labs(y= "Ans Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x))+
+  geom_boxplot(size=.2) +
+  ylim(c(0, 900)) + 
+  ggtitle("Box plot of total time in hours per Answer Scores \n Extended view")+
+  labs(y= "Ans Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.x)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 500))+
+  xlim(c(0, 10))+
+  ggtitle("Scatter plot of total time in hours per answersj Scores\n Condended view ")+
+  labs(y= "Q Score", x = "Hours")
+``` 
+Outliers are predominant consistently, thus having an effect on the regression line   suggesting that as time go by answersj scores have a slight increase 
+
+
+
+Mean, median, variance, Standard deviation, range, and IQR for questionj Scores
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean-----------------------------------------\n")
+mean(merged$Score.y)
+writeLines("\nMedian--------------------------------------\n")
+median(merged$Score.y)
+writeLines("SD------------------------------------------\n")
+sd(merged$Score.y)
+writeLines("\nRange---------------------------------------\n")
+range(merged$Score.y)
+writeLines("\nIQR-----------------------------------------\n")
+quantile(merged$Score.y)
+```
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 100))+ 
+  ggtitle("Box plot of total time in hours per questionj Scores\n Extended view")+
+  labs(y= "Q Score", x = "Hours")
+```
+
+
+
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 1500))+
+  ggtitle("Scatter plot of total time in hours per questionjs Scores ")+
+  labs(y= "Q Score", x = "Hours")
+```
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 1400))+ 
+  ggtitle("Box plot of total time in hours per questionj Scores")+
+  labs(y= "Q Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 500))+
+  xlim(c(0, 10))+
+  ggtitle("Scatter plot of total time in hours per questionjs Scores\n \n Condended view  ")+
+  labs(y= "Q Score", x = "Hours")
+```
+
+The total time and its relation with the Answer and questionj scores initially display a negative corralation at the range of 0 to 10 hours. Once past the 10-hour mark we see a slight positive correlation with questionj and answersj scores
+
+ A significant amount of outliers that do affect the relationship between score and total time. 
+
+It seems the correlation between total time and scores is positively correlated but to a small degree. 
+
+#---------------------------------------------------------------------------------end Timeliness 
+#Discussing the features
+
+jorges features: My question at hand is there any differences in averages or outliers scores concerning the exlution or inclution of the word : code (the feature ), in both question and answers scores.
+
+
+
+
+
+Thorbin's Hypothesis: 
+
+  The number of "if's' and "then's" in a Question should be a proxy of specific and detailed questions which usually net a higher ammount of upvotes. The relationship between these keywords and score should be inverse in the Question domain becuase the amount of ifs and thens indicate a very faceted,complicated answer which regardless of correctness, should net a lower number of upvotes due to people who don't have a solid grasp on the material discussed in the answer. Limitations: answers dont explain if else/then statements in depth lmao, questions asked are asked using logic resembling a flow chart.
+```{r}
+#Thorbin's code
+A<-answers %>% select(BodyA,AnswerDate,Id,ScoreA) %>% group_by(Id)%>%mutate(keywords=sum(str_detect(BodyA,c("if","If","Iff","iff","then","Then")))) %>% ungroup() %>% group_by(keywords)
+Asummarized<-A %>% summarize(observations=n())
+# assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyA
+Q<-questions %>% select(BodyQ,AskedDate,Id,ScoreQ) %>% group_by(Id)%>% mutate(keywords=sum(str_detect(BodyQ,c("if","If","Iff","iff","then","Then"))))%>% ungroup() %>% group_by(keywords)
+Qsummarized<-Q %>% summarize(observations=n())
+
+## assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyQ
+```
+
+#### Analysis:
+
+```{r}
+ggplot(data=Q,mapping=aes(x=keywords,y=ScoreQ))+geom_point()+ggtitle("Question upvotes at number of keywords")
+kable(Qsummarized,format="html",caption="Summarized answer data at keyword count")
+```
+
+  While the Question data appears to directly oppose my hypothesis, it is important to look at the number of questions in each group of keyword counts: 
+  
+  From this it is clear that the decreasing upvote count is in part due to decreasing number of observations of questions with large numbers of select key words. Since there are still decent numbers of observations up until the 5th category, variability in upvotes appears to decrease with number of key words used, indicating that questions with higher counts keywords tend to be spurned by the stack community. This makes sense because the more If's and then's used likely indicate a question operating at a more advanced level meaning fewer people are going to view it and also meaning that the asker will be intimate with the various complexities of the question.
+  
+  Turning to the Answers data, at first glance my hypothesis does not appear to be rejected out right. First impression is that there are 2 accepted levels of proxied detail namely from about 0-3 keywords. The summarized data is as follows: 
+
+```{r}
+ggplot(data=A,mapping=aes(x=keywords,y=ScoreA))+geom_point()+ggtitle("Answer upvotes at number of keywords")
+kable(Asummarized,format="html",caption="Summarized answer data at keyword count")
+```
+
+  This table shows that the number of observations across keyword groups changes approximately linearly, which was the case in the previous summarized table. The plot for this data shows that generally variability in percieved answer quality,considering decreasing audience in each percieved level of complexity, tends to increase with the number of key words used. This indicates that for more technical questions requiring the use of more conditional/concluding phrases posess higher likelihood of being highly appreciated answers. To make sense of this it is assumed again that the higher level of complexity questions require more complex answers meaning that the people likley to answer are highly qualified to give said answer, which implies that fewer people will up/down vote the answer because alot of people simply arent at that level of complexity. This is a trend that is observed indicating that this conclusive hypothesis has at least a shred of truth to it. 
+  
+Conclusion:
+  It appears as though my hypothesis is false under the assumed understanding that more complex questions regarding higher level concepts require more complex and faceted answers as measured by the use of conditional language. 
+
+###End Thorbin
+
+---
+title: "Lab10"
+output: html_document
+---
+
+```{r}
+#answers <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Answers_trunc.csv")
+#questions <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Questions_trunc.csv")
+merged <-left_join(questions,answers,by=c("Id"="ParentId"),convert==TRUE) 
+
+
+
+## create relevant columns
+merged <-merged %>% mutate(total_time = AnswerDate - AskedDate) %>% filter(total_time>0)
+
+```
+
+## Ryan's Hypothesis:
+There is an optimal length for questions and an optimal length for answers, and people in general will tend to confine their lengths to that optimal point.
+
+For humans, both time and attention spans are finite. A question or an answer that is too long will be penalized to due either the time-cost or the cognitive load, or both. A question or answer that is too short, on the other hand, risks omitting critical information. Therefore, it will be interesting to use data to help us understand what length of questions or answers tend to result in the highest score.
+
+We begin with the length of a questions' title. Below we see a bar graph showing string length on the x axis and score on the y axis:
+
+```{r}
+ggplot(data = questions) +
+  geom_bar(mapping = aes(x = str_count(questions$Title), fill = ScoreQ))+
+  labs(title= "Question Length vs Score", x = "Question Length", y = "Score")
+```
+
+While this is not a perfectly normal distribution, it does have a distinct bell-shape, suggesting that question title-lengths closer to the mean tend to result in a higher score.
+Indeed, if we calculate the mean, median and standard deviation . . .
+
+```{r}
+mean(str_count(questions$Title))
+median(str_count(questions$Title))
+sd(str_count(questions$Title))
+```
+
+. . . we find that title lengths that gravitate more toward the center also happen to be near to where our curve peaks. A standard deviation of 18.99463 is relatively small, suggesting titles have a fairly regular length and questioners tend to restrict their titles to a normal length.
+
+Maybe there is something about the title of a question that leads people to naturally be concise, so we will now turn to the body of the question, where the questioner has more freedom in terms of length. Does it follow the same pattern?
+
+```{r}
+ggplot(data = questions) +
+  geom_bar(mapping = aes(x =str_count(questions$Body), fill=ScoreQ))+
+  labs(title= "Question Length vs Score", x = "Question Length", y = "Score")+
+  xlim(c(0,5000))
+```
+
+This is messier. Peak scores seem to gravitate somewhere around a question length of 500, but there is a fat tail leading out to the right. However, unlike the case of titles, where the questioners tend to limit their lengths to that optimal point, here we see that this is not the case:
+
+```{r}
+mean(str_count(questions$BodyQ))
+median(str_count(questions$BodyQ))
+sd(str_count(questions$BodyQ))
+```
+
+The standard deviation is massive here compared to that of the question titles, and a mean of 826 is further from the optimal point than we would expect if questioners tended to limit their lengths on average to a point that was rewarded with a high score. In other words, although lengthy questions are clearly penalized (since we see from the graph that concise questions get higher scores and longer questions get lower scores), people still tend to err on the side of length.
+
+This makes sense given that concise writing in the ungraduate, graduate, and technical levels is a skill that must be cultivated--it is not the natural tendency of humans. These analyses taken together reveal an interesting tension in human behavior, where the communicator on average imposes a greater time- and attention-cost on the recipient than the recipient deems optimal. And we have just used data to extract a lesson for the communicator.
+
+Finally, we turn to answer length:
+
+```{r}
+ggplot(data = answers)+
+  geom_bar(mapping = aes(x = str_count(answers$BodyA), fill = ScoreA))+
+  labs(title = "Answer Length vs Score", x ="Answer Length", y = "Score") +
+  xlim(c(0, 1000))
+```
+
+This is even more interesting: there is a noticable peak in score around a length of 250, and then a very gradual decline as answers lengthen. If we again calculate the statistical properties:
+
+```{r}
+mean(str_count(answers$BodyA))
+median(str_count(answers$BodyA))
+sd(str_count(answers$BodyA))
+```
+
+The standard deviation is very large--meaning that answer-lengths vary tremendously--and the mean of (roughly) 658 is very far away from the "optimal point" of 250. (Notice that this is an even greater distance of length than that for questions, which was, roughly, 873-500). This shows that answers tend to err on the side of lengthiness far more than even questions.
+
+What these data show is that a lack of concision is an omnipresent human flaw. It's possible that user feedback over time will (or already has to an extent), teach users to be more concise, but it's also possible that technical-minded people on stackexchange need to understand the art of economical use of language, keeping in mind that humans do not have infinite bandwidth. 
+
+At any rate, the original hypothesis that there is an optimal length has been shown to be true, while the related idea that users will tend to gravitate toward that length has been shown to be true only for question titles and nothing else. Humans grasp that the purpose of a title is to concisely summarize a topic, and this shows that we are able to understand the idea of concision better than we can always implement it--suggesting that it is an acquired skill, not an automatic tendency.
+
+
+### End Ryan
+
+### Start Jorge
+#write a few sentences in the team report detailing what you did. 
+
+First I began exploring data as a whole by observing the distribution to have orientation. Then I began analisyn in Timeliness in relation to question and answer scores. It seems the correlation between total time and scores is positively correlated but to a small degree. Finaly, for my feature analysis, I explored how the integration or the lack of the word/text: code effected scores in both conditions. 
+
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = T,
+                      results = "hide")
+
+answersjj <- read_csv("~/Desktop/lab10/answers_trunc.csv")
+questionjsj <- read_csv("~/Desktop/lab10/questions_trunc.csv")
+
+merged <- answersjj %>%
+  left_join(questionjsj, c('ParentId' = 'Id')) 
+merged <- merged %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+```
+
+```{r eval=TRUE, echo=FALSE, results='markup'} 
+writeLines("Mean for answersj Score")
+mean(answersjj$Score)
+writeLines("\nRange for answersj Score")
+range(answersjj$Score)
+writeLines("\nSD for answersj Score")
+sd(answersjj$Score)
+```
+
+#Determine whether the variable answer score is normally distributed. Based on your answer to this, think about whether theoretically we can calculate z-scores and percentiles of an individual’s answer score.
+
+Answer score is normally distributed but the tails are not symmetrically proportionate. The right tail is largly skewed. 
+```{r echo=FALSE,  warning=FALSE }
+#exploring data as a whole
+ggplot(data=answersj, aes(Score)) +
+  geom_histogram(aes(x=Score, y=..density..), bins=50) +
+  geom_density(color="red")+ 
+  xlim(c(-10, 100))+ ggtitle("Histogram and Density plot for answersj Scores")
+```
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean for questionjs Score")
+mean(questionsj$Score)
+writeLines("\nRange for questionjs Score")
+range(questionsj$Score)
+writeLines("\nSD for questionjs Score")
+sd(questionsj$Score)
+```
+we can calculate z-scores and percentiles of an individual’s answer score
+```{r , results='markup'}
+#working with z scores to orient (verb)
+ans_score_sd <- sd(answersjj$Score)*sqrt((length(answersjj$Score)-1)/(length(answersj$Score)))
+z <- (55 - mean(answersj$Score)) / ans_score_sd
+p_yellow2 <- pnorm(z)  
+p_blue2 <- 1 - p_yellow2 
+"displaying z score for score at 55"
+print(z)
+"displaying percentiles score for score at 55"
+"right"
+print(p_blue2)
+"left"
+print(p_yellow2)
+```
+
+
+
+```{r echo=FALSE,  warning=FALSE }
+ggplot(questionsj, aes(Score)) +
+  geom_histogram(aes(x=Score, y=..density..), bins=50) +
+  geom_density(color="blue")+ 
+  xlim(c(-10, 150))+ 
+  ylim(c(0, .1191))+
+  ggtitle("Histogram and Density plot for questionj Scores")
+#hist(answersj$Score)
+```
+
+
+
+
+#Timeliness analysis --jorge's part
+Mean, median, Standard deviation, range, and IQR for total time in Secs
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean-------------------------------------------\n")
+mean(merged$total_time)
+writeLines("\nMedian-----------------------------------------\n")
+median(merged$total_time)
+writeLines("\nSD---------------------------------------------\n")
+sd(merged$total_time)
+writeLines("\nRange------------------------------------------\n")
+range(merged$total_time)
+writeLines("\nIQR--------------------------------------------\n")
+quantile(merged$total_time)
+```
+
+
+Mean, median, variance, Standard deviation, range, and IQR for Answers Scores
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean----------------------\n")
+mean(merged$Score.x)
+writeLines("\nMedian--------------------\n")
+median(merged$Score.x)
+writeLines("\nSD------------------------\n")
+sd(merged$Score.x)
+writeLines("\nRange---------------------\n")
+range(merged$Score.x)
+writeLines("\nIQR-----------------------\n")
+quantile(merged$Score.x)
+```
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 1400))+ 
+  ggtitle("Scatter plot of total time in hours per Answer Scores ")+
+  labs(y= "Ans Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/3600, y=Score.x))+
+  geom_boxplot(size=.2) +
+  ylim(c(0, 900)) + 
+  ggtitle("Box plot of total time in hours per Answer Scores \n Extended view")+
+  labs(y= "Ans Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.x)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 500))+
+  xlim(c(0, 10))+
+  ggtitle("Scatter plot of total time in hours per answersj Scores\n Condended view ")+
+  labs(y= "Q Score", x = "Hours")
+``` 
+Outliers are predominant consistently, thus having an effect on the regression line   suggesting that as time go by answers scores have a slight increase 
+
+
+
+Mean, median, variance, Standard deviation, range, and IQR for Question Scores
+```{r eval=TRUE, echo=FALSE, results='markup'}
+writeLines("Mean-----------------------------------------\n")
+mean(merged$Score.y)
+writeLines("\nMedian--------------------------------------\n")
+median(merged$Score.y)
+writeLines("SD------------------------------------------\n")
+sd(merged$Score.y)
+writeLines("\nRange---------------------------------------\n")
+range(merged$Score.y)
+writeLines("\nIQR-----------------------------------------\n")
+quantile(merged$Score.y)
+```
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 100))+ 
+  ggtitle("Box plot of total time in hours per questionj Scores\n Extended view")+
+  labs(y= "Q Score", x = "Hours")
+```
+
+
+
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 1500))+
+  ggtitle("Scatter plot of total time in hours per questionjs Scores ")+
+  labs(y= "Q Score", x = "Hours")
+```
+
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y))+
+  geom_boxplot(size=.2)+
+  ylim(c(0, 1400))+ 
+  ggtitle("Box plot of total time in hours per questionj Scores")+
+  labs(y= "Q Score", x = "Hours")
+```
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(merged, aes(x=total_time/1000, y=Score.y)) +
+  geom_point(size=.02, shape=23)+
+  geom_smooth()+
+  ylim(c(0, 500))+
+  xlim(c(0, 10))+
+  ggtitle("Scatter plot of total time in hours per questionjs Scores\n \n Condended view  ")+
+  labs(y= "Q Score", x = "Hours")
+```
+
+The total time and its relation with the Answer and Question scores initially display a negative corralation at the range of 0 to 10 hours.once past the 10-hour mark we see a slight positive correlation with question and answers scores
+
+ A significant amount of outliers that do affect the relationship between score and total time. 
+
+It seems the correlation between total time and scores is positively correlated but to a small degree. 
+
+#---------------------------------------------------------------------------------end Timeliness Jorge-part
+
+#----------------------------------------------------------------------------------
+
+
+#Exploring feature and analysis
+
+#What features did you create and why did you choose those features?
+
+To finds out if there is a relation in what makes an appropriate or optimal answer and questions would be best at first to focus at the lowest resolution in relation to the given topic
+
+Thus, the broadest concept related to the given topic, Python Questions from Stack Overflow, would be under the broadest umbrella that encompasses the topic which I hypothesis is the word:  code.  
+
+My question at hand is there any differences in averages or outliers scores concerning the exlution or inclution of the word : code, in both question and answers scores.
+
+```{r echo=FALSE,  warning=FALSE, message=FALSE}
+ggplot(questionjs, aes(x = str_detect(Body, "code"), y=Score)) +
+  geom_boxplot(size=.1, shape=23)+
+  ylim(c(0, 25))+
+  ggtitle("Box Plot inclusion and exclusion text feature: code, per questionjs Scores\n \n Condended view ")+
+  labs(y= "Q Score", x = "Feature Text: code")
+```
+
+```{r echo=FALSE,  warning=FALSE, }
+ggplot(questionjs, aes(x = str_detect(Body, "code"), y=Score))+
+geom_boxplot(outlier.colour="red", outlier.shape=8,
+              outlier.size=.4)+
+  stat_summary(fun.y=mean, geom="point", shape=23, size=4)+
+  ggtitle("Box Plot inclusion and exclusion feature: code, per questionjs Scores\n \n Extended view ")+
+  labs(y= "Q Score", x = "Feature Text: code")
+```
+
+```{r echo=FALSE,  warning=FALSE}
+ggplot(answersj, aes(x = str_detect(Body, "code"), y=Score)) +
+  geom_boxplot(size=.1, shape=23)+
+  ylim(c(0, 20))+
+  ggtitle("Box Plot inclusion and exclusion feature: code, per Answer Scores\n \n Condended view ")+
+  labs(y= "Ans Score", x = "Feature Text: code")
+```
+
+```{r echo=FALSE,  warning=FALSE}
+ggplot(answersj, aes(x = str_detect(Body, "code"), y=Score))+
+  geom_boxplot(outlier.colour="red", outlier.shape=8,
+               outlier.size=.4)+ 
+  stat_summary(fun.y=mean, geom="point", shape=23, size=4)+
+  ggtitle("Box Plot inclusion and exclusion feature: code, per Answer Scores\n \n Extended view ")+
+  labs(y= "Ans Score", x = "Feature Text: code")
+```
+#What is the relationship between your features and the scores of questions/answers if any? Provide an explanation for why each relationship does/does not exist? 
+
+It seems that that the integration or the lack of the word: code, did not have any effect in scores averages, however, when we look at the extream on the positive end we observe the inclusion of the word: code did affect the amount and density of the outliers, which arguably defines a question or answer of high utility. 
+
+This is important because it is the positive outliers that are attributed to questions and answers that have high utility. 
+
+Thus, perhaps the reason for this effect is that it is a question or answer that does not define itself a the lowest resolution with proper keywords such as : code, then, the probability of a user finding that question or answer relevant diminishes thus affecting its score.
+
+### end Jorge. 
+
+#Begin Erik
+
+#Here I import all the necessary imports
+library(tidyverse)
+library(readxl)
+library(dplyr)
+answers <- read_csv("Answers_trunc.csv")
+questions <- read_csv("Questions_trunc.csv")
+
+#I selected columns I wanted
+answers <- select(answers, Score, Body)
+questions <- select(questions, Score, Title, Body)
+
+#I filtered out NAs
+
+answers <- filter(Answers, !is.na(Body))
+answers <- filter(Answers, !is.na(Score))
+questions <- filter(Questions, !is.na(Score))
+questions <- filter(Questions, !is.na(Title))
+questions <- filter(Questions, !is.na(Body))
+
+str(answers)
+str(questions)
+
+#I combined the datasets
+merged <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+
+qmark <- questions %>%
+  mutate(link = str_detect(Body, "?"))
+
+#I graphed
+ggplot(merged) + geom_point(mapping=aes(x=Score.x, y = Score.y))
+
+#My question was is there a trend between the strength of the question and the strength of the answer. I found that when people asked better questions (received a higher score), they received better answers. From this, one can predict the stength of an answer received based on the strength of the question they ask.
+
+#End Erik 
+
+## Start Mandy ## 
+I, Mandy Karako, analyzed length of body and answer versus the score. I expected to see longer answers and questions with a less score. I also hypothesized that very short questions and answers would have a less score as well. Very short answers or questions wouldn't be very effective because in order for it to be helpful, the questions and answers need detail but not too much that makes them too long. I also analyzed "How" questions versus "Why" questions. I hypothesized that there were probably more "How" questions than "Why" questions. Futhermore, I predicted that "How" questions result in a better score than "Why" questions. 
+```{r}
+library(tidyverse)
+library(readxl)
+library(dplyr)
+library(stringr)
+answers <- read_csv("~/Desktop/Data Science Fall2019/Answers_trunc.csv")
+questions <- read_csv("~/Desktop/Data Science Fall2019/Questions_trunc.csv")
+colnames(answers)
+colnames(questions)
+str(answers)
+str(questions)
+### join relational data using the join function
+data <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+colnames(data)
+str(data)
+## create relevant columns
+data <- data %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+## rename columns 
+answers <- answers %>% rename(ScoreA = Score, BodyA=Body)
+questions <- questions %>% rename(ScoreQ = Score, BodyQ= Body)
+```
+```{r}
+## score vs answer body length 
+ggplot(data = answers)+
+  geom_bar(mapping = aes(x = str_count(answers$BodyA), fill = ScoreA))+
+  labs(title = "Answer Length vs Score", x ="Answer Body Length", y = "Score")+
+  xlim(c(0,1000))
+```
+```{r}
+## score vs question body length 
+ggplot(data = questions) + 
+  geom_bar(mapping=aes(x=str_count(questions$BodyQ), fill = ScoreQ ))+ 
+  ggtitle("Question Body Length vs Score")+
+  labs(x= "Question Body Length", y = "Score")+
+  xlim(c(0,1200))
+```
+```{r}
+## score vs questions with how
+ggplot(data=questions)+
+  geom_jitter(mapping=aes(x=str_detect(Title, c("How", "how")), y=ScoreQ))+
+  ggtitle("Score of Questions with 'How' in it")+
+  labs(x= "Questions with 'How' in it")
+```
+```{r}
+## score vs questions with why 
+ggplot(data=questions)+
+  geom_jitter(mapping=aes(x=str_detect(Title, c("Why", "why")), y=ScoreQ))+
+  ggtitle("Score of Questions with 'Why' in it")+
+  labs(x= "Questions with 'Why' in it")
+```
+Mandy's Analysis: Looking at the graph for the question data, questions between 250 and 750 received the best score, while very short or too long questions received a lower score, confirming my hypothesize. The same was true for the answer data. The answers around 250 received the best score. For the second part, I compared the "Why" questions with the "How" questions with geom jitter graphs, confirming that there were more "How" questions, and the "How" questions were receiving higher scores than the "Why" questions. I assume this is because "How" questions, in this context, are more popular and easier to answer. It's easier to tell someone how to do something rather than explain the "why" of that same concept.
+## End Mandy ##

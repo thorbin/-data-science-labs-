@@ -1,0 +1,630 @@
+---
+title: "Lab_14"
+authors: The Black Swans
+output: html_document
+---
+
+
+### Team Portion: Which features previously analyzed in Lab 10 allow for well-fitted models?
+
+In lab 10, the Black Swans analyzed various features of questions and answers on the site Stack Overflow to generate interesting findings. In light of newly-learned statistical modeling techniques, we now revisit this project to see if we can apply these new techniques to our previous work. In particular, we will determine whether any of these visualizations allow for a well-fitted model, as well as testing the statistical permutations of some with permutations.
+
+The feature we found most interesting was Ryan's analysis of question and answer lengths, which together demonstrate both the importance of brevity in question-forming as well as the importance of thoroughness in answers. Ryan's analysis is below:
+
+### Ryan's Portion:
+
+In lab 10 I answered the question of how length relates to score, in questions (titles and body) and answers (body). We found interesting patterns which tended towards a bell curve, suggesting an optimal length for both, although the distribution for answers had a very fat right-hand tail. To gain further insight, I'll now try to fit a linear model to these data.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(modelr)
+library(dplyr)
+library(stringr)
+library(knitr)
+library(purrr)
+options(na.action = na.warn)
+```
+
+This time, we include the modelr package.
+
+```{r}
+
+answers <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Answers_trunc.csv")
+questions <- read_csv("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\Questions_trunc.csv")
+colnames(answers)
+colnames(questions)
+str(answers)
+str(questions)
+merged <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+
+colnames(merged)
+str(merged)
+
+## create relevant columns
+merged <- merged %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+
+
+```
+
+
+As we saw in lab 10, the length of a question title is rewarded by a high score only within strict length parameters, giving the distribution a strict bell shape:
+
+```{r}
+ggplot(data = questions) +
+  geom_bar(mapping = aes(x = str_count(questions$Title), fill = Score))+
+  labs(title= "Question Length vs Score", x = "Question Length", y = "Score")
+
+
+
+ggplot(data = questions) +
+  geom_point(mapping = aes(x = str_count(questions$Title), y = Score))+
+  labs(title= "Question Length vs Score", x = "Question Length", y = "Score")
+```
+
+We now fit a linear model:
+
+
+```{r}
+questions_2 <-  tibble::data_frame(
+  x = str_count(questions$Title),
+  y = questions$Score
+)
+
+head(questions_2)
+
+m1 <- lm(y ~ x, data = questions_2)
+grid <- questions_2 %>%
+  data_grid(x)
+grid
+
+grid <- grid %>%
+  add_predictions(m1)
+grid
+
+coef(m1)
+```
+
+We see that the y-intercept is about 35 and the slope has a barely negative, slowly descending trajectory. This suggests that we can make the very weak claim that overall, question-title lengths will be barely penalized the longer they grow. Below is a visualization of that trajectory, as well as the points that show just how bad of a model this is.
+
+
+```{r}
+ggplot(data = questions) +
+  geom_point(mapping = aes(x = str_count(questions$Title), y = Score))+
+  labs(title= "Question Length vs Score", x = "Question Length", y = "Score")+
+  geom_line(aes(x, y = pred), data = grid, colour = 'red', size = 1)
+
+
+```
+
+To further understand how this model fails to capture what's really going on, we'll examine the residuals:
+
+```{r}
+questions_2 <- questions_2 %>%
+  add_residuals(m1)
+questions_2
+
+ggplot(questions_2, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+
+ggplot(questions_2, aes(x, resid)) + 
+  geom_ref_line(h = 0) +
+  geom_point() 
+```
+
+As we see, there is a great deal of variation in between 0 and 100, which illustrates the pitfall of a linear model in this circumstance.
+
+We'll turn at last to the body of the answers. Since this had a fat right tail....
+
+```{r}
+ggplot(data = answers)+
+  geom_bar(mapping = aes(x = str_count(answers$Body), fill = Score))+
+  labs(title = "Answer Length vs Score", x ="Answer Length", y = "Score") +
+  xlim(c(0, 1000))
+```
+
+...we would expect its linearization to look somewhat different from the questions one we saw above.
+
+```{r}
+
+answers_2 <-  tibble::data_frame(
+  x = str_count(answers$Body),
+  y = answers$Score
+)
+
+head(answers_2)
+
+m2 <- lm(y ~ x, data = answers_2)
+grid <- answers_2 %>%
+  data_grid(x)
+grid
+
+grid <- grid %>%
+  add_predictions(m2)
+grid
+coef(m2)
+
+```
+
+Indeed, we see that this one has a much lower y intercept and a slightly positive slope.
+
+```{r}
+
+ggplot(data = answers) +
+  geom_point(mapping = aes(x = str_count(answers$Body), y = Score))+
+  labs(title= "Answer Length vs Score", x = "Answer Length", y = "Score")+
+  geom_line(aes(x, y = pred), data = grid, colour = 'red', size = 1)
+```
+
+This is interesting. Once again we have a poor linear model, but this one shows a clear, long-term upward trend. In contrast to question titles, answer bodies are not, in general, penalized for length, even though the bulk of the residuals reside in the lower areas once again:
+
+```{r}
+
+answers_2 <- answers_2 %>%
+  add_residuals(m2)
+answers_2
+
+ggplot(answers_2, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+
+ggplot(answers_2, aes(x, resid)) + 
+  geom_ref_line(h = 0) +
+  geom_point() 
+```
+
+
+The conlusion from this new technique applied to old data is that linear models can shed light on visual patterns even when the fit is poor. We've seen two very clear patterns--question-titles score lower the longer they are, answers score higher the longer they are--and this is only useful when we hold in mind the residuals, which communicate where the bulk of variability lies.
+
+
+
+
+#Jorge R 
+
+
+#What features did you create and why did you choose those features?
+
+To finds out if there is a factor that contributes to appropriate or optimal answer and questions scores would be best at first to focus at the lowest resolution in relation to the given topic
+
+Thus, the broadest concept related to the given topic, Python Questions from Stack Overflow, would be under the broadest umbrella that encompasses the topic which I hypothesis is the word:  code.  
+
+My question at hand is, is there any differences in averages or outliers scores concerning the exlution or inclution of the word : code, in both question and answers scores.
+
+
+```{r include=FALSE}
+
+library(tidyverse)
+library(plyr)
+
+knitr::opts_chunk$set(echo = T,
+                      results = "hide")
+answersjj <- read_csv("C:/Users/chele/Documents/stats_data_sci/lab10zip/answers_trunc.csv")
+questionjsj <- read_csv("C:/Users/chele/Documents/stats_data_sci/lab10zip/questions_trunc.csv")
+merged <- answersjj %>%
+  left_join(questionjsj, c('ParentId' = 'Id')) 
+merged <- merged %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+```
+
+
+```{r}
+#working with Quest
+test<-str_detect(questionjsj$Body, "code")
+
+test2<-questionjsj$Score
+
+test3<-data.frame(test,test2)
+
+CT<-test3 %>% filter(test==T)
+
+CF<-test3 %>% filter(test==F)
+
+mean(CT$test2)
+
+mean(CF$test2)
+
+"total mean diff for q scores"
+
+mean(CT$test2)-mean(CF$test2)
+
+#working with Ans
+Atest<-str_detect(answersjj$Body, "code")
+
+Atest2<-answersjj$Score
+
+
+Atest3<-data.frame(Atest,Atest2)
+
+ACT<-Atest3 %>% filter(Atest==T)
+
+ACF<-Atest3 %>% filter(Atest==F)
+
+
+mean(ACT$Atest2)
+
+mean(ACF$Atest2)
+
+"total mean diff for q scores"
+
+mean(ACT$Atest2)-mean(ACF$Atest2)
+
+#perm funtion to see if categories matter in determining if mean diff are statistically significant
+
+perm_mean <- function(perms = 1000, all_values, n_A)
+  {
+    ## Variables ##
+    # perms: The number of permutations 
+    # all_values (num): all data values
+    # n_A (int): Size of group A
+    ###############
+    
+    # Step 1:
+    # Create vector of zeroes of length "perms" to store
+    # permuted mean differnces
+    perm_mean_diff <- numeric(perms)
+    # Loop throught number of permutations
+    for (i in c(1:perms))
+    {
+      
+      rand_order <-sample(all_values)
+      group_A <-rand_order[1:n_A]
+      group_B <-rand_order[(n_A+1):length(all_values)]
+      
+      # Step 3:
+      # Compute the sample means for the two groups from 
+      # step 2
+      A_bar <- mean(group_A)
+      B_bar <- mean(group_B)
+      
+      # Step 4: 
+      # Compute the difference in sample means, store the
+      # value in the vector from step 1
+      diff_means <- A_bar - B_bar
+      
+      
+      perm_mean_diff[i] = diff_means
+    }
+      # Step 5:
+      # Return the permuted mean differences vector
+      
+      
+      return(perm_mean_diff)
+ 
+    }
+  
+
+```
+
+```{r}
+x<-perm_mean(perms=1000, all_values=test3$test2, n_A=(length(test3$test)/2))
+
+hist(x)
+
+ quantile(x, probs = seq(0, 1, 0.05))
+ 
+ "total mean diff for quest"
+ mean(CT$test2)-mean(CF$test2)
+ 
+ "groups are not stat sig"
+
+```
+
+```{r}
+x<-perm_mean(perms=1000, all_values=Atest3$Atest2, n_A=(length(Atest3$Atest)/2))
+
+hist(x)
+
+ quantile(x, probs = seq(0, 1, 0.05))
+ 
+  "total mean diff for ans"
+ mean(ACT$Atest2)-mean(ACF$Atest2)
+
+"groups are stat sig"
+
+```
+
+###Begin Erik
+
+
+```{r}
+#The goal of my code was to test the difference between the scores of questions which contained the word: "tried" and those that did not, along with answers which contained the word: "try" and those that did not. I found this interesting because oftentimes it seems that a question can be asked more knowledgeably and effectively when one has already attempted a solution, and is likely close to the answer. Similarly, I was interested in answers which contained the word "try", but I was not sure wheter they would be better or worse than answers without the word. I figured some answers would be in response to people who had already tried a solution, but there also might be some answers which come from someone who is uncertain in the set as well.
+#I imported the necesssary packages
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(modelr)
+library(dplyr)
+options(na.action = na.warn)
+```
+
+```{r}
+#Here I imported the datasets
+answers <- read.csv("C:/Users/ErikSvenneby/Desktop/lab10/Answers_trunc.xlsx.csv")
+questions <- read.csv("C:/Users/ErikSvenneby/Desktop/lab10/Questions_trunc.xlsx.csv")
+
+#Tests to see column names to help me decide how to left join
+#colnames(answers)
+#colnames(questions)
+#str(answers)
+#str(questions)
+
+#The left join of the datasets
+merged <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+
+#Summary of the merged dataset
+#colnames(merged)
+#str(merged)
+
+#Removing questions without scores
+merged <- merged %>% 
+  filter(!is.na(Score.x))%>%
+  filter(!is.na(Score.y))
+#original code to create column for total time
+#merged <- merged %>% 
+ # mutate(total_time = CreationDate.x - CreationDate.y) %>%
+#  filter(total_time>0)
+
+```
+```{r}
+#
+tried <- str_detect(questions$Body, "tried")
+qscores <- questions$Score
+triedframe <- data.frame(tried, qscores)
+
+didtry <- triedframe %>% filter(tried==T)
+didnttry <- triedframe %>% filter(tried==F)
+
+mean(didtry$qscores)
+#Result is 16.16564
+mean(didnttry$qscores)
+#Result is 26.16277
+mean(didtry$qscores)-mean(didnttry$qscores)
+#Result is -9.997131 (This is the difference between questions which contained the word tried and questions which did not contain the word--which was the greater category of the two)
+
+try <- str_detect(answers$Body, "try")
+ascores <- answers$Score
+tryframe <- data.frame(try, ascores)
+
+suggestedtry <- tryframe%>%filter(try==T)
+didntsuggesttry <- tryframe%>%filter(try==F)
+
+mean(suggestedtry$ascores)
+#Result is 11.24077
+mean(didntsuggesttry$ascores)
+#Result is 13.04038
+mean(suggestedtry$ascores)-mean(didntsuggesttry$ascores)
+#Result is -1.799607 (This is the difference between answers which contained the word try and answers which did not contain the word--which was the greater category of the two)
+
+#Here I set up a perm test function to determine whether or not the mean values I got above were significant or not
+meanbyperm <- function(perms = 1000, all_values, n_A)
+{
+  meanpermdiff <- numeric(perms)
+  
+  for (i in c(1:perms))
+  {
+    randorder <- sample(all_values)
+    firstgroup <- randorder[1:n_A]
+    secondgroup <- randorder[(n_A+1):length(all_values)]
+  
+  sampmeanfirst <- mean(firstgroup)
+  sampmeansecond <- mean(secondgroup)
+  
+  meansdiff <- sampmeanfirst - sampmeansecond
+  meanpermdiff[i] = meansdiff
+  }
+  return(meanpermdiff)
+}
+
+```
+
+```{r}
+#Here I plugged in the values for my questions set
+questiontest <- meanbyperm(perms=1000, all_values=triedframe$qscores, n_A=(length(triedframe$tried)/2))
+
+hist(questiontest)
+quantile(questiontest, probs = seq(0,1,0.05))
+
+mean(didtry$qscores)-mean(didnttry$qscores)
+#This mean falls outside of the quantile range, so it is statistically significant-- to my surprise, questions which contained the word tried scored lower than questions which did not.
+```
+```{r}
+#Here I plug in my answers set
+answertest <- meanbyperm(perms=1000, all_values=tryframe$ascores, n_A=(length(tryframe$try)/2))
+
+hist(answertest)
+quantile(answertest, probs = seq(0,1,0.05))
+
+mean(suggestedtry$ascores)-mean(didntsuggesttry$ascores)
+#This mean falls inside of the quantile range, but within the 0-5% area, so it is statistically significant in support of questions that did not contain the word try generally scoring higher than those that did.
+```
+
+###End Erik
+
+###Mandy's Analysis
+In Lab 10, I analyzed several different questions. I analyzed the score of questions with the word 'how' in it. I also analyzed the score of questions with the word 'why' in it. I found that questions with 'how' in it did better than questions with 'why' in it. But individually, questions without either of those words had a higher score. In this lab, I will create a linear model to analyze this. 
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(modelr)
+library(readxl)
+library(dplyr)
+library(stringr)
+options(na.action = na.warn)
+```
+```{r}
+answers <- read_csv("~/Desktop/Data Science Fall2019/Answers_trunc.csv")
+questions <- read_csv("~/Desktop/Data Science Fall2019/Questions_trunc.csv")
+colnames(answers)
+colnames(questions)
+str(answers)
+str(questions)
+### join relational data using the join function
+data <- answers %>%
+  left_join(questions, c('ParentId' = 'Id')) 
+colnames(data)
+str(data)
+## create relevant columns
+data <- data %>% 
+  mutate(total_time = CreationDate.x - CreationDate.y) %>%
+  filter(total_time>0)
+## rename columns 
+answers <- answers %>% rename(ScoreA = Score, BodyA=Body)
+questions <- questions %>% rename(ScoreQ = Score, BodyQ= Body)
+```
+The orginal graphs: 
+```{r}
+ggplot(data=questions)+
+  geom_jitter(mapping=aes(x=str_detect(Title, c("How", "how")), y=ScoreQ))+
+  ggtitle("Score of Questions with 'How' in it")+
+  labs(x= "Questions with 'How' in it")
+
+ggplot(data=questions)+
+  geom_jitter(mapping=aes(x=str_detect(Title, c("Why", "why")), y=ScoreQ))+
+  ggtitle("Score of Questions with 'Why' in it")+
+  labs(x= "Questions with 'Why' in it")
+```
+Filter for how and why: 
+```{r}
+howquestions <- questions %>% filter(str_detect(Title, c("How", "how")))
+whyquestions <- questions %>% filter(str_detect(Title, c("Why", "why")))
+
+
+```
+Linear model for how questions: 
+```{r}
+questions_2 <-  tibble::data_frame(
+  x = str_count(howquestions$Title),
+  y = howquestions$ScoreQ
+)
+
+head(questions_2)
+
+m1 <- lm(y ~ x, data = questions_2)
+grid <- questions_2 %>%
+  data_grid(x)
+grid
+
+grid <- grid %>%
+  add_predictions(m1)
+grid
+
+coef(m1) # y-intercept of about 69.9 and a slight negative slope of -.65
+```
+Linear model for why questions:
+```{r}
+questions_3 <-  tibble::data_frame(
+  x = str_count(whyquestions$Title),
+  y = whyquestions$ScoreQ
+)
+
+head(questions_3)
+
+m1 <- lm(y ~ x, data = questions_3)
+grid <- questions_3 %>%
+  data_grid(x)
+grid
+
+grid <- grid %>%
+  add_predictions(m1)
+grid
+
+coef(m1) # y-intercept of about 44.1 and a very slight negative slope of -.2
+```
+Residuals (how questions) 
+```{r} 
+questions_2 <- questions_2 %>%
+  add_residuals(m1)
+
+ggplot(questions_2, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+
+ggplot(questions_2, aes(x, resid)) + 
+  geom_ref_line(h = 0) +
+  geom_point()  # Between 0 and 100 points are scattered everywhere. 
+```
+Residuals (why questions): 
+```{r}
+questions_3 <- questions_3 %>%
+  add_residuals(m1)
+
+ggplot(questions_3, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+
+ggplot(questions_3, aes(x, resid)) + 
+  geom_ref_line(h = 0) +
+  geom_point() #This graph shows less points but the points do seem to be more concise from 0 to 100. 
+```
+To conclude, how questions' resid are all over the place while why questions' residuals only had a few outliers. Since the how questions had a slightly more negative slope than the why questions, we can conlude that the why questions were receiving a better score than the how questions. 
+##End Mandy
+
+#### Thorbin's section 
+Thorbin's question: 
+Expanding on the question I asked for lab 10 (number of key words a predictor of score), in this lab I am curious as to whether my results are statistically significant or are circumstantial. The problem that I ran into on lab 10 was that the more key words there were, the fewer responses existed, this was likely due to increase in complexity of the question/ answer. The problem with this is that it gives biased data. I can fix this if I take an individual score and divide it by the number of observations in the group. This would make a plot that can be modeled despite the disparity in popularity between complex and simple answers. Ill only do answers for the sake of time.
+
+```{r}
+answers<-read_csv("~/Desktop/lab10/Answers_trunc.csv") %>% rename(BodyA=Body,AnswerDate=CreationDate,ScoreA=Score)
+questions<-read_csv("~/Desktop/lab10/Questions_trunc.csv")%>%rename(BodyQ=Body,AskedDate=CreationDate,ScoreQ=Score)
+A<-answers %>%select(BodyA,AnswerDate,Id,ScoreA) %>% group_by(Id)%>%mutate(keyword_occurance=sum(str_count(BodyA,c("if","If","Iff","iff","then","Then")))) %>% ungroup() %>% group_by(keyword_occurance) %>% mutate(mean_score=ScoreA/n(),n=n())
+
+#assuming Id is a unique identifier, this gives the amount of ifs and thens in bodyQ
+
+```
+```{r}
+#generating plot
+ggplot(data=A,mapping=aes(x=keyword_occurance,y=mean_score))+geom_point()+ylim(0,150)
+#the y-limit was set because the giant outliers (namely 2) made it hard to read the data, the generated model will capture those though 
+
+```
+looking at this plot, I want to test all linear models (reasonable iteration) that will exist between the lines y=4(x) and y=0. I will use a linear model format in a for loop, I will also set the run (x) value to 100 so that I only have to sequence the rise (y value), also y intercept of zero should produce reasonable approximation, also you cant have a null answer with any upvotes or down votes, so this fits our picture.
+
+```{r}
+#generating the function family
+
+  storage_vector1<-numeric(25)
+  storage_vector2<-numeric(25)
+  for(i in c(1:25))
+  {
+    y1<-(25-i)/12.5 #creates slope
+    y2<-(0) #creates y intercept
+    storage_vector1[i]=y1
+    storage_vector2[i]=y2
+  }
+#storage_vector1 =slope
+#storage_vector2 = intercept
+slp_int<-tibble(storage_vector1,storage_vector2) 
+
+```
+```{r}
+#generating plot with family of functions: 
+
+ggplot(data=A,mapping=aes(x=keyword_occurance,y=mean_score))+geom_point()+ylim(0,150) + geom_abline(data=slp_int,mapping=aes(intercept=slp_int$storage_vector2,slope=slp_int$storage_vector1))
+```
+Now I need to find the vertical rms distance between each point and each function: 
+```{r}
+model<-function(a,data) #specifiying linear model
+{
+
+  m<-a[1]*data$keyword_occurance+a[2]#takes first and second colum of tibble a respectively
+}
+dist<-function(mod,data)
+{
+  diff=data$mean_score-model(mod,data)
+  m=sqrt(mean(diff^2))
+  return(m)
+}
+prep_A<-function(d1,d2,a) #prepares the distance function to be used in a mapping function
+{
+  dist(c(d1,d2),A)
+}
+final<-slp_int %>% mutate(distance=map2_dbl(slp_int$storage_vector1,slp_int$storage_vector2,prep_A)) %>% rename(slope=storage_vector1,y_int=storage_vector2)
+```
+On inspection of the table final represents, it can be easily observed that the best fitting model has an RMS vertical displacement of 11.85053. This indicates that this "best" fitting linear model is not a stellar choice, but will do in a pinch. another approach would be to construct a peicewise linear fit model for better results, but im not going to do that. Factors that may raise this would be the iteration angle, I could have just missed the best distance,or the massive outliers contributing significantly to the cumulative distance.
+
+```{r}
+ggplot(data=A,mapping=aes(x=keyword_occurance,y=mean_score))+geom_point()+ylim(0,150) + geom_abline(mapping=aes(intercept=0,slope=.32))
+```
+This plot shows that the process of selecting the linear fit was successful, suggesting that the two massive outlier not pictured were juking the stats and that this is probably a rather decent model. Drawing conclusions, I can negate and expand on my previous findings, it appears as though the number of times a key-word appears in an answer, the more likely it is that that answer will be better rated. This is possibly becuase the key words selected would tend to belong to a multi-faceted concept which would be answered by a) someone who knows what theyre tallking about and b) being able to successfuly reach a large audience each member with a slightly different question.
+####End Thorbin

@@ -1,0 +1,794 @@
+---
+title: "Lab 15 Black Swans"
+authors: Ryan Bilkie, Jorge Robelo, Mandy Karako, Thorbin Atwell-Donoughy, Erik Svenneby
+date: "12/10/2019"
+output: html_document
+---
+
+# How does alcohol consumption relate to health and well-being?
+
+The Black Swans have been hired by the World Health Organization to analyze how the patterns of alcohol consumption affect various measures of health and well-being. This question is important because alcohol is consumed worldwide in a variety of forms, and it is estimated that drinking causes (globablly) 2.8 million premature deaths per year (https://ourworldindata.org/alcohol-consumption). It is useful to understand how and why (in what form) alcohol is dangerous (or beneficial) to health.
+
+The primary dataset we will be using is from FiveThirtyEight (https://github.com/fivethirtyeight/data/blob/master/alcohol-consumption/drinks.csv), in conjunction with various other datasets such as gapminder.org.  The alcohol dataset is a worldwide tally of total litres of alcohol consumed, in addition to total servings of beer, wine, spirits, per country for 2010.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(modelr)
+library(readxl)
+library(dplyr)
+library(knitr)
+library(modelr)
+library(purrr)
+
+alcohol <- read.csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+
+```
+
+
+# Team Conclusion and Recommendation:
+
+The sum of the individual findings tell a cautiously optimistic story about some forms of drinking, but not all. For example, Jorge's work shows that there is a strong correlation between total alcohol consumed and life expectency. Ryan's work then dives deeper into that issue and reveals that, whereas wine and beer consumption is positively correlated with higher life expectency, consumption of spirits is negatively correlated. Erik's findings showed that alcohol consumption is actually an indicator of lower rates of childhood mortality; however, as a counterpoint to this positive narrative, Mandy found that alcohol consumption is weakly correlated with higher rates of suicide, and Thorbin found that some alcohol consumption is associated with violent crime. Erik found that there was no significant correlation between alcohol consumption and child mortality.
+
+To further complicate the issue, in all five instances, confounding variables certainly play a role, which is detailed in the individual sections. Nevertheless, taken together, all of these data and analyses show that at minimum, the consumption of wine (and to a lesser extent, beer) is an indicator of better health and well-being (whether or not that is a causal relationship is a different story), whereas consumption of spirits is associated with less favorable outcomes, and this is best illustrated by plotting the relationship of these drinks with life expectency:
+
+(In order to properly use visualizations for the team section, it will be necessary to use Ryan's data-tidying here, rather than in his individual section):
+
+
+```{r message=FALSE, warning=FALSE}
+#download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
+
+life_exp <- read_csv("~/Desktop/life_expectancy_years.csv")
+
+m <- merge(alcohol, life_exp[ , c('country', '2010')],
+           by.x = 'country', by.y = 'country')
+
+colnames(m)[ncol(m)] <- 'lex'
+# Removing countries with NA life exp.
+m <- m[!is.na(m$lex), ]
+
+
+ggplot(data = m, warning=FALSE, message=FALSE)+
+  geom_point(aes(x = wine_servings, y = lex), color = "red")+
+  geom_smooth(aes(x = wine_servings, y = lex), color = "red", se= FALSE)+
+  geom_point(aes(x = beer_servings, y = lex), color = "springgreen4")+
+  geom_smooth(aes(x=beer_servings, y= lex), color = "springgreen4", se= FALSE)+
+  geom_point(aes(x = spirit_servings, y = lex), color = "steelblue2")+
+  geom_smooth(aes(x = spirit_servings, y = lex), color = "steelblue2", se = FALSE)+
+  xlim(c(0,375))
+
+```
+
+Therefore, the team's cautious recommendation for the holiday season is to enjoy wine and avoid spirits.
+
+#Begin Erik
+
+I chose to analyze the effects of Alchohol Consumption on child mortality, I figured it was likely that countries that consumed more alcohol would have the propensity to have a higher child mortality rate. I decided to filter for only the 15 highest GDP countries that had no na values in any of the datasets because I figured that this would eliminate other non-alcohol-related child mortality causes. Obviously, in poorer countries, child mortality would be influenced by many other factors.
+
+
+
+```{r}
+#Here I load the Alcohol Consumption, Child Mortality, and GDP datasets. I used the year 2010 because the Alcohol Consumption dataset only used the year 2010. I filtered the final merged set(which used country to join the three datasets) to include only the top 15 countries by GDP.
+#download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
+
+alc <- alcohol
+alc <- rename(alc, 'beer' = 'beer_servings')
+alc <- rename(alc, 'wine' = 'wine_servings')
+alc <- rename(alc, 'spirit' = 'spirit_servings')
+alc <- rename(alc, 'total' = 'total_litres_of_pure_alcohol')
+
+childmort <- read.csv("~/Desktop/child_mortality_0_5_year_olds_dying_per_1000_born.csv")
+childmort <- select(childmort, 'country','X2010')
+childmort <- rename(childmort, 'MortRate' = 'X2010')
+
+GDP <- read.csv("~/Desktop/gdppercapita_us_inflation_adjusted.csv")
+GDP <- select(GDP, 'country', 'X2010')
+GDP <- rename(GDP, 'GDP'='X2010')
+
+merged_temp <- alc %>%
+  left_join(childmort, c('country')) 
+merged1 <- merged_temp %>% filter(!is.na(MortRate))
+
+finmerged1 <- merged1 %>% left_join(GDP, c('country'))
+finmerged <- finmerged1 %>% filter(!is.na("country"),GDP>45000)
+
+```
+```{r}
+#Here I graphed my results. I had one graph for all alcohol consumption, one for the consumption of beer, one for wine, and one for spirits. I put the alcohol consumption on the x axis and the child mortality rate on the y axis. I used a best fit line to show the correlation as a country drank more alcohol.
+ggplot(finmerged, mapping = aes(x= total, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= beer, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= wine, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= spirit, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+#Contrary to what I hypothesized, I found that as countries drank more alcohol, all four of the graphs showed there was a decrease in the child mortality rate as one followed the best fit line. I do believe that Qatar might have thrown off the data, as it is extremely wealthy but other factors may contribute to child mortality.
+```
+
+#End Erik
+
+
+##Ryan's Section
+
+I'm interested in how the individual forms of consumption (wine, beer, and spirits) relate to one another in terms of health. For the measurement of health, I will use life expectancy (from gapminder.org). First we import the data and tidy it such that life expectancy for 2010 per country is joined to the alcohol dataset.
+
+
+
+
+Now we are ready to see who were the top consumers of wine, beer and spirits:
+```{r}
+top_wine <- m[order(m$wine_servings, decreasing = TRUE),]
+top_wine <- top_wine[1:10, c('country', 'wine_servings', 'lex')]
+top_wine$drink <- 'wine'
+top_wine
+```
+
+## Beer
+```{r}
+top_beer <- m[order(m$beer_servings, decreasing = TRUE),]
+top_beer <- top_beer[1:10, c('country', 'beer_servings', 'lex')]
+top_beer$drink <- 'beer'
+top_beer
+```
+
+## Spirit
+```{r}
+top_spirit <- m[order(m$spirit_servings, decreasing = TRUE),]
+top_spirit <- top_spirit[1:10, c('country', 'spirit_servings', 'lex')]
+top_spirit$drink <- 'spirit'
+top_spirit
+```
+
+This sort of exploratory data analysis gives us an idea of which countries drink which kind of alcoholic beverage. Note that the top 9/10 wine consumers are European countries. This will be important near the end when we're analyzing our models.
+
+Let's see what a boxplot tells us about the life expectancy for wine drinkers, beer drinkers and spirit drinkers based on this data.
+
+
+```{r}
+top_drink <- rbind(top_wine[, c('lex', 'drink')],
+                   rbind(top_beer[, c('lex', 'drink')], top_spirit[, c('lex', 'drink')]))
+top_drink
+```
+
+```{r}
+ggplot(data = top_drink, aes(x = drink, y = lex)) +
+    geom_boxplot() +
+    ggtitle('Life expectancy for top 10 countries in consumption of wine, beer, and spirit')
+```
+
+
+This is a fascinating result. Wine is the clear victor here, and with the smallest standard error at that.
+
+Now let's look at how volumes of each beverage consumed relate to life expectancy using geom_points and geom_smooths:
+
+## Wine
+```{r}
+ggplot(m, aes(x = wine_servings, y = lex)) +
+    geom_point() +
+    geom_smooth()
+```
+
+## Beer
+```{r}
+ggplot(m, aes(x = beer_servings, y = lex)) +
+    geom_point() +
+    geom_smooth()
+```
+
+
+
+## Spirits
+```{r}
+ggplot(m, aes(x = spirit_servings, y = lex)) +
+    geom_point() +
+    geom_smooth()
+```
+
+
+This gives us a clearer picture of the patterns of life expectancy in relation to the various drinks. Notice the lower life expectancy towards the lower end of the x-axis--why should that be? For spirit consumption in particular, it rises sharply up to about 100 servings and then drops down steadily. We will explore this issue near the end of our analysis. For now, we will fit some models and add predictions:
+
+
+```{r}
+
+wine_2 <-  tibble::data_frame(
+  x = m$wine_servings,
+  y = m$lex
+)
+
+head(wine_2)
+
+m2 <- lm(y ~ x, data = wine_2)
+grid <- wine_2 %>%
+  data_grid(x)
+grid
+
+grid <- grid %>%
+  add_predictions(m2)
+grid
+coef(m2)
+
+
+ggplot(data = m) +
+  geom_point(mapping = aes(x = wine_servings, y = lex))+
+  labs(title= "Predicting LifeExp from Wine Consumption", x = "Amount of wine consumed", y = "Life Expectancy")+
+  geom_line(aes(x, y = pred), data = grid, colour = 'red', size = 1)
+
+
+
+```
+
+
+```{r}
+
+beer_2 <-  tibble::data_frame(
+  x = m$beer_servings,
+  y = m$lex
+)
+
+
+m3 <- lm(y ~ x, data = beer_2)
+grid2 <- beer_2 %>%
+  data_grid(x)
+
+
+grid2 <- grid2 %>%
+  add_predictions(m3)
+
+coef(m3)
+
+
+ggplot(data = m) +
+  geom_point(mapping = aes(x = beer_servings, y = lex))+
+  labs(title= "Predicting LifeExp from Beer Consumption", x = "Amount of beer consumed", y = "Life Expectancy")+
+  geom_line(aes(x, y = pred), data = grid2, colour = 'red', size = 1)
+
+
+
+```
+
+```{r}
+
+spirit_2 <-  tibble::data_frame(
+  x = m$spirit_servings,
+  y = m$lex
+)
+
+
+m4 <- lm(y ~ x, data = spirit_2)
+grid3 <- spirit_2 %>%
+  data_grid(x)
+
+
+grid3 <- grid3 %>%
+  add_predictions(m4)
+
+coef(m4)
+
+
+ggplot(data = m) +
+  geom_point(mapping = aes(x = spirit_servings, y = lex))+
+  labs(title= "Predicting LifeExp from Spirit Consumption", x = "Amount of spirits consumed", y = "Life Expectancy")+
+  geom_line(aes(x, y = pred), data = grid3, colour = 'red', size = 1)
+
+
+
+```
+
+
+Surprisingly, all three drinks predict clearly higher life expectancy based on higher consumption. This is seems to run against the trend we saw above in our point/smooth plots. That means we need to further investiage. 
+
+It might be useful to look at the residuals. Since the slopes are similar for all three linear models, we will only look at one.
+
+```{r}
+wine_2 <- wine_2 %>%
+  add_residuals(m2)
+
+ggplot(wine_2, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+
+
+```
+
+It appears that the smallest residuals tend to be highest in count--meaning that these models are not bad, though not perfect. There is a good deal of variability, but the linear trend is still clear.
+
+One conclusion to draw from these data is that wine consumption is a strong predictor of life expectency, relative to beerand spirits. However, this might not be valid, as there could possibly be confounding variables at play, which we have not explored. We notice that the biggest wine-consumers, for instance, reside on the European continent, and it's possible that the higher life expectency there is due to other factors, such diet, climate, or lifestyle.
+
+There's something else going on here: when we look at the table of this data, we notice that there are several countries that consume 0 alcohol per year, such as Afghanistan, Libya, Iran, Yemen, Pakistan, and North Korea). These countries also happen to be countries that are war-torn, or impoverished, or both. That is a clear confounding variable that we should filter out. So what happens when we only look at countries that consume more than 50 servings of a given drink per year?
+
+
+```{r}
+ggplot(m[m$wine_servings>=50,], aes(x = wine_servings, y = lex)) +
+    geom_point() +
+    labs(title= "Wine Consumed >= 50")+
+    geom_smooth(method='lm')
+```
+
+```{r}
+ggplot(m[m$beer_servings>=50,], aes(x = beer_servings, y = lex)) +
+    geom_point() +
+    labs(title= "Beer Consumed >= 50")+
+    geom_smooth(method = 'lm')
+```
+
+```{r}
+ggplot(m[m$spirit_servings>=50,], aes(x = spirit_servings, y = lex)) +
+    geom_point() +
+    labs(title= "Spirits Consumed >= 50")+
+    geom_smooth(method = 'lm')
+```
+
+Now we are able to see the trend much more clearly. Wine has a strong incline, beer a steady incline, and spirits a sharp decline.
+
+Conclusion: it is evident from these data and analyses that wine consumption is indeed associated with better health outcomes than beer, and beer is better than spirits, though more work would need to be done to tease out the confounding variables (such as doing this comparison between wine drinkers and spirit drinkers within the same country). But that would require more data and more data scientists.
+
+
+ ### Thorbin's section
+ 
+ The question I want to try and answer is: Does alcohol consumption by country have a noticeable effect on murder rates? The data I am using is from the gapminder data set and the fivethirtyeight data set on git hub. Since the first data set lists the consumption in different types of alcohol, I can do the same analysis for each different type of spirit to see if there is a noticeable general trend. 
+  My hypothesis is that if there is a positive trend in alcohol consumption, harder liqours will have the most murder-prone stats due to quicker and more significant intoxicative properties.
+  
+```{R}
+#importing data
+wasteage<-alcohol
+merkage<-read_csv("~/Desktop/murder_total_deaths.csv")
+```
+```{R}
+#separating data
+merkage_10<-select(merkage,country,'2010')%>% rename("Murders"='2010')#the alcohol data is only for 2010
+merk_ineb<-full_join(merkage_10,wasteage,by="country")
+beer<-select(merk_ineb,Murders,beer_servings,)%>%rename("consumption"=beer_servings) %>% filter()
+hard_alc<-select(merk_ineb,Murders,spirit_servings)%>%rename("consumption"=spirit_servings)
+wine<-select(merk_ineb,Murders,wine_servings)%>%rename("consumption"=wine_servings)
+```
+
+Since I now have the data separated and simplified, I need to plot murder rates vs alcohol consumption, since no time variable data exists for the alcohol consumption data, an analysis by country is not possible. To get around this, what I need to do is group all people together and create a continuous scale on alcohol consumption and murder rates. I justify this by saying that when consumption of alcohol occurs, humans become intoxicated. A possible confounding variable to this analysis would certainly be altitude of each country. This is because drinking at altitude requires less alcohol to become intoxicated meaning that countries at altitude would generally show fewer Liters of alcohol consumed at the respective murder rate therefore juking the stats. Ill ignore this because I dont have the time and energy to calculate average altitude for each country. 
+
+```{r}
+#generating initial plots
+ggplot(data=beer,mapping=aes(x=consumption,y=Murders))+geom_point()+ggtitle("Beer servings in Liters vs Murders")
+ggplot(data=hard_alc,mapping=aes(x=consumption,y=Murders))+geom_point()+ggtitle("Hard alcohol servings in Liters vs Murders")
+ggplot(data=wine,mapping=aes(x=consumption,y=Murders))+geom_point()+ggtitle("Wine servings in Liters vs Murders")
+```
+
+We can see from the plots that there will not be a strong arguement for my hypothesis, but an arguement none the less. The next portion will be finding series of linear models that tell us the general but rather inaccurate trend between alchol consumption and murders, the differences in slope will tell us how significant outliers effect the linear model, since each slope will be different, general conclusions can be drawn about the murder potency of each alcohol type observed. 
+
+For each model, I will create 100 different lines of varying slope. I will then calculate the slope and y-intercept of each line and then arrange them into a tibble to be used in the next loop series. looking at the plots, I want the slopes of all lines to have a mean of 0 and standard deviation of 400 distributed normally (negative slopes are discarded). The y intercept will be uniformly distributed around 1500. 
+
+```{R}
+#creating linear models, just generates a bunch of lines. 
+slp_int<-tibble(slope=rnorm(200,0,sd=400),y_int=runif(200,0,1500)) %>% filter(slope>=0)
+```
+Now to add the family of lines to all the plots.
+
+```{r}
+#beer plot
+ggplot(data=beer,mapping=aes(x=consumption,y=Murders))+geom_point()+ geom_abline(data=slp_int,mapping=aes(intercept=slp_int$y_int,slope=slp_int$slope),alpla=.25)+ggtitle("Beer servings in Liters vs Murders")
+#hard alcohol plot
+ggplot(data=hard_alc,mapping=aes(x=consumption,y=Murders))+geom_point()+ geom_abline(data=slp_int,mapping=aes(intercept=slp_int$y_int,slope=slp_int$slope),alpha=.25)+ggtitle("Hard-Alchol servings in Liters vs Murders")
+#wine plot
+ggplot(data=wine,mapping=aes(x=consumption,y=Murders))+geom_point()+ geom_abline(data=slp_int,mapping=aes(intercept=slp_int$y_int,slope=slp_int$slope),alpha=.25)+ggtitle("wine servings in Liters vs Murders")
+```
+
+Now I need to make a function that will take each individual line and calculate the horizontal distance between each data point and then calculate the rms distance per that line. I will then integrate each of these values into a table to select the best lines based on smallest rms difference. Since I used the same distribution on each plot I shouldnt have to worry about varying line families due to different random distributions. 
+
+```{R}
+  
+  model<-function(a,data)#a=slp_int, input is deduced from getting_that_thing
+  {
+    line<-a[1]*data$consumption+a[2]
+    #this returns the murder value for each value of     consumption on a given y intercept
+  }
+  sending_that_thing<-function(mod,data) #calculates the rms distance   for a single line 
+  {
+    diff<-data$Murders-model(mod,data)
+    rms_diff<-sqrt(mean(diff^2,na.rm=TRUE))
+    return(rms_diff)
+    #returns the value, difficulty is that the vectors used are not the same length, the map function takes one operation and applies it to another function to circumvent this.
+  }
+  getting_that_thing_beer<-function(d1,d2)
+  {
+    sending_that_thing(c(d1,d2),beer) #sets us up so that we can name a data frame as an arguement to an overlapping function.
+  }
+   getting_that_thing_hard_alc<-function(d1,d2)
+  {
+    sending_that_thing(c(d1,d2),hard_alc) #sets us up so that we can name a data frame as an arguement to an overlapping function.
+   }
+    getting_that_thing_wine<-function(d1,d2)
+  {
+    sending_that_thing(c(d1,d2),wine) #sets us up so that we can name a data frame as an arguement to an overlapping function.
+  }
+beer_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_beer))
+beer_lines<-beer_int%>% filter(rank(dist)<=10) # dist: 6586 y_int: 591 slp:5.65
+hard_alc_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_hard_alc)) 
+hard_alc_lines<-hard_alc_int%>% filter(rank(dist)<=10) # dist: 6594 y_int: 591 slp:5.65
+wine_int<-slp_int %>% mutate(dist=map2_dbl(slp_int$slope,slp_int$y_int,getting_that_thing_wine))
+wine_lines<-wine_int%>% filter(rank(dist)<=10) # dist: 6712 y_int: 591 slp:5.65
+```
+```{r}
+ggplot(data=beer)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of beer (L) vs Murders")
+ggplot(data=hard_alc)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of Hard alcohol (L) vs Murders")
+ggplot(data=wine)+geom_point(mapping=aes(x=consumption,y=Murders))+geom_abline(mapping=aes(slope=5.65,intercept=591))+ggtitle("Consumption of Wine (L) vs Murders")
+```
+
+  From the comments giving the best slope, y intercept and rms distance, we can see that the lines do not differ at all in their plot. But the rms distances differ slightly. This indicates that there is a variance in murder rates for each type of line, however to definitively say that it is dependent on alcohol type would be incorrect because there are no observed trends on this behavior in time. But what these results appear to indicate is that alcohol type and consumption does not play a significant role in the murder rate of any given 
+  
+Thorbin's sub questions: 
+1) Question: Does alcohol turn us into a bunch of murderous primates? Importance: If it did people should know so that they can stay away from drunk people at all costs. Interest: It would be cool to see if there is a more subtle effect
+2)Tools used: map, loop, function, linear modeling. 
+3)Answer: since the slopes and y intercepts of each line do not differ, there is no functional difference in murder inductance between the alcohols. However the 'large' change in difference for rms distance for wine indicates that wine drinkers have a higher variation impulses of stupidity/murderous intent.
+4)Ethical:none Conclusions: Alcohol at low consumption does not generally increase Murders/deaths by murder. Recommendations: Don't drink above your tolerance to minimize risk of death.
+
+
+  
+###End Thorbin's section
+
+#Start Jorge
+
+Given that our expert domine concern about the effect of alcohol at a global scale, and the support that alcohol consumption is quite detrimental to nations then my investigation deals in exploring if there is a correlation between alcohol, measured by the total liters of consumption per person, and global GDP, compromise of 170 countries.
+
+```{r}
+
+    drinks_alcholol_csv <- alcohol
+
+  life_expectancy_years <-read_csv("~/Desktop/life_expectancy_years.csv")
+
+   x<-life_expectancy_years %>% select(`2010`,country)
+   y<-drinks_alcholol_csv
+
+
+
+
+x <- x %>% mutate_each(funs(toupper), country)
+y <- y %>% mutate_each(funs(toupper), country)
+
+w<-inner_join(y, x, by = "country")
+
+colnames(w)[colnames(w)=="2010"] <- "life_exp"
+
+
+
+```
+What new tools did you use? 
+
+For my analysis, I used a permutation test to verify that the correlations are significant or not
+
+```{r}
+perm_cor <- function(perms = 1000, x, y)
+{
+  
+  perm_mean_diffC <- numeric(perms)
+  # Loop throught number of permutations
+  for (i in c(1:perms))
+  {
+    # Step 2:
+    # Randomly mix up the values in the vector "y"
+    rand_order_y <-sample(y)
+    # Step 3:
+    # Compute the correlation between x and the randomly mixed
+    # up y-vector. Store this value in the vector from step 1.
+    
+    vc<-cor(x, rand_order_y) 
+    
+    perm_mean_diffC[i]= vc
+    
+  }
+  
+  # Step 4:
+  # Return new updated vector, created in step 1
+  return(perm_mean_diffC)
+}
+
+
+```
+
+```{r}
+xc<-w$total_litres_of_pure_alcohol
+yc<-w$life_exp
+
+
+```
+ 
+```{r}
+xyc<-perm_cor(perms = 1000, xc, yc)
+```
+
+
+  What is the answer to the question?
+
+```{r}
+cor(xc,yc)
+```
+
+```{r}
+ ggplot(, aes(x = xc, y = yc))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  ggtitle("GPD and Life expectancy")+
+  labs(y="total_litres_of_pure_alcohol", x = "life expectancy")
+   
+
+```
+
+plot
+```{r echo=FALSE, warning=FALSE}
+ggplot(, aes(x=xyc)) +
+  geom_histogram(alpha=.9, fill="cornflowerblue")+
+  #geom_density(alpha=.2, fill="tan")+
+  labs(title="Permutated Correlation Distribution", 
+       subtitle="Correlation Distribution differences between GDP and life expectancy in from 170 countrie in 2010",
+       x="Diffrence in Correlation Distribution"
+  )+ geom_segment(aes(x = -0.127073245,y =0, xend = -0.2345, yend = 0))+ 
+  geom_segment(aes(x = -0.127073245,y =0, xend = -0.127073245, yend = 27))+
+  geom_segment(aes(x =  .129212019 ,y =0, xend = 0.234, yend = 0))+
+  geom_segment(aes(x =  .129212019 ,y =0, xend =  .129212019 , yend = 27))+
+  geom_vline(xintercept = cor(xc,yc), color="blue")+
+  annotate(geom="text", x=-0.2, y=6, label="critical region ",
+              color="red")+
+  annotate(geom="text", x=0.2, y=6, label="critical region ",
+              color="darkred")+
+  annotate(geom="text", x=cor(xc,yc), y=60, label="corralation\nlife_exp\nGDP ",
+              color="darkgreen")
+
+
+
+```
+why the questions are important/interesting? 
+
+Given that the presented correlation is positive the implication is provoking because one might suspect that the less alcohol consumption then countries would do better economically. Yet, a possible explanation could be that as a country becomes more developed than it as access to alcohol resources. Thus, this analysis could indicate that at some level alcohol consumption could indicate a countries economic prosperity. This is likely done to a third variable effect. 
+
+
+#Anwser:
+
+```{r}
+
+ quantile(xyc, probs = seq(0, 1, 0.05))
+
+"We find a statistically significat corralation between GDP and Life Expectancy at the global scale (170 countires)"
+
+"corralation a positivly strongs"
+```
+#End of Jorge analasys
+
+##Mandy's Portion:
+Mandy's Question: Since alcohol is a depressant, I'm comparing suicide rates to alcohol consumption. Do countries with a large consumption of alcohol experience higher suicide rates? If so, is it conclusive to say these two are related? Does the type of alcohol make a difference? 
+The datasets I'm using are the alcohol consumption dataset from github and a suicide rates dataset I found on Kaggle.
+
+```{r}
+#import suicide rate data 
+suicide_rates <- read_csv("~/Desktop/suicide-rates-by-country.csv")
+#to make this a little simpler, let's look at just a specific year in the dataset
+suicide_rates <- suicide_rates %>% filter(Year=='2005')
+suicide_rates <- suicide_rates %>% rename('suicide rate' = 'suicide rate (age-adjusted suicides per 100,000 people)', 'country'='Entity')
+suicide_rates <- suicide_rates %>% select(-Code)
+#combine datasets 
+data <- full_join(suicide_rates, alcohol, by= 'country')
+#year column in unnecassary 
+data <- data %>% select(-Year)
+#filter out NA's 
+data <- data %>% drop_na()
+```
+Let's explore the data for the different kinds of alcohol:
+```{r}
+#beer
+beer <- data %>% select(-c(4,5,6))
+beer <- beer %>% arrange(desc(beer_servings))
+#spirit 
+spirit <- data %>% select(-c(3,5,6))
+spirit <- spirit %>% arrange(desc(spirit_servings))
+#wine
+wine <- data %>% select(-c(3,4,6))
+wine <- wine %>% arrange(desc(wine_servings))
+#total
+total <- data %>% select(-c(3,4,5)) 
+total <- total %>% arrange(desc(total_litres_of_pure_alcohol))
+# It's important to note from this exploraty data analysis that in the total alcohol consumed set, the top two countries, Belarus and Lithuania, had alarmingly high suicide rates of 26.8 and 33.3. 
+# Let's look at the mean of the top half of alcohol consumption compared to the bottom half to see if we can see a major difference. There are 178 total observations so let's compare the top 89 to the bottom 89. 
+mean(total$`suicide rate`[row_number(1:89)]) #11.13972
+mean(total$`suicide rate`[row_number(89:178)]) #11.11044
+#Interestingly enough, we see almost no difference. Let's see if that goes for every type of alcohol. 
+mean(beer$`suicide rate`[row_number(1:89)]) #10.82907
+mean(beer$`suicide rate`[row_number(89:178)]) #10.78719
+mean(spirit$`suicide rate`[row_number(1:89)]) #10.34842
+mean(spirit$`suicide rate`[row_number(89:178)]) #10.24879
+mean(wine$`suicide rate`[row_number(1:89)]) #10.02403
+mean(wine$`suicide rate`[row_number(89:178)]) #10.05809
+# The means show us that there is no real difference in suicide rates between the top and bottom half. 
+```
+Let's take a better look with some graphs. 
+Total Alcohol:
+```{r}
+ggplot(data = total, mapping = aes(x=`suicide rate`, y= total_litres_of_pure_alcohol))+
+  geom_point()+
+  geom_smooth()+
+  labs( y= "total litres of pure alcohol" )+
+  ggtitle("Suicide Rate vs Total Litres of Pure Alcohol")
+```
+Beer:
+```{r}
+ggplot(data = beer, mapping = aes(x=`suicide rate`, y= beer_servings))+
+  geom_point()+
+  geom_smooth()+
+  labs(y= "Beer Servings" )+
+  ggtitle("Suicide Rate vs Beer Servings")
+```
+Wine: 
+```{r}
+ggplot(data=wine, mapping= aes(x=`suicide rate`, y= wine_servings))+
+  geom_point()+
+  geom_smooth()+
+  labs(y= "Wine Servings")+
+  ggtitle("Suicide Rate vs Wine Servings")
+```
+Spirit:
+```{r}
+ggplot(data = spirit, mapping = aes(x=`suicide rate`, y=spirit_servings))+
+  geom_point()+
+  geom_smooth()+
+  labs(y= "Spirit Servings")+
+  ggtitle("Suicide Rate vs Spirit Servings")
+```
+Let's do some linear models:
+```{r}
+#Wine
+wine2 <-  tibble::data_frame(
+  x = data$wine_servings,
+  y = data$`suicide rate`
+)
+head(wine2)
+
+data2 <- lm(y ~ x, data = wine2)
+grid <- wine2 %>% data_grid(x)
+grid <- grid %>%
+  add_predictions(data2)
+grid
+coef(data2) #Intercept = 9.099288376 x= .008744693
+ggplot(data = data) +
+  geom_point(mapping = aes(x = wine_servings, y = `suicide rate`))+
+  labs(title= "Predicting Suicide Rate from Wine Consumption", x = "Wine Consumed", y = "Suicide Rate")+
+  geom_line(aes(x, y = pred), data = grid, colour = 'blue', size = 1)
+```
+
+```{r}
+#Beer:
+beer2 <- tibble::data_frame(
+  x=data$beer_servings,
+  y=data$`suicide rate`
+)
+data3 <- lm(y~x, data = beer2)
+grid2 <- beer2 %>% data_grid(x)
+grid2 <- grid2 %>% add_predictions(data3)
+coef(data3) #Intercept = 8.37134417 x= .01104256
+ggplot(data=data)+
+  geom_point(mapping=aes(x=beer_servings, y= `suicide rate`))+
+  labs(title = "Predicting Suicide Rate from Beer Consumption", x= "Beer Consumed", y= "Suicide Rate")+
+  geom_line(aes(x, y=pred), data=grid2, colour = 'blue', size=1)
+```
+
+```{r}
+#Spirit
+spirit2 <- tibble::data_frame(
+  x=data$spirit_servings, 
+  y=data$`suicide rate`
+  )
+data4 <- lm(y~x, data=spirit2)
+grid3<- spirit2 %>% data_grid(x)
+grid3 <- grid3 %>% add_predictions(data4)
+coef(data4) #Intercept = 8.33589506 x= .01565516
+ggplot(data=data)+
+  geom_point(mapping=aes(x=beer_servings, y=`suicide rate`))+
+  labs(title = "Predicting Suicide Rate from Spirit Consumption", x= "Spirits Consumed", y= "Suicide Rate")+
+  geom_line(aes(x, y=pred), data=grid3, colour= 'blue', size=1)
+```
+
+```{r}
+#Total Alcohol:
+total2<- tibble::data_frame(
+  x=data$total_litres_of_pure_alcohol,
+  y=data$`suicide rate`
+)
+data5 <- lm(y~x, data=total2)
+grid4 <- total2 %>% data_grid(x)
+grid4 <- grid4 %>% add_predictions(data5)
+coef(data5) #Intercept= 7.1149068, x= .5185126
+ggplot(data=data)+
+  geom_point(mapping=aes(x=total_litres_of_pure_alcohol, y=`suicide rate`))+
+  labs(title= "Predicting Suicide Rate from Total Alcohol Consumed", x="Alcohol Consumed", y="Suicide Rate")+
+  geom_line(aes(x, y=pred), data= grid4, colour= 'blue', size= 1)
+```
+From all the linear models graph, we do see the prediction that countries that consume more liters of alcohol will experience higher suicide rates. The correlation, however, is slight. We see the most correlation with total alcohol consumed, which was to be expected. There are many other factors that go into suicide rates, but I thought examining the amount of alcohol consumed was interesting.  
+##End Mandy 
+
+#Begin Erik
+
+```{r}
+#I chose to analyze the effects of Alchohol Consumption on child mortality, I figured it was likely that countries that consumed more alcohol would have the propensity to have a higher child mortality rate. I decided to filter for only the 15 highest GDP countries that had no na values in any of the datasets because I figured that this would eliminate other non-alcohol-related child mortality causes. Obviously, in poorer countries, child mortality would be influenced by many other factors.
+#I imported everything that was necessary here
+
+
+```
+```{r}
+#Here I load the Alcohol Consumption, Child Mortality, and GDP datasets. I used the year 2010 because the Alcohol Consumption dataset only used the year 2010. I filtered the final merged set(which used country to join the three datasets) to include only the top 15 countries by GDP.
+#download.file('https://github.com/Gapminder-Indicators/lex/raw/master/lex-by-gapminder.xlsx', destfile = 'lex-by-gapminder.xlsx')
+
+alc <- alcohol
+alc <- rename(alc, 'beer' = 'beer_servings')
+alc <- rename(alc, 'wine' = 'wine_servings')
+alc <- rename(alc, 'spirit' = 'spirit_servings')
+alc <- rename(alc, 'total' = 'total_litres_of_pure_alcohol')
+
+childmort <- read.csv("~/Desktop/child_mortality_0_5_year_olds_dying_per_1000_born.csv")
+childmort <- select(childmort, 'country','X2010')
+childmort <- rename(childmort, 'MortRate' = 'X2010')
+
+GDP <- read.csv("~/Desktop/gdppercapita_us_inflation_adjusted.csv")
+GDP <- select(GDP, 'country', 'X2010')
+GDP <- rename(GDP, 'GDP'='X2010')
+
+merged_temp <- alc %>%
+  left_join(childmort, c('country')) 
+merged1 <- merged_temp %>% filter(!is.na(MortRate))
+
+finmerged <- merged1 %>% left_join(GDP, c('country')) %>% filter(!is.na("country"),GDP>45000)
+```
+```{r}
+#Here I graphed my results. I had one graph for all alcohol consumption, one for the consumption of beer, one for wine, and one for spirits. I put the alcohol consumption on the x axis and the child mortality rate on the y axis. I used a best fit line to show the correlation as a country drank more alcohol.
+ggplot(finmerged, mapping = aes(x= total, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= beer, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= wine, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+ggplot(finmerged, mapping = aes(x= spirit, y= MortRate, color = 'country'))+geom_point()+geom_smooth(method = "lm", se = FALSE)
+#Contrary to what I hypothesized, I found that as countries drank more alcohol, all four of the graphs showed there was a decrease in the child mortality rate as one followed the best fit line. I do believe that Qatar might have thrown off the data, as it is extremely wealthy but other factors may contribute to child mortality.
+```
+#End Erik
+
+
+# Individual Reflections
+
+## Ryan's:
+# How have your six-month or 5-year goals changed? 
+I've found that I need to begin studying statistics. This course is a good way to get your feet wet and learn the R tools that will take you far, but what is limiting me now is my lack of statistical knowledge more than anything.
+# What did you learn/accomplish in this course? 
+A lot of practice with R in tidyverse, which will pay dividends for me in the future. The visualizations were probably the most important part.
+# If you could give yourself advice at the beginning of the semester, what would you tell yourself to keep doing, stop doing, and start doing?
+Go to every recitation. Start out ahead in the readings and don't fall behind. Use datacamp to supplement your R work.
+From the comments giving the best slope, y intercept and rms distance, we can see that the lines do not differ at all in their plot. But the rms distances differ slightly. This indicates that there is a variance in murder rates for each type of line, however to definitively say that it is dependent on alcohol type would be incorrect because there are no observed trends on this behavior in time. But what these results appear to indicate is that alcohol type and consumption does not play a significant role in the murder rate of any given country. 
+
+##Mandy's:
+My 5 year goals have definitely changed after experiencing this semester. I never thought I wanted a career in data science, but now I would love to at least make it a small part of my future. 
+I learned so much from this course. I learned more from this course than any other course this semester. I had never coded a day in my life and now I feel like I can do it fairly well. I learned how to explore data and visualize that exploration. 
+If I could give myself advice at the beginning, I would tell myself to take the class a little bit more serioulsy. I would also tell myself to ask for help!! I never asked a professor or TA for help. It's the easiest thing you can do to get a better grade. 
+
+
+## Jorge's
+
+Now I find my self more interested in tiding data. I found out that there is an abundance of data in the net and devises yet it is not organized for analysis. working on the labs I found my self challenged in this notion of tidy data yet once tidy the end result is gratifying. I find utility in this skill and wish to continue developing it. I thought at first that visualizing data was of my priority now I see that to get there realistically one need tidy data. 
+
+What did you learn/accomplish in this course? 
+
+After this course, I have acquired the confidence to guide my self to problem solve by using a multitude of sources. the book helps but I found that online communities are more helpful. 
+
+If you could give yourself advice at the beginning of the semester, what would you tell yourself to keep doing, stop doing, and start doing?
+
+My advice is to read all the chapters, but most importantly run and do every piece of code that it is presented. play with the code or concepts until it becomes implicit memory. to do this one needs to code every day. conclusion code more than reading, but most importantly have fun with it as elements of coding includes creativity and design. 
+
+Thorbins reflection:
+6 month goal: pass the class and learn a valuable skill. 5 year goal: Retain functional knowledge of that skill to routinely apply it.
+
+Thorbin's Advice: Stop doing: the labs 2 hours before its due, Start doing: Do the labs earlier. Keep doing: enjoying coding 
+
+#Erik's
+I have found that I am very interested in data analysis as it applies to basivally anything that you would want it to. In 6 months I just hope to be doing well in school, but I hope to find a job in 5 years analyzing data for something like sports which I am truly passionate about.
+I learned to code in R and a lot of general ways to analyze data effectively and efficiently.
+My advice would be to practice more code outside of what we did in class and in recitation. I think that it took me far too long to get comfortable in R.
+
+
+### Team reflection: 
+We felt that we did a good job of getting the labs done not always on time but always to the best of our abilities. One thing we think we could start doing would have been to get the lab logisticts figured out a tad bit earlier. One thing that we should keep doing would be to keep up our communication habits as they really help us divvy up the work and break the lab down into manageable parts. I dont really know a thing we could stop doing as I feel this class went pretty smoothly on our end.  
+
+
+# Summary of who did what.
+
+Ryan imported and tidied the initial data and wrote the introduction and conclusion of the team section.
+Thorbin wrote team reflection and debugged/knitted the final code.
+Jorge helped conceive the initial question and showed the statistical relationship between total alcohol consumption and life expectency.
+Mandy analyzed alcohol consumption and suicide rates in countries and wrote her relfection. 
+Erik contributed to the conclusion and analyzed the relationshiop between alcohol consumption and child mortality in high GDP countries.
+
+

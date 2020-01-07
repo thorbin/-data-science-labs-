@@ -1,0 +1,231 @@
+---
+title: "Lab 8 Black Swans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "10/16/2019"
+output: html_document
+---
+What we need:
+
+* a general overall question you want to answer using data (you may end up changing your question next week)
+
+* an explanation of why that question is important or interesting and a deeper explanation of why those reasons are important or     interesting
+
+* a reference to at least one dataset you plan on using to answer this overall question
+who the “pretend” domain expert is (and why they think the overall question is important and interesting)
+
+* each person's individual African Lake visualization.
+### Team Question:
+We have been hired by the Oprah Winfrey 2024 presidential campaign manager to analyze the question of why voter turnout is so low.
+This question is important because, in order to give her the greatest chance of winning, Oprah must understand what drives all demographics to the polls and what we can do to maximize her chances of success. Further, a better understanding of voting patterns may help us understand how humans function on a deeper, psychological level, which in turn can help give us better predictions about our political, economic and social future. At least one dataset we will be using is from census.gov: https://www.census.gov/topics/public-sector/voting.html
+
+### Backup Question: 
+What are the major causal factors driving violent crime?
+The mayor of Denver Michael Hancock is determined to end violent crime once and for all in the city of Denver. To that end, he has hired our team to perform statistical analysis on crime data throughout the country in order to better understand what drives violent crime. This question is important because every data scientist would like to live in a world of peace and safety. At least one dataset we will be using is: https://catalog.data.gov/dataset/violent-crime-property-crime-by-county-1975-to-present-f0443
+
+
+
+#JORGE INDIVIDUAL QUESTIONS
+
+With federal election approaching, recognition of voting behaviors and the perceptions can shed light on the motivations as to why individuals vote. To better understand this notion I want to ask: How voting heuristics affect the individual's decision or inclination to vote? For my back up question ( just incase obtaining reliable valid data for my previous question is out of reach) I would like to ask how are personality traits associated with voting behaviors or perceptions?
+
+
+“Heuristics are simple strategies to form judgments and make decisions by focusing on the most relevant aspects of a complex problem.” That being said it would be interesting to see what types of heuristics are available and potentially see if it affects people's decision to vote. Additionally it be interesting to see how precise are these heuristics in capturing the most relevant aspects of the person being voted for or its affiliated party. 
+I think that by analyzing temperaments one could find an association with political party affiliation and thus a proclivity to vote.   
+
+
+```{r}
+
+library(tidyverse)
+library(readxl)
+library(dplyr)
+#Tang <- read_excel("East Africa lake data.xlsx")#
+#Thorbin's import#
+Tang<-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet=6)
+#Ryans#
+Naivasha <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx", sheet=5)
+#Mandys#
+Victoria <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet = 7)
+#Jorge's
+East_Africa_lake_data <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet = 8)
+#Erik's
+challa <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet=1)
+
+
+
+```
+```{r}
+#Thorbin's lake visualisation
+
+tang <- Tang %>% select("Year AD...1":TEX86) %>% mutate(year1=`Year AD...1`%/%1,year2=`Year AD...4`%/%1,year=Year%/%1) #%/%1 gives year as a whole number#
+tang_BSI<-select(tang,year1,`BSi (normalized)`)
+tang_CHARC<-select(tang,year2,`Charcoal (normalized)`)
+tang_TEX86<-select(tang,year,TEX86)
+tang_interim <- full_join(tang_BSI,tang_CHARC,tang_TEX86,by=c("year1"="year2"))
+tang_final <-full_join(tang_interim,tang_TEX86,by=c("year1"="year"))
+
+#Thorbin's plot# 
+ ggplot(data=tang,mapping=aes(x=year,y=`BSi (normalized)`))+geom_point()+xlab("year")+ylab("Biogenic silica")+ggtitle("deviation of biogenic silica soil concentration by time")
+
+```
+Clearly concentration cannot be negative, the negative values indicate negative deviation from some kind of unity. If BSi concentration is a proxy of rain fall then higher positive deviations from unity indicate heavier periods of rain fall. 
+
+###End Thorbin###
+
+##Ryan's Naivisha visualization
+
+I chose to plot the depth of lake Naivasha over time:
+
+```{r}
+#Naivasha <- read_excel("C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\East Africa lake data.xlsx", sheet=5)
+
+Year = col_date(format="%Y")
+
+Naivasha$Year <- parse_date(as.character(Naivasha$Year), format = "%Y")
+
+Naivasha <- rename(Naivasha,LakeDepth=`Lake Depth`)
+ggplot(data = Naivasha)+geom_col(mapping =aes(x=Year, y = LakeDepth), color = "blue")+geom_line(mapping =aes(x=Year, y = LakeDepth), color = "green")+xlab("Time")+ylab("Depth")
+```
+
+```{r}
+library(tidyverse)
+library(readxl)
+Naivasha <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx", sheet=5)
+
+Year = col_date(format="%Y")
+
+Naivasha$Year <- parse_date(as.character(Naivasha$Year), format = "%Y")
+#Doesn't work because of the decimals in the years.
+
+Naivasha <- rename(Naivasha,LakeDepth='Lake Depth')
+ggplot(data = Naivasha, mapping =aes(x='Year', y = 'Lake Depth'))+geom_point()+xlab("Time")+ylab("Depth")
+```
+
+
+Mandy's Lake Data: Victoria Lake 
+```{r}
+library(tidyverse)
+library(dplyr)
+library(readxl)
+```
+Importing data Victoria sheet of East Africa Lake Data: 
+#East_Africa_lake_data <-read_excel("/Users/thorbinatwell-donaghey/Desktop/DSFA19/East_Africa_lake_data.xlsx",sheet = 7)#
+View(East_Africa_lake_data)
+Assigning data:
+Rename age to year:
+```{r}
+Victoria <- rename(Victoria, Year = 'Age')
+```
+Filter out NA's:
+```{r}
+Victoria <- filter(Victoria, !is.na(Year))
+```
+Round all years to a whole number: 
+```{r}
+year.victoria <- select(Victoria, Year)
+year.victoria <- round(year.victoria, 0)
+SWD.victoria <- select(Victoria, 'SWD(%)')
+Victoria <- cbind(year.victoria, SWD.victoria)
+```
+Arrange years in descending order:
+```{r}
+Victoria <- arrange(Victoria, desc(Year))
+```
+Change name of SWD(%):
+```{r}
+Victoria <- rename(Victoria, SWDpercentage = 'SWD(%)')
+```
+Final tidyed data: 
+```{r}
+#View(Victoria)
+```
+Plot: 
+```{r}
+ggplot(data=Victoria, mapping=aes(x=SWDpercentage, y=Year))+
+  geom_point()+
+  geom_smooth()+
+  ggtitle("Percentage of SWD's per Year")
+```
+##End Mandy##
+
+
+<<<<<<< HEAD
+```{r}
+#East_Africa_lake_data <- read_excel("East Africa lake data.xlsx",sheet = 8)
+#taking out unnecessary column .making a new varible : Months
+East_Africa_lake_data_test <-East_Africa_lake_data %>% select(Jan:Dec) %>% 
+  gather(`Jan`,`Feb`,`Mar`,`Apr`,`May`,`Jun`,`Aug`,`Sep`,`Oct`,`Nov`,`Dec`,`Jul`, key = "Month", value = "Rainfall")
+#done 
+#observing Jan rainfall 
+janrain<-filter(East_Africa_lake_data_test, Month == "Jan")
+=======
+#Jorges' visual rep VOI
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T,
+                      results = "hide")
+library(tidyverse)
+library(readxl)
+East_Africa_lake_data <- read_excel("stats/class_work_lake data/East Africa lake data.xlsx", 
+                                    sheet = "VOI rainfall station data")
+#taking out unnecessary column .making a new varible : Months 
+East_Africa_lake_data_test <-  East_Africa_lake_data[, -c(14, 15)] %>% 
+  gather(`Jan`, `Feb`,`Mar`,`Apr`,`May`,`Jun`,`Aug`,`Sep`,`Oct`,`Nov`,`Dec`,`Jul`, key = "Month", value = "Rainfall")
+#done 
+#observing Jan rainfall 
+janrain<-filter(East_Africa_lake_data_test, Month == "Jan")
+
+```
+
+```{r}
+>>>>>>> c84dcf4d87ef63d2189fce9a3e8c42a7915e9075
+ggplot(janrain, aes(x=Rainfall )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white")+
+  geom_density(alpha=.2, fill="#FF6666") + ggtitle("Histogram and Density plot for rainfall in January ranging from 1904-1996")
+```
+
+##END JORGE##
+
+#Start Erik:
+Eriks Questions:
+Question: Over time, what has the demographic of African-American voters tended to vote for?
+Does this demographic change over the demographics of men and women?
+
+#Eriks code:
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(dplyr)
+
+#This is where I set up the data, I imported the file, renamed age ad and varve thickness as these were the two variables I wanted to use, and I filtered out nas firt. I then realized with the 3000+ data points, I only wanted to use about 30. I created a graph using mutated variables to take the average of the varve thickness for each century over time.
+#challa <- read_excel("C:/Users/ErikSvenneby/Desktop/challa.xlsx")
+
+challa <- rename(challa, Year = 'Age AD')
+
+challa <- filter(challa, !is.na(Year))
+
+challa <- arrange(challa, Year)
+
+challa <- rename(challa, VarveThickness = 'varve thickness')
+
+challa <-filter(challa, !is.na(VarveThickness))
+
+challa <- filter(challa, (Year>-1000 & Year<2000))
+
+challa <- mutate(challa, Century = ceiling(Year/100))
+
+challa <- challa %>% mutate(VarveThickness=as.double(VarveThickness))
+
+challadata <- group_by(challa, Century)
+
+challadata <- mutate(challadata, avg = mean(VarveThickness))
+
+summarize(challadata, average = mean(VarveThickness))
+
+```
+#Eriks Graph
+```{r}
+#I graphed centuries on the x axis and average rainfall per century on the y, and made it so that I had both a point and smooth line graph.
+ggplot(data = challadata, mapping=aes(x=Century, y=avg))+geom_point()+geom_smooth()+ggtitle('Varve Thickness over time at Lake Challa')
+
+
+```
+#End Erik

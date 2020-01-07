@@ -1,0 +1,214 @@
+ 
+---
+title: "Lab12"
+author: "Jorge Robelo, Ryan Bilkie, Thorbin Atwell-Donaghy, Mandy Karako, Erik Svenneby"
+date: "11/10/2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r echo=FALSE, warning=FALSE }
+
+  #install.packages("gapminder")
+  #install.packages("tidyverse")
+  library(gapminder)
+  library(tidyverse)
+
+
+```
+
+#The Gapminder Data Set
+
+The "gapminder" library in R contains worldwide country data, with variables that include country, continent, year, life expectancy, total population and per-capita GDP.
+
+The questions we're interested in from this data set are:
+
+1) Is there a difference in life expectancy between Nicaragua and Costa Rica?
+2) Is there a correlation between life expectancy and total population?
+
+These are important questions for understanding the relationship between a county's population and its relative health and safety. If life expectancy is a good measure of the well-being of a given country, then we should be interested in the variables that might be correlated with a higher or lower life expectancy.
+
+The first of these questions will be answered with a mean permutation test. The second will be answered with a correlation permutation test.
+
+
+```{r echo=TRUE, warning=FALSE }
+
+  Nica_cost_lifexp <-gapminder_unfiltered%>%filter(country %in% c("Nicaragua", "Costa Rica"))
+  
+  Nica<-Nica_cost_lifexp%>%filter(country=="Nicaragua")
+  Costa<-Nica_cost_lifexp%>%filter(country=="Costa Rica")
+  
+  "Life expectancy sample Mean in Nicaragua"
+  
+  mean(Nica$lifeExp)
+  
+  "Life expectancy sample Mean in Costa Rica"
+  mean(Costa$lifeExp)
+  
+  "Total Mean diffrances"
+  mean(Nica$lifeExp)-mean(Costa$lifeExp)
+  
+  #values of intrest 
+    v_all_test <- Nica_cost_lifexp$lifeExp
+    length(v_all_test)
+  #all_values= v_all_test, n_A=(length(v_all_test)/2))
+  perm_mean <- function(perms = 1000, all_values, n_A)
+  {
+    ## Variables ##
+    # perms: The number of permutations 
+    # all_values (num): all data values
+    # n_A (int): Size of group A
+    ###############
+    
+    # Step 1:
+    # Create vector of zeroes of length "perms" to store
+    # permuted mean differnces
+    perm_mean_diff <- numeric(perms)
+    # Loop throught number of permutations
+    for (i in c(1:perms))
+    {
+      
+      rand_order <-sample(all_values)
+      group_A <-rand_order[1:n_A]
+      group_B <-rand_order[(n_A+1):length(all_values)]
+      
+      # Step 3:
+      # Compute the sample means for the two groups from 
+      # step 2
+      A_bar <- mean(group_A)
+      B_bar <- mean(group_B)
+      
+      # Step 4: 
+      # Compute the difference in sample means, store the
+      # value in the vector from step 1
+      diff_means <- A_bar - B_bar
+      
+      
+      perm_mean_diff[i] = diff_means
+    }
+      # Step 5:
+      # Return the permuted mean differences vector
+      
+      
+      return(perm_mean_diff)
+ 
+    }
+  
+```
+
+```{r echo=FALSE, warning=FALSE }
+
+  x<-perm_mean(perms=1000, all_values=v_all_test, n_A=(length(v_all_test)/2))
+
+  #hist(x)
+  
+  
+  ggplot(, aes(x=x)) +
+    geom_histogram(alpha=.9, fill="cornflowerblue")+
+    labs(title="Permutated Mean Distribution", 
+         subtitle="Mean distribution differences between life expectancy between Nicaragua and Costa Rica",
+         x="Diffrence in Mean"
+         ) + geom_segment(aes(x = -7.3287500,y =0, xend = -14.1611667, yend = 0))+ 
+            geom_segment(aes(x = -7.3287500,y =0, xend = -7.3287500, yend = 27))+
+            geom_segment(aes(x = 6.9143917,y =0, xend = 14, yend = 0))+
+            geom_segment(aes(x = 6.9143917,y =0, xend = 6.9143917, yend = 27))
+  
+  
+  
+  t.test(x)
+  
+```
+ 
+We see from the above that the p-value for x is .9496. If we round up, this is enough to reject the null hypothesis and conclude that life expectancy for Nicaragua is indeed less than that of Costa Rica. We also see that the mean of x is .008721 and we have a 95% confidence interval of about -.26 to +.28. This is supported by the data in the table, which passes the eye test to suggest that Costa Rica does have a higher mean life expectancy.
+
+Further summary statistics:
+
+```{r}
+  quantile(x, probs = seq(0, 1, 0.05))
+  
+  "Sample mean diffrance for life expectancy between Nicaragua and Costa Rica."
+  
+  (aH<-mean(Nica$lifeExp)-mean(Costa$lifeExp))
+  
+  "The mean diffrance falls in the critical region"
+```
+
+
+Finally, we need to construct a permutation correlation test to examine the relationship between life expentency and population:
+
+```{r}
+  
+  
+  perm_cor <- function(perms = 1000, x, y)
+  {
+    ## Variables ##
+    # perms: The number of permutations 
+    # x: Vector of Variable 1 - for computing correlation
+    # y: Vector of Variable 2 - for computing correlation
+    ###############
+    
+    # Step 1:
+    # Create vector of zeroes of length "perms" to store
+    # permuted mean differnces
+    perm_mean_diffC <- numeric(perms)
+    # Loop throught number of permutations
+    for (i in c(1:perms))
+    {
+      # Step 2:
+      # Randomly mix up the values in the vector "y"
+      rand_order_y <-sample(y)
+      # Step 3:
+      # Compute the correlation between x and the randomly mixed
+      # up y-vector. Store this value in the vector from step 1.
+      
+      vc<-cor(x, rand_order_y) 
+      
+      perm_mean_diffC[i]= vc
+      
+    }
+    
+    # Step 4:
+    # Return new updated vector, created in step 1
+    return(perm_mean_diffC)
+  }
+
+```
+
+```{r  echo=FALSE, warning=FALSE}
+  xc<-gapminder$pop
+  yc<-gapminder$lifeExp
+  
+  xyc<-perm_cor(perms = 1000, xc, yc)
+ 
+  # hist(xyc)  
+ 
+  ggplot(, aes(x=xyc)) +
+    geom_histogram(alpha=.9, fill="cornflowerblue")+
+    #geom_density(alpha=.2, fill="tan")+
+    labs(title="Permutated Correlation Distribution", 
+         subtitle="Correlation Distribution differences between life expectancy and population",
+         x="Diffrence in Correlation"
+         )+ geom_segment(aes(x = -3.831881e-02,y =0, xend = -0.066, yend = 0))+ 
+            geom_segment(aes(x = -3.831881e-02,y =0, xend = -3.831881e-02, yend = 27))+
+            geom_segment(aes(x =  3.932543e-02,y =0, xend = 0.0714, yend = 0))+
+            geom_segment(aes(x =  3.932543e-02,y =0, xend =  3.932543e-02, yend = 27))
+```
+
+```{r}  
+  
+  quantile(xyc, probs = seq(0, 1, 0.05))
+  #by jorge r and Team
+  cor(xc,yc)
+   cor.test(xc,yc)
+ "The correlation falls within the critical region"
+  cor.test(xc,yc)
+
+```
+
+## Data-based conclusions:
+Once again, the data showed with 95% confidence that Costa Rica had a higher mean life expectancy than Nicaragua. This was reflected by the analysis which fell in place in the critical region.
+
+## Individual Contributions:
+
+Jorge formulated the questions of interest and provided the mean permutation test. Ryan wrote the initial summary and conclusion and calculated p-values and summary statistics. Thorbin helped construct the permutation correlation test, and he helped resolve knitting issues. Mandy created the visualizations and generated most of the conclusions based on the data. Erik helped in generalizing the function code to allow for different data sets.

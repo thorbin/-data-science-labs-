@@ -1,0 +1,503 @@
+---
+title: "Lab 7 Black Swans"
+author: "Erik Svenneby, Jorge Robelo, Mandy Karako, Ryan Bilkie, Thorbin Atwell"
+date: "10/10/2019"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+power<-read_csv2("/Users/thorbinatwell-donaghey/Desktop/household_power_consumption.txt",na=c('?',' '),locale=locale(grouping_mark=".",decimal_mark = ",")
+)
+#Thorbins import# 
+#stringpathPC <-  "C:/Users/chele robelo/Documents/stats/lab 7/household_power_consumption.txt"#
+#Jorge's import#
+```
+###Household Power Usage
+The dataset used in this analysis, which was imported from the UCI ML Repository (https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption), contains data on household appliances and power usage. Our team each individually cleaned the data and produced our own individual findings and analyses.
+
+
+
+#jorge start
+#Setup
+
+```{r}
+library(tidyverse)
+stringpathPC <-  "C:/Users/chele robelo/Documents/stats/lab 7/household_power_consumption.txt"
+```
+#Jorge's Analysis: 
+
+
+#Varible Descriptions :
+#   KitchenApl : kitchen appliances, consitst of mainly a dishwasher, an oven and a microwave (hot plates are not     electric but gas powered).
+#   LaundryApl : a washing-machine, a tumble-drier, a refrigerator and a light.
+#   Water_Heater_AirCon : corresponds to an electric water-heater and an air-conditioner.
+
+
+
+```{r echo = FALSE, message = FALSE, results = 'hide' }
+#A variable containing the string datatype  (that hold information to the correct path in which the document is located) 
+# Parsing and formatting the file to an appropriate dataset/dataframe.
+# values with " " and "?" are NA
+
+#power <- read_delim(file = stringpathPC, delim=';', na = c('', '?'),
+                    #col_types = cols(
+                     # Time = col_time(format="%H:%M:%S"),
+                      #Global_active_power = col_double(),
+                     # Voltage = col_double(),
+                      #Global_intensity = col_double(),
+                      #Sub_metering_1 = col_double(),
+                      #Sub_metering_2 = col_double(),
+                      #Sub_metering_3 = col_double()
+                    ))
+#Renaming Variables for better reference 
+
+power<-rename(power, KitchenApl = Sub_metering_1)
+
+power<-rename(power, LaundryApl = Sub_metering_2)
+
+power<-rename(power, Water_Heater_AirCon = Sub_metering_3)
+
+#----
+# Checking if data types are appropriate 
+
+typeof(power$Date)
+typeof(power$Time)
+typeof(power$Voltage)
+
+# We can also use a tibble
+
+as.tibble(power)
+#  Interestingly; the function, typeof, output Date as a double but the Tibble gives me its own data type. 
+# Possible explanation: the new data type is using or is a derivative of the new data type from double data types that probably consists of the individual elements of the new data types, respectively: format="%d/%m/%Y" and %H:%M:%S" ...
+
+
+```
+#Exploring the Data
+
+```{r echo = FALSE, message = FALSE, results = 'hide'}
+ggplot(power, aes(x=Voltage )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.01)+
+  geom_density(alpha=.2, fill="#FF6666") 
+
+#It seems that most of the time the French household consumed 240-243 V. V: Volts 
+```
+
+#It seems the distribution varies in two sections and it is not a normal distribution, this could suggest that most kitchen appliances most of the time use less than 5 Watts per hour, 
+#But to a lesser extent, the minority of the time the household use 38 Watts per hour
+
+```{r }
+ggplot(power, aes(x=KitchenApl )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, 1.4)) + ggtitle("Histogram and Density plot for Watt consumtion in KitchenApl")
+
+
+```
+
+
+```{r}
+#parsing through the variable, year, to derive out new values 
+power <- power %>% mutate(year=substr(Date,1,4), month=substr(Date, 6,7), day=substr(Date, 9,10))
+
+#parsing through the variable, hour, to derive out new values 
+
+#Updating data set
+#Casting the appropriate  data type
+
+power <- power %>% mutate( day=as.integer(day),
+                           month=as.integer(month),
+                           year=as.integer(year))
+                        
+                         
+library(lubridate)
+power <- power %>% mutate(datetime=make_datetime(year, month, day))
+
+#crating a new datatype to form a new variable that all-inclusive with respect to data and time
+
+```
+
+
+```{r echo = FALSE, message = FALSE, results = 'hide'}
+#exploring how voltage changes over the month on ave
+data_by_month <- power %>% select(month, Voltage) %>% 
+  group_by(month) %>% summarise(mean.voltage=mean(Voltage, na.rm=TRUE))
+
+ggplot(data_by_month) + geom_point(aes(month, mean.voltage))+ ggtitle("voltage mean cross Months")
+
+
+```
+
+#Primary Analasys - Jorge R
+
+#Exploring how wattege changes over the months on ave while obverving water-heater and an air-conditioner use. 
+```{r}
+data_by_month_lun <- power %>% select(month, Water_Heater_AirCon) %>% 
+  group_by(month) %>% summarise(mean.Water_Heater_AirCon=mean(Water_Heater_AirCon, na.rm=TRUE))
+
+ggplot(data_by_month_lun) + geom_point(aes(month, mean.Water_Heater_AirCon))+ ggtitle(" Watt  change Per Month in  water-heater and an air-conditioner use ")
+
+
+```
+
+#Exploring on ave how wattege changes per month while obverving kitchen appliances use. 
+```{r}
+data_by_month_kichApp <- power %>% select(month, KitchenApl) %>% 
+  group_by(month) %>% summarise(mean.KitchenApl=mean(KitchenApl, na.rm=TRUE))
+
+ggplot(data_by_month_kichApp) + geom_point(aes(month, mean.KitchenApl))+ ggtitle(" Watt  change Per Month in  kitchen appliances use ")
+
+
+```
+#Exploring on ave how wattege changes per month while obverving a washing-machine, a tumble-drier, a refrigerator and a light use. 
+
+
+```{r}
+data_by_month_lundApp <- power %>% select(month, LaundryApl) %>% 
+  group_by(month) %>% summarise(mean.LaundryApl=mean(LaundryApl, na.rm=TRUE))
+
+ggplot(data_by_month_lundApp) + geom_point(aes(month, mean.LaundryApl))+ ggtitle(" Watt  change Per Month in  LaundryApl")
+
+```
+
+#On average for the months of July and Aug for all appliances use less wattage from the rest of the months to a significant degree. 
+#the range of wattage use is approximately from .25 to 1 in July and august for all appliances except for appliances in the LaundryApl variable which still mention a relatively lower position in those two months. 
+#While the rest of the months maintained a higher range in wattage consumption relative to July and August. 
+#we can speculate that the members of this household are mostly not present during those two months. 
+#giving the information above I am interested in finding out what specific appliances might still be consuming wattage despite the low consumption? 
+#thus, assuming that the tenets of the french household are not residing during July and August, are there ways to reduce consumption wattage even further?
+
+
+
+```{r}
+WaJulAgu <- power %>% filter( month %in% c(7,8) )
+
+```
+
+
+```{r}
+ggplot(WaJulAgu, aes(x=KitchenApl )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))+ggtitle("Histogram and Density plot for Watt consumtion in KitchenApl while observing July and Aug")
+
+```
+
+
+```{r}
+ggplot(WaJulAgu, aes(x=LaundryApl )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))+ggtitle("Histogram and Density plot for Watt consumtion in LaundryApl while observing July and Aug")
+
+```
+
+```{r}
+ggplot(WaJulAgu, aes(x=Water_Heater_AirCon )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))+ggtitle("Histogram and Density plot for Watt consumtion in Water_Heater_AirCon while observing July and Aug")
+
+```
+
+#Now let us compare it to the months that use more wattage and try to hypothesis a valid explanation base on graphical behavior. 
+```{r}
+high_consuming_wat_months <- power %>% filter( month %in% c(1,2,3,4,5,6,9,10,11,12) )
+```
+
+
+```{r}
+ggplot(high_consuming_wat_months, aes(x=KitchenApl )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))+ggtitle("Histogram and Density plot for Watt consumtion in KitchenApl while observing all months without July and Aug")
+
+```
+
+
+```{r}
+ggplot(high_consuming_wat_months, aes(x=LaundryApl )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))+ggtitle("Histogram and Density plot for Watt consumtion in LaundryApl while observing all months without July and Aug")
+
+```
+
+
+```{r}
+ggplot(high_consuming_wat_months, aes(x=Water_Heater_AirCon )) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = 0.100)+
+  geom_density(alpha=.2, fill="#FF6666") +
+  coord_cartesian(xlim = c(0, 40), ,ylim = c(0, .25))+ggtitle("Histogram and Density plot for Watt consumtion in Water_Heater_AirCon while observing all months without July and Aug")
+
+```
+#Displaying ave wattage consumption in both sets of months for all appliances
+
+# Average wattage consumption for Water_Heater_AirCon
+```{r}
+summarise(high_consuming_wat_months, watteg_consumption = mean(Water_Heater_AirCon, na.rm = TRUE))
+
+summarise(WaJulAgu, watteg_consumption = mean(Water_Heater_AirCon, na.rm = TRUE))
+
+
+```
+
+# Average wattage consumption for LaundryApl
+```{r}
+summarise(high_consuming_wat_months, watteg_consumption = mean(LaundryApl, na.rm = TRUE))
+
+summarise(WaJulAgu, watteg_consumption = mean(LaundryApl, na.rm = TRUE))
+
+```
+#Average wattage consumption for KitchenApl
+```{r}
+summarise(high_consuming_wat_months, watteg_consumption = mean(KitchenApl, na.rm = TRUE))
+
+summarise(WaJulAgu, watteg_consumption = mean(KitchenApl, na.rm = TRUE))
+
+```
+
+#Final analysis: After observing both sets months, it is clear that the months that exclude July and August have a higher degree of consuming wattage, however, there seems to be pulsing behavior at a different level of wattages consumption in both sets with July and August having a significantly smaller density at each pules. 
+# Given the constancy in both sets of observation it could be hypothesized that there are appliances that are plugged in and not in use still consume wattage. this phenomenon is referred to as "phantom" electricity 
+# if this is the case one could recommend to unplug appliance that doesn't require for them to be plug at all time such as dryer and washer machine. If the refrigerator does not have any times that could be disconnected as well. this will reduce or remove some of the pulses seen in the months for July and August 
+##End Jorge
+
+
+
+####Thorbin's Analysis
+
+##### Question: Is meter data a possible frontier for govt. or otherwise programs to reward more eco-friendly house holds and in turn incentivise reduced energy consumption?
+
+Things to consider: RMS voltage/power/current over the entire time surveyed to gauge 'average' electricity useage. Values above this RMS would show higher averages of electricity consumption indicating an increased presence at home, it should be easy to compare multiple house holds RMS value if we can see explicit fluctuations in RMS power consumption in just one house especially in a day to day capacity. 
+
+```{r}
+#manipulating data frame into final format, assumed group marker will be used as decimal for ease of plotting# 
+power_new<-type_convert(power)
+power_separated<-power_new %>% separate(Date,into=c("Day","Month","Year"),convert=TRUE) %>% separate(Time, into=c("Hour","Minute"),convert=TRUE)
+```
+
+```{r}
+#2006#
+power_separated_month_2006<-filter(power_separated,Year==2006) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
+#2006 plot# 
+ggplot(data=power_separated_month_2006,mapping=aes(x=Minutes,y=mean_GI))+geom_point()+geom_smooth()+facet_wrap(~ Month,nrow=NULL)+labs(title="2006 Global current intensity in Amps")+ylab("Global current intensity")
+```
+
+```{r}
+#2007#
+power_separated_month_2007<-filter(power_separated,Year==2007) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
+#plot#
+ggplot(data=power_separated_month_2007,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~ Month, nrow=NULL)+labs(title="2007 Global current intensity in Amps")+ylab("Global current intensity")
+#rms calculation and bar plot of RMS per month#
+RMS_2007_month<-power_separated_month_2007 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+ggplot(data=RMS_2007_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2007 RMS power by month")+ylab("RMS power (Watts)")
+```
+
+#### 2007 plot comments: 
+Nearly all months show a common trend: Current drawn from the house tends to decrease at night until the morning at precisely 8:20 am except for october. This is best explained by the person taking vacation in october and sleeping in. This explanation is probable because current intensity steadily increases and in the wee hours of the morning, current intensity is much higher than usual, someone with work in the morning wouldnt be staying up until 1 am using electronic devices for nearly a month.Interesting enough is that there is also a second peak right around lunch time which is highest in December and lowest in July. A possible explanation for this is that since this house is located in Sceaux, a tourist hot spot, perhaps the person is able to get cheaper street food in the warmer months requiring less frequent trips home for lunch. This makes sense because in general the colder months have higher mid-day peak current intensity, suggesting more time spent at home by the inhabitant. Lastly the last peak toward the end of the day is generally the highest. It is significant to note that the location of the second peak's maximum is located at 1250 minutes or nearly 9 pm give or take an hour. It should be noted that during the warmer months, this maximum is located past 9 pm, where as for the generally cooler months the location of this maximum is located at or before 9 pm. Is this proof that winter in France is not as enjoyable as one would think? As for explanations to this tertiary maximum, the documentation does not say anything about a heater, so since this tertiary maximum is larger for all months of the year, it is possible that the inhabitant used the electric AC unit in the summer and an electric heater in the winter months. 
+```{r}
+#2008#
+power_separated_month_2008<-filter(power_separated,Year==2008) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
+#plot#
+ggplot(data=power_separated_month_2008,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~Month, nrow=NULL)+labs(title="2008 Global current intensity in Amps")+ylab("Global current intensity")
+#rms calculation and bar plot of RMS per month#
+RMS_2008_month<-power_separated_month_2008 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+ggplot(data=RMS_2008_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2008 RMS power by month")+ylab("RMS power (Watts)")
+```
+#### 2008 plot comments
+It should be pointed out that the tertiary curve follows the same patterns as the previous figure regarding time location and relative size. It is also interesting to observe that the current intensity is generally at a minumum for the earlier hours of the morning, which is remniscient of the plots from 2007. Another similarity between 2007 and 2008 is the fact that the primary peaks are all located at exactly 500 minutes or 8:20 am exempting August. This suggests that this person probably kept their Job considering August is an obvious sign of a month long abscence. The differences however are that August shows almost no current intensity suggesting that the inhabitant went somewhere for a month, another is that the secondary peak doesn't show such a strong dependence on month. In the previous data set, there was an apparent relationship between the magnitude of the secondary maximum and month, here we see that relationship drop off quickly through out the rest of the year. If this secondary curve is in fact a lunch time presence, maybe the inhabitant found a good lunch squad and got out of the house more often.  
+```{r}
+#2009# 
+power_separated_month_2009<-filter(power_separated,Year==2009) %>% mutate(Minutes=(Hour%%100)*60+Minute)%>%group_by(Month,Minutes)%>%mutate(mean_Voltage=mean(Voltage)/10^6,mean_GI=mean(Global_intensity),mean_RP=mean(Global_reactive_power)) %>% ungroup(Minutes)
+#plot#
+ggplot(data=power_separated_month_2009,mapping=aes(x=Minutes,y=mean_GI))+geom_smooth()+facet_wrap(~Month, nrow=NULL)+labs(title="2009 Global current intensity in Amps")+ylab("Global current intensity")
+#rms calculation and bar plot of RMS per month#
+RMS_2009_month<-power_separated_month_2009 %>% group_by(Month) %>% transmute(Global_RP2=Global_reactive_power*Global_reactive_power) %>% summarise(RMS=(sum(Global_RP2,na.rm=TRUE)/n())^.5)
+ggplot(data=RMS_2009_month,mapping=aes(x=Month,y=RMS))+geom_col()+scale_x_continuous(breaks=1:12)+labs(title="2009 RMS power by month")+ylab("RMS power (Watts)")
+```
+#### 2009 comments
+This bit of data is a little lower quality but trends namely the tertiary curve remaining larger through out the year are still observer and the position of the tertiary curve on a month to month basis.
+
+
+From the plots of RMS power vs month, it is clear that there is discernable variation in RMS power spannng as little time as a month. This shows that meter data can be used in conjunction with a program that seeks to award electrically frugal neighborhoods. Note that 2006 was omitted because 2006 contained only a single months worth of data. 
+
+Comments and final analysis: 
+The first method of finding the time dependence by minute per month was to see if the meter data collected was decent enough to actually reasonably depict a tenant's possible day to day activities on average. While the first series of plots did not directly contribute to plausibility of the action posed in the question, it aided in showing that this data was meticulous enough to show a persons day to day behavior down to the accuracy of a minute! While this would have made an interesting question in of itself, there were too many possible rational explanations for the observed's electrical behavior meaning that any answer to that question would be purley speculative. Speculative or not, the plots that would be used to answer that question gave rise to a valuable possibility  of being able to detect RMS power on a month-month basis. This was because clear changes in hourly electrical activity could be observed to change through time. Combined with our desparate need for renewable or at least tightly rationed energy and the possibility of detailed descriptions of power consumptions on a relatively small scale time frame, the question of whether or not economic or other valuable incentives could be awarded to communities that practice responsible energy consumption was asked. The answer to this question given by the bar plots is absolutely. The question remaining is whether or not power corporations would allow that to happen as it would reduce the depth of their pockets. TLDR: The people who would benifit from said programs would be literally everyone currently on and to exist on the planet including energy and coal executives. The people who would be harmed would be big energy and coal executives.  
+
+##Begin Erik
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+hpc <- "C:/Users/ErikSvenneby/Desktop/household_power_consumption/household_power_consumption.txt"
+data1 <- read_delim(file = hpc, delim=';', na = c('', '?'),
+                    col_types = cols(
+                      Date = col_date(format="%d/%m/%Y"),
+                      Time = col_time(format="%H:%M:%S"),
+                      Global_active_power = col_double(),
+                      Global_reactive_power = col_double(),
+                      Voltage = col_double(),
+                      Global_intensity = col_double(),
+                      Sub_metering_1 = col_double(),
+                      Sub_metering_2 = col_double(),
+                      Sub_metering_3 = col_double()
+                    ))
+#This makes new objects for year, month, day and hour, minute, second
+data1 <- data1 %>% mutate(year=substr(Date,1,4), month=substr(Date, 6,7), day=substr(Date, 9,10))
+data1 <- data1 %>% mutate(hour=substr(Time,1,2), minute=substr(Time, 4,5), second=substr(Time, 7,8))
+#This casts the following objects to integers
+data1 <- data1 %>% mutate( day=as.integer(day),
+                           month=as.integer(month),
+                           year=as.integer(year),
+                           hour=as.integer(hour),
+                           minute=as.integer(minute),
+                           second=as.integer(second))
+#This sets the date and time variables up
+data1 <- data1 %>% mutate(datetime=make_datetime(year, month, day, hour, minute, second))
+#I tested that the dataset was plotting correctly
+#ggplot(data1) + geom_histogram(aes(Voltage))
+#This part selects submetering 3 and hour so I can more easily and efficiently work with the data
+data3 <- data1 %>% select(hour, Sub_metering_3) %>% group_by(hour) %>% summarise(x3 = mean(Sub_metering_3, na.rm = TRUE))
+```
+```{r setup, include=FALSE}
+#This is my plot of the data, which shows a graph with two peaks. The largest one is located at approximately 8am, and the second is smaller at 8pm.There are two relative minimums at approximately 3am and 4pm, with the 3am being the absolute minimum.
+ggplot(data3)+geom_line(aes(hour, x3))
+```
+
+#Erik's Analysis: Question: What time of day sees the most power coming from the Water Heater and A/C unit? I plotted a graph of submetering 3, which was the values associated with power consumption from the water heater and a/c, and found that 8am was the time with the most power consumption. I think this question is interesting because the power consumption in a household could be made much more efficient if things like the a/c and water heater use less power when not needed, and they both use a lot of power to function. I came up with this question trying to think about an easy way to consume less power. Anyone who would use my analysis could better plan for when they really need the a/c and water heater, and they would benefit from using less power.
+
+##End Erik
+
+##Ryan's Analysis
+```{r}
+library(tidyverse)
+library(dplyr)
+
+power <- "C:\\Users\\ryanb\\OneDrive\\Desktop\\Data Science 2019\\household_power_consumption.txt"
+
+data1 <- read_delim(file = power, delim=';', na = c('', '?'),
+                    col_types = cols(
+                      Date = col_date(format="%d/%m/%Y"),
+                      Time = col_time(format="%H:%M:%S"),
+                      Global_active_power = col_double(),
+                      Global_reactive_power = col_double(),
+                      Voltage = col_double(),
+                      Global_intensity = col_double(),
+                      Sub_metering_1 = col_double(),
+                      Sub_metering_2 = col_double(),
+                      Sub_metering_3 = col_double()
+                    ))
+data1 <- data1 %>% mutate(year=substr(Date,1,4), month=substr(Date, 6,7), day=substr(Date, 9,10))
+
+data1 <- data1 %>% mutate(hour=substr(Time,1,2), minute=substr(Time, 4,5), second=substr(Time, 7,8))
+
+data1 <- data1 %>% mutate( day=as.integer(day),
+                           month=as.integer(month),
+                           year=as.integer(year),
+                           hour=as.integer(hour),
+                           minute=as.integer(minute),
+                           second=as.integer(second))
+
+library(lubridate)
+data1 <- data1 %>% mutate(datetime=make_datetime(year, month, day, hour, minute, second))
+
+
+```
+Before deciding on a question worth answering, it is necessary to first explore the data to find patterns of interest. Since others are examining the micro-details of the various household appliances in terms of their energy patterns, I wanted to instead take a broader look at energy patterns throughout the year. To begin, a simple but necessary first step is to get an intial idea of how energy consumption changes based on month. Below is a geom_smooth showing mean voltage usage against the month of the year:
+
+```{r}
+ggplot(data1) + geom_smooth(aes(x = month, y = Voltage)) 
+```
+
+It's clear that energy consumption is lower in the warmer months, higher in the colder months. An obvious implication of this is that cooling a home requires less energy than heating it. But what if there are other factors at work? Let's what energy consumption looks like within the individual months. Below is a facet of geom_smooth plots showing energy usage throughout the day for each month:
+
+```{r}
+ggplot(data1) + geom_smooth(aes(hour, Voltage)) + facet_wrap(~month)
+```
+
+This is a far more interesting visualization. We notice that the winter months are far more volatile in their energy use than the summer months. Indeed, there is a notable leveling-off beginning in April, a near-total flattening in August, and a resumption of the volatility in October. The months with greater volatility are also the months with higher energy consumption, as we see by comparing this facet with our girst graph. This raises the question: is it possible that it is the volatility itself that causes higher energy consumption? Does the constant changing of the temperature throughout the day require more overall voltage than a smooth, predictable use of heating/cooling mechanisms? Or, a related consideration, is it possible that heating and cooling mechanisms in a home are optimized for a steady, average level of temperature control?
+
+These questions are important in light of today's discussion on climate change and power conservation. Some countries (like Germany) have gone so far as to ban or discourage the use of household air conditioners. Futhermore, consumers and businesses alike should be interested in what contributes more significantly to their energy costs and what they can do to minimize them.
+
+We need employ the concept of variance--a measure of the distance from the mean. In particular, we would like to know which months have the greatest variance in terms of their energy consumption. So, the question to answer becomes:
+
+
+## What times of the year have the greatest variance in energy usage, and how does variance relate to overall energy consumption?
+
+We start by selecting data that will give us our mean and variance:
+
+
+```{r}
+data_by_month <- data1 %>% select(month, Voltage) %>% 
+  group_by(month) %>% summarise(mean.voltage=mean(Voltage, na.rm=TRUE), var.voltage=var(Voltage, na.rm=TRUE))
+
+variance <- data_by_month %>% select(var.voltage)
+vari <- as.numeric(unlist(variance))
+
+ggplot(data_by_month)+geom_line(aes(month, vari))
+```
+
+
+We see from the above that, with the interesting exception of May, the months with greater energy consumption also have the highest variance. May is highly variable on the low end--in other words, like the winter months, it does not have a steady level of energy usage, and yet at the same time, its overall energy usage is the lowest of all twelve months, meaning that there are periods of time in May when there is very little energy expended. So, taking into account the evidence we've already seen about the much higher cost of heat relative to cooling, we can disregard May and consider only how the variance of heat-demanding months compares to the steadier months. Indeed, as we see in the summarized data below, there is a strong positive correlation between variance and energy usage:
+
+```{r}
+data_by_month
+
+```
+
+If we want to find the single most interesting statistic from this data, we can calculate the average in variance for four summer months (June, July, August, September), and divide them by the average variance for four winter months (November, December, January, February)--the result being that summer months have a variance of 57% of the variance of the winter months--meaning that summer months are far smoother, and almost half as variable, as winter months, in terms of energy consumption.
+
+The implications of this analysis might be damaging to residents in warmer and less variable climates like Los Angeles, who could see a further rise in traffic due to the long-term migration of individuals and businesses into their more energy-conserving territories, while those damaged by this analysis will be manufacturers of household heating appliances, as well as energy companies that profit off of residents in highly-variable cold climates.
+
+##End Ryan
+
+## Start Mandy 
+## Mandy's question: How has the househoulds energy consumption changed over time? 
+```{r}
+data1 <- read_csv(file= "household_power_consumption.txt")
+macpath <- "~/Desktop/household_power_consumption.txt"
+```
+```{r}
+data1 <- read_delim(file=macpath, delim=';',na=c('?'),
+                    col_types=cols(
+                      Date = col_date(format="%d/%m/%Y"),
+                      Time = col_time(format="%H:%M:%S"),
+                      Global_active_power = col_double(),
+                      Global_reactive_power = col_double(),
+                      Voltage = col_double(),
+                      Global_intensity = col_double(),
+                      Sub_metering_1 = col_double(),
+                      Sub_metering_2 = col_double(),
+                      Sub_metering_3 = col_double()
+                    ))
+```
+```{r}
+data1 <- data1 %>% mutate(year=substr(Date,1,4), month=substr(Date, 6,7), day=substr(Date, 9,10))
+data1 <- data1 %>% mutate(hour=substr(Time,1,2), minute=substr(Time, 4,5), second=substr(Time, 7,8))
+data1 <- data1 %>% mutate( day=as.integer(day),
+                  month=as.integer(month),
+                  year=as.integer(year),
+                  hour=as.integer(hour),
+                  minute=as.integer(minute),
+                  second=as.integer(second))
+```
+```{r}
+first.data <- data1 %>% filter(year == 2006)
+```
+```{r}
+last.data <- data1 %>% filter(year == 2010)
+```
+```{r}
+ggplot(first.data)+
+  geom_point(mapping = aes(x= Voltage, y= minute))
+```
+```{r}
+ggplot(last.data)+
+  geom_point(mapping=aes(x= Voltage, y=minute))
+```
+ Comparing the first year (2006) to the last year (2010), the amount of energy used has increased heavily. By looking at the
+## graph from 2006 and comparing it to the graph from 2010, we see a more filled in plot for 2010, proving that their energy ## consumption has gone way up. There are many theories as to why that might be. There could be an increase in residents in 
+## the house. There could be an increase in the amount of appliances, particularly in the kitchen. I think the most logical 
+## assumption is that residents in the house were staying home more in 2010 than in 2006, since the 2010 graph shows more 
+## concentration of voltage in the center of the graph, which would be the middle of the day. 
